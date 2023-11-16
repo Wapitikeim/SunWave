@@ -6,13 +6,12 @@
 
 |  General Info  | |
 | ---|---|
-| Working Title | `Edit me!` |
+| Working Title | Hidden Instinct |
 | Final Title | `Edit me!` |
-| Student | `Name`, `edit-me`@stud-mail.uni-wuerzburg.de, `s######` |
-| Target Platform(s) | `Edit me!` |
+| Student | Wenzel Hünting, wenzel.huenting@stud-mail.uni-wuerzburg.de, s375936 |
+| Target Platform(s) | PC |
 | Start Date | 21.10.2019 |
 | Study Program | Games Engineering B.Sc.|
-| Engine Version | Unity 2021.3.11f1 or Unreal 5.0.3 |
 
 ### Abstract
 
