@@ -1,0 +1,60 @@
+﻿# CMakeList.txt: CMake-Projekt für "CMakeSandboxLaptop". Schließen Sie die Quelle ein, und definieren Sie
+# projektspezifische Logik hier.
+#
+cmake_minimum_required(VERSION 3.7...3.27)
+if(${CMAKE_VERSION} VERSION_LESS 3.12)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+endif()
+message([STATUS] "CMAKE VERSION: "${CMAKE_VERSION})
+
+set(CXX_STANDARD 17)
+#set_property(TARGET tgt PROPERTY CXX_STANDARD 20)
+
+project(HiddenInstinct VERSION 0.3
+                  DESCRIPTION "GameLab3 Project"
+                  LANGUAGES CXX)
+
+
+#Output Directory https://stackoverflow.com/questions/6594796/how-do-i-make-cmake-output-into-a-bin-dir
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/runtime)
+
+
+file(GLOB SOURCEFILES 
+ src/*.h 
+ src/*.cpp
+ src/util/*.cpp
+ src/util/*.h
+ src/shaders/*.cpp
+ src/shaders/*.h
+ src/entities/*.cpp
+ src/entities/*.h
+ src/mesh/*.h
+ src/mesh/*.cpp
+ src/fieldOfShapes/*.h
+ src/fieldOfShapes/*.cpp
+)
+
+
+# Cmake glfw stuff
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(extern/glfw)
+add_subdirectory(extern/glad)
+add_subdirectory(extern/glm)
+add_subdirectory(extern/stbimage)
+
+# Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
+add_executable (HiddenInstinct ${SOURCEFILES})
+
+
+# opengl32.lib -> included in glad
+target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage)
+
+# require C++ 17 compiler
+target_compile_features(HiddenInstinct PRIVATE cxx_std_17)
+
+# TODO: Fügen Sie bei Bedarf Tests hinzu, und installieren Sie Ziele.
