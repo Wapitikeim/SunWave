@@ -5,7 +5,11 @@
 class Shape: public Entity
 {
     private:
+    //MeshStuff
+    std::shared_ptr<std::vector<float>> quadrat;
+    
+    std::shared_ptr<std::vector<int>> EBOIndices;
 
     public:
-    explicit Shape();
+    Shape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, std::string texturePath);
 };

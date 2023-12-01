@@ -14,3 +14,7 @@ void Entity::draw()
 
     entityMesh.drawMesh();
 }
+
+/* void Entity::update(GLFWwindow *window, float deltaTime)
+{
+} */

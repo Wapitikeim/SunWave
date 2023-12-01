@@ -3,25 +3,26 @@
 
 void MeshContainer::setupMesh()
 {
-    setupVAO();
-    setupVBO();
-    setupVertexAttributeInterpretation();
-    if(indicesForEBO)
-        setupEBO();
-    setupTexture();
-    
+    generateBuffers();
+    if(vertexAttributes)
+    {
+        setupVAO();
+        setupVBO();
+        setupVertexAttributeInterpretation();
+        if(indicesForEBO)
+            setupEBO();
+        setupTexture();
+    }
 }
 
 void MeshContainer::setupVAO()
 {
     //VAO
-    glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 }
 void MeshContainer::setupVBO()
 {
     //VBO Vertex Buffer Object to send to the GPU
-    glGenBuffers(1,&VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertexAttributes->capacity()*4, &vertexAttributes->operator[](0), GL_STATIC_DRAW);
 }
@@ -45,14 +46,12 @@ void MeshContainer::setupVertexAttributeInterpretation()
 }
 void MeshContainer::setupEBO()
 {
-    glGenBuffers(1,&EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesForEBO->capacity()*4, &indicesForEBO->operator[](0), GL_STATIC_DRAW);
 }
 void MeshContainer::setupTexture()
 {
     //Texture
-    glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     // set the texture wrapping/filtering options (on the currently bound texture object)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
@@ -87,6 +86,13 @@ void MeshContainer::setupTexture()
     stbi_image_free(data);
 }
 
+void MeshContainer::generateBuffers()
+{
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1,&VBO);
+    glGenBuffers(1,&EBO);
+    glGenTextures(1, &texture);
+}
 
 void MeshContainer::drawLine()
 {
@@ -106,4 +112,15 @@ void MeshContainer::drawMesh()
     
     
 }
+
+void MeshContainer::reinitMesh()
+{
+    setupVAO();
+    setupVBO();
+    setupVertexAttributeInterpretation();
+    if(indicesForEBO)
+        setupEBO();
+    setupTexture();
+}
+
 

@@ -20,6 +20,7 @@
 #include "shaders/ShaderContainer.h"
 #include "mesh/MeshContainer.h"
 #include "entities/Entity.h"
+#include "entities/Shape.h"
 
 //Camera
 glm::mat4 view;
@@ -140,30 +141,11 @@ int main()
     //Actually also handles the opengl Draw stuff resize for Window
     GLFWwindow* window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_LENGTH, "Game");
 
-    //MeshStuff
-    std::shared_ptr<std::vector<float>> quadrat = std::make_shared<std::vector<float>>();
-    quadrat->assign(
-    {
-    // positions          // texture coords
-     1.0f,  1.0f, 0.0f,   1.0f, 1.0f,   // top right
-     1.0f, -1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-    -1.0f, -1.0f, 0.0f,   0.0f, 0.0f,   // bottom left
-    -1.0f,  1.0f, 0.0f,   0.0f, 1.0f    // top left 
-    }
-    );
-    std::shared_ptr<std::vector<int>> EBOIndices = std::make_shared<std::vector<int>>();
-    EBOIndices->assign({  // note that we start from 0!
-    0, 1, 2,   // first triangle
-    3, 2, 0    // second triangle
-    });
-
-    Entity heart("Heart", ShaderContainer("defaultVertexShader.glsl", "defaultFragmentShader.glsl"), MeshContainer(quadrat, EBOIndices, "BlockyHeart.png"), glm::vec3(0.1f,0.1f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 45.0f);
-    Entity circle("Circle", ShaderContainer("defaultVertexShader.glsl", "defaultFragmentShader.glsl"), MeshContainer(quadrat, EBOIndices, "Circle.png"), glm::vec3(0.1f,0.3f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f);
-    Entity xShape("XShape", ShaderContainer("defaultVertexShader.glsl", "defaultFragmentShader.glsl"), MeshContainer(quadrat, EBOIndices, "XShape.png"), glm::vec3(0.1f,0.5f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f);
-    Entity simpleBox("SimpleBox", ShaderContainer("defaultVertexShader.glsl", "defaultFragmentShader.glsl"), MeshContainer(quadrat, EBOIndices, "SimpleBox.png"), glm::vec3(0.5f,0.7f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f);
+    Shape heart("Heart", glm::vec3(0.1f,0.1f,0.0f), glm::vec3(0.1f,0.1f,1.0f), 45.0f, "BlockyHeart.png");
+    Shape circle("Circle", glm::vec3(0.1f,0.3f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "Circle.png");
+    Shape xShape("XShape", glm::vec3(0.1f,0.5f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "XShape.png");
+    Shape simpleBox("SimpleBox", glm::vec3(0.5f,0.7f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "SimpleBox.png");
     
-    
-
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active

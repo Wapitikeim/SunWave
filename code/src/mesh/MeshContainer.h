@@ -24,10 +24,6 @@ private:
 
     std::string textureName;
 
-    std::shared_ptr<std::vector<float>> vertexAttributes;
-    
-    std::shared_ptr<std::vector<int>> indicesForEBO;
-
     void setupMesh();
 
     void setupVAO();
@@ -36,7 +32,14 @@ private:
     void setupEBO();
     void setupTexture();
 
+    void generateBuffers();
+
 public:
+    //GETTER/SETTER FEHLEN!
+    
+    std::shared_ptr<std::vector<float>> vertexAttributes;
+    std::shared_ptr<std::vector<int>> indicesForEBO;
+    
     MeshContainer(std::shared_ptr<std::vector<float>> vertexAttributesPointer, std::shared_ptr<std::vector<int>> indicesForEBOPointer, const std::string &textureNameRef)
     :vertexAttributes(vertexAttributesPointer), indicesForEBO(indicesForEBOPointer), textureName(textureNameRef)
     {
@@ -76,6 +79,9 @@ public:
     
     void drawLine();
     void drawMesh();
+
+    void reinitMesh();
+
 };
 
 #endif 

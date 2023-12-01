@@ -1,7 +1,6 @@
+#pragma once
+
 #include <string>
-
-
-
 #include "../shaders/ShaderContainer.h"
 #include "../mesh/MeshContainer.h"
 #include "../util/Camera.h"
@@ -16,7 +15,8 @@ private:
     
     //Components
     ShaderContainer entityShader;
-    MeshContainer entityMesh;
+    
+    
 
 protected:
     //World Data 
@@ -24,20 +24,23 @@ protected:
     float entityRotation;
     glm::vec3 entityPosition;
 
+    MeshContainer entityMesh;
+
 public:
     Entity(std::string Name, ShaderContainer shader, MeshContainer mesh, glm::vec3 position, glm::vec3 scale, float rotation )
     :entityName(std::move(Name)), entityShader(std::move(shader)), entityMesh(std::move(mesh)), entityPosition(position), entityScale(scale), entityRotation(rotation)
     {};
 
-    Entity(std::string Name, ShaderContainer shader, MeshContainer mesh, glm::vec3 position)
+
+    /* Entity(std::string Name, ShaderContainer shader, MeshContainer mesh, glm::vec3 position)
     :entityName(std::move(Name)), entityShader(std::move(shader)), entityMesh(std::move(mesh)), entityPosition(position)
     {
         entityScale = glm::vec3(1.0f, 1.0f, 1.0f);
         entityRotation = 0.0f;
-    };
+    }; */
 
     //Delete Copy Constructor
-    Entity(const Entity &entity) = delete;
+    //Entity(const Entity &entity) = delete;
     
     //Move Constructor
     /* Entity(Entity &&other) noexcept
