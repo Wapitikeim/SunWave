@@ -18,10 +18,12 @@
 #include "util/glfwPrep.h"
 #include "util/InfiniteGrid.h"
 #include "util/Camera.h"
+#include "util/CollisionTester.h"
 #include "shaders/ShaderContainer.h"
 #include "mesh/MeshContainer.h"
 #include "entities/Entity.h"
 #include "entities/Shape.h"
+#include "entities/PlayerShape.h"
 
 class GameEnvironment 
 {
@@ -29,7 +31,7 @@ class GameEnvironment
 
     //Camera
     glm::mat4 view;
-    glm::vec3 cameraPos = glm::vec3(2.2f, 1.05f, 3.00f);  
+    glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
     glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
@@ -68,6 +70,9 @@ class GameEnvironment
 
     //Window
     GLFWwindow* window;
+
+    //Update
+    void update();
 
     public:
     GameEnvironment();

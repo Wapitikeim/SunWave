@@ -15,6 +15,8 @@ void Entity::draw()
     entityMesh.drawMesh();
 }
 
-/* void Entity::update(GLFWwindow *window, float deltaTime)
+void Entity::switchTexture(std::string newTextureName)
 {
-} */
+    entityMesh.setTexture(newTextureName);
+}
+

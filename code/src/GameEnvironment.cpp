@@ -56,7 +56,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-    const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
+    /* const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         cameraPos += cameraSpeed * cameraFront;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
@@ -72,7 +72,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
-        Camera::setCurrentCameraView(view);
+        Camera::setCurrentCameraView(view); */
 }
 
 float GameEnvironment::signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 objectScale, glm::vec3 objectPos, float rotation)
@@ -97,6 +97,14 @@ void GameEnvironment::updateDeltaTime()
     lastFrame = currentFrame;
 }
 
+void GameEnvironment::update()
+{
+    for(auto &entity: entities) 
+    {
+        entity->update(window, deltaTime);
+    }
+}
+
 GameEnvironment::GameEnvironment()
 {
     window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_LENGTH, "Game");
@@ -104,14 +112,18 @@ GameEnvironment::GameEnvironment()
 
 void GameEnvironment::run()
 {
+    //Player? Prep
+    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.23f,1.45f,1.0f), 0.0f, "SimpleBox.png");
+    entities.push_back(std::move(playerShape));
+
     //Entities Prep
-    auto heart = std::make_unique<Shape>("Heart", glm::vec3(0.1f,0.1f,0.0f), glm::vec3(0.1f,0.1f,1.0f), 45.0f, "BlockyHeart.png");
+    auto heart = std::make_unique<Shape>("Heart", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f, 1.f,1.0f), 0.0f, "SimpleBox.png");
     entities.push_back(std::move(heart));
-    auto circle = std::make_unique<Shape>("Circle", glm::vec3(0.1f,0.3f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "Circle.png");
+    auto circle = std::make_unique<Shape>("Circle", glm::vec3(14.1f,7.0f,0.0f),glm::vec3(1.f,1.f,1.0f), 0.0f, "Circle.png");
     entities.push_back(std::move(circle));
-    auto xShape = std::make_unique<Shape>("XShape", glm::vec3(0.1f,0.5f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "XShape.png");
+    auto xShape = std::make_unique<Shape>("XShape", glm::vec3(3.1f,11.0f,0.0f),glm::vec3(1.f,1.f,1.0f), 0.0f, "Circle.png");
     entities.push_back(std::move(xShape));
-    auto simpleBox = std::make_unique<Shape>("SimpleBox", glm::vec3(0.5f,0.7f,0.0f),glm::vec3(0.1f,0.1f,1.0f), 0.0f, "SimpleBox.png");
+    auto simpleBox = std::make_unique<Shape>("SimpleBox", glm::vec3(9.1f,11.0f,0.0f),glm::vec3(1.f,1.f,1.0f), 0.0f, "Circle.png");
     entities.push_back(std::move(simpleBox));
 
     //Camera Prep
@@ -145,17 +157,19 @@ void GameEnvironment::run()
         projection = glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_LENGTH, 0.1f, 100.0f);
         Camera::setCurrentCameraProjection(projection);
         
-        /* if(signedDistance2DBox(cameraPos, simpleBox.getScale(), simpleBox.getPosition(), simpleBox.getRotation()) <=0)
-            simpleBox.setPosition(glm::vec3(simpleBox.getPosition().x, simpleBox.getPosition().y,simpleBox.getPosition().z-0.01f));
-        else if(simpleBox.getPosition().z < 0)
-            simpleBox.setPosition(glm::vec3(simpleBox.getPosition().x, simpleBox.getPosition().y,simpleBox.getPosition().z+0.0001f));
-        xShape.setZRotation(sin(glfwGetTime())*100);
-        entities[0]->setZRotation(sin(glfwGetTime())*100);
-        simpleBox.setPosition(glm::vec3(simpleBox.getPosition().x,glm::abs(cos(glfwGetTime())),simpleBox.getPosition().z));
-        simpleBox.setZRotation(sin(glfwGetTime())*100); */
-        
+        bool test = CollisionTester::areEntitiesColliding(entities[0].get(), entities[1].get());
+        if(test)
+        { 
+            entities[0]->switchTexture("SimpleBoxFilled.png");
+        }    
+        else
+        {
+            entities[0]->switchTexture("SimpleBox.png");
+        }
+            
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
-        grid.drawGrid(5);
+        update();
+        grid.drawGrid(1.f);
         drawEntities();
         glfwSwapBuffers(window);
         updateDeltaTime(); 

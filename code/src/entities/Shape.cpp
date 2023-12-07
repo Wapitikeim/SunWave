@@ -25,3 +25,8 @@ Shape::Shape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScal
     entityMesh.indicesForEBO = EBOIndices;
     entityMesh.reinitMesh();
 }
+
+void Shape::update(GLFWwindow* window, float deltaTime)
+{
+    
+}

@@ -2,7 +2,7 @@
 #include "Entity.h"
 
 
-class Shape: public Entity
+class PlayerShape: public Entity
 {
     private:
     //MeshStuff
@@ -10,8 +10,10 @@ class Shape: public Entity
     
     std::shared_ptr<std::vector<int>> EBOIndices;
 
+    float velocity = 5.f;
+
     public:
-    Shape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, std::string texturePath);
+    PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, std::string texturePath);
 
     void update(GLFWwindow* window, float deltaTime) override;
 };

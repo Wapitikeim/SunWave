@@ -123,4 +123,8 @@ void MeshContainer::reinitMesh()
     setupTexture();
 }
 
-
+void MeshContainer::setTexture(std::string newTextureName)
+{
+    textureName = newTextureName;
+    reinitMesh();
+}

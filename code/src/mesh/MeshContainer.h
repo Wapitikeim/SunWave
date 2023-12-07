@@ -82,6 +82,8 @@ public:
 
     void reinitMesh();
 
+    void setTexture(std::string newTextureName);
+
 };
 
 #endif 

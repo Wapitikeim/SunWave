@@ -58,7 +58,7 @@ public:
 
     virtual ~Entity() = default;
 
-    virtual void update(GLFWwindow *window, float deltaTime) {};
+    virtual void update(GLFWwindow* window, float deltaTime){};
     virtual void draw();
 
     //Getter/Setter
@@ -69,4 +69,6 @@ public:
     void setScale(const glm::vec3 &scale) { Entity::entityScale = scale; }
     void setZRotation(float zRotation) { Entity::entityRotation = zRotation; }
     void setPosition(const glm::vec3 &position) { Entity::entityPosition = position; }
+
+     void switchTexture(std::string newTextureName);
 };
