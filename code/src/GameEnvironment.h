@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/vec4.hpp>
+//io.hpp overloads the << operator (e.g std::cout)
+#include <glm/gtx/io.hpp>
 
 #include <iostream>
 
@@ -29,55 +31,74 @@ class GameEnvironment
 {
     private:
 
-    //Camera
-    glm::mat4 view;
-    glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
-    glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-    glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+        //Physics testing
+        glm::vec2 _initialVelocity;
+        glm::vec2 _initialPosition;
+        float _time = 0.f;
+        float _angle = 0.f;
+        float _power = 10.f;
+        bool _kinematicActivated = false;
 
-    //DeltaTime
-    float deltaTime = 0.0f;	// Time between current frame and last frame
-    float lastFrame = 0.0f; // Time of last frame
+        void activateKinematic(Entity* e);
+        void updateKinematics(Entity* e);
+        float kinematicCalculation(float acceleration, float velocity, float position, float time);
 
-    //Mouse Movement
-    bool firstMouse = true;
-    glm::vec3 direction;
-    float lastX = SCREEN_WIDTH/2, lastY = SCREEN_LENGTH/2;
-    float pitch = 0.0f;
-    float yaw = -90.f; 
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+        //Framebuffer Testing for Texture->Shader
+        GLuint fbo;
+        GLuint texture;
 
-    //Entities
-    std::vector<std::unique_ptr<Entity>> entities;
-    void drawEntities();
+        void createFrameBufferAndAttachTexture();
 
-    //Zoom
-    float fov = 45.0f;
-    void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+        //Camera
+        glm::mat4 view;
+        glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
+        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
+        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
-    //Grab Input for ESC key
-    void processInput(GLFWwindow* window);
-    
-    //SDF
-    float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
+        //DeltaTime
+        float deltaTime = 0.0f;	// Time between current frame and last frame
+        float lastFrame = 0.0f; // Time of last frame
 
-    //Update Delta
-    void updateDeltaTime();
+        //Mouse Movement
+        bool firstMouse = true;
+        glm::vec3 direction;
+        float lastX = SCREEN_WIDTH/2, lastY = SCREEN_LENGTH/2;
+        float pitch = 0.0f;
+        float yaw = -90.f; 
+        void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-    //Window
-    GLFWwindow* window;
+        //Entities
+        std::vector<std::unique_ptr<Entity>> entities;
+        void drawEntities();
 
-    //Update
-    void update();
+        //Zoom
+        float fov = 45.0f;
+        void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
+        //Grab Input for ESC key
+        void processInput(GLFWwindow* window);
+        
+        //SDF
+        float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
+
+        //Update Delta
+        void updateDeltaTime();
+
+        //Window
+        GLFWwindow* window;
+
+        //Update
+        void update();
+
 
     public:
-    GameEnvironment();
-    ~GameEnvironment(){glfwTerminate();};
+        GameEnvironment();
+        ~GameEnvironment(){glfwTerminate();};
 
-    void run();
+        void run();
 
 };

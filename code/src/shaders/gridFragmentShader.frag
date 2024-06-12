@@ -1,6 +1,6 @@
 //All Credits to https://asliceofrendering.com/scene%20helper/2020/01/05/InfiniteGrid/ opened 18.10.2023 18:00
 
-#version 330 core
+#version 460 core
 in vec3 nearPoint; // nearPoint calculated in vertex shader
 in vec3 farPoint; // farPoint calculated in vertex shader
 

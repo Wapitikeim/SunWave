@@ -4,9 +4,12 @@
 #include "../shaders/ShaderContainer.h"
 #include "../mesh/MeshContainer.h"
 #include "../util/Camera.h"
+//#include "../GameEnvironment.h"
 
 #include <glm/vec4.hpp>
 
+
+//class GameEnviorment;
 class Entity 
 {
 private:
@@ -70,5 +73,5 @@ public:
     void setZRotation(float zRotation) { Entity::entityRotation = zRotation; }
     void setPosition(const glm::vec3 &position) { Entity::entityPosition = position; }
 
-     void switchTexture(std::string newTextureName);
+    void switchTexture(std::string newTextureName);
 };

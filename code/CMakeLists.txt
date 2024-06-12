@@ -7,7 +7,8 @@ if(${CMAKE_VERSION} VERSION_LESS 3.12)
 endif()
 message([STATUS] "CMAKE VERSION: "${CMAKE_VERSION})
 
-set(CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set_property(TARGET tgt PROPERTY CXX_STANDARD 20)
 
 project(HiddenInstinct VERSION 0.3
@@ -20,7 +21,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/runtime)
 
-
+#[[
 file(GLOB SOURCEFILES 
  src/*.h 
  src/*.cpp
@@ -33,23 +34,24 @@ file(GLOB SOURCEFILES
  src/mesh/*.h
  src/mesh/*.cpp
  src/fieldOfShapes/*.h
- src/fieldOfShapes/*.cpp
-)
+ src/fieldOfShapes/*.cpp)
+]]
 
-
-# Cmake glfw stuff
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+file(GLOB SOURCEFILES src/*.cpp src/*/*.cpp)
+file(GLOB HEADERFILES src/*.h src/*/*.h)
 
 add_subdirectory(extern/glfw)
 add_subdirectory(extern/glad)
 add_subdirectory(extern/glm)
 add_subdirectory(extern/stbimage)
 
-# Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
-add_executable (HiddenInstinct ${SOURCEFILES})
+# Cmake glfw stuff
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+# Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
+add_executable (HiddenInstinct ${SOURCEFILES} ${HEADERFILES})
 
 # opengl32.lib -> included in glad
 target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage)
