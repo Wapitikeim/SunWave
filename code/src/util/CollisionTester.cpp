@@ -130,7 +130,7 @@ bool CollisionTester::simpleCheckForCollision(Entity* e1, Entity* e2)
     
     //BoundingBox *1.2f because on unevenly Scales Boxes it sometimes is an Situation between perf/Precision
     if(e1->getScale().x >= e1->getScale().y)
-        widthBoundingBoxE1 = e1->getScale().x*1.2f;
+        widthBoundingBoxE1 = e1->getScale().x*1.2f; // 1.2
     else 
         widthBoundingBoxE1 = e1->getScale().y*1.2f;
     

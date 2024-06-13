@@ -152,14 +152,20 @@ void GameEnvironment::createFrameBufferAndAttachTexture()
 void GameEnvironment::run()
 {
     //Player? Prep
-    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.23f,1.45f,1.0f), 0.0f, true, "box");
+    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(playerShape));
 
     //Entities Prep
-    auto simpleBox = std::make_unique<Shape>("SimpleBox", glm::vec3(1.0f,10.0f,0.3f),glm::vec3(1.f,1.f,1.0f), 0.0f, true, "cross");
-    entities.push_back(std::move(simpleBox));
-    auto simpleBox2 = std::make_unique<Shape>("SimpleBox2", glm::vec3(0,0,0.3f),glm::vec3(1.f,1.f,1.0f), 0.0f, true, "circle");
-    entities.push_back(std::move(simpleBox2));
+    auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(21.1f,0.0f,0.3f),glm::vec3(22.f,1.f,1.0f), 0.0f, true, "box");
+    entities.push_back(std::move(wallBottom));
+    auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(21.1f,22.f,0.3f),glm::vec3(22.f,1.f,1.0f), 0.0f, true, "box");
+    entities.push_back(std::move(wallTop));
+    auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(-1.0f,11.f,0.3f),glm::vec3(1.0f,11.f,1.0f), 0.0f, true, "box");
+    entities.push_back(std::move(wallLeft));
+    auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(42.8f,11.f,0.3f),glm::vec3(1.f,11.f,1.0f), 0.0f, true, "box");
+    entities.push_back(std::move(wallRight));
+    auto wallMiddle = std::make_unique<Shape>("wallMiddle", glm::vec3(21.f,11.f,0.3f),glm::vec3(4.f,1.f,1.0f), 0.0f, true, "box");
+    entities.push_back(std::move(wallMiddle));
 
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
@@ -188,6 +194,29 @@ void GameEnvironment::run()
         //"z" Buffer - depth testing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        //"Physics" VOR Update
+        //#################
+        std::vector<glm::vec3> initialPosOfEntites;
+        std::vector<float> initialRotationOfEntites;
+        for(auto &entry:entities)
+        {
+            initialPosOfEntites.push_back(entry->getPosition());
+            initialRotationOfEntites.push_back(entry->getRotation());
+        }
+        //#################  
+
+        //FPS
+        double currentTime = glfwGetTime();
+        fps++;
+        if (currentTime - prevTime >= 1.)
+        {
+            std::cout << "FPS: " << fps << "\n";
+            fps = 0;
+            prevTime = currentTime;
+        }
+            
+              
+
         //Kinematic testing stuff
         /*
         if(!_kinematicActivated)
@@ -200,7 +229,13 @@ void GameEnvironment::run()
             updateKinematics(entities[1].get());
         std::cout << entities[1]->getPosition().x << " " << entities[1]->getPosition().y << "\n";
         */
+        
+        //glm::vec3 newScale = entities[0]->getScale();
+        //newScale.y +=deltaTime;
+        //entities[0]->setScale(newScale);
 
+
+        //std::cout<<"X: " << entities[0]->getPosition().x<<" Y: " << entities[0]->getPosition().y << "\n";
         //Camera Update (Theoriactically)
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
         Camera::setCurrentCameraView(view);
@@ -212,6 +247,21 @@ void GameEnvironment::run()
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
         grid.drawGrid(1.f);
+
+        //"Physics" Reset AFTER Update
+        //#################
+        bool checkToWallBottom = CollisionTester::areEntitiesColliding(entities[0].get(),entities[1].get());
+        bool checkToWallTop = CollisionTester::areEntitiesColliding(entities[0].get(),entities[2].get());
+        bool checkToWallLeft = CollisionTester::areEntitiesColliding(entities[0].get(),entities[3].get());
+        bool checkToWallRight = CollisionTester::areEntitiesColliding(entities[0].get(),entities[4].get());
+        bool checkToWallMiddle = CollisionTester::areEntitiesColliding(entities[0].get(),entities[5].get());
+        if(checkToWallBottom || checkToWallTop || checkToWallLeft || checkToWallRight || checkToWallMiddle)
+        {
+            entities[0]->setPosition(initialPosOfEntites[0]);
+            entities[0]->setZRotation(initialRotationOfEntites[0]);
+        }
+        //#################    
+
         drawEntities();
         glfwSwapBuffers(window);
         updateDeltaTime(); 

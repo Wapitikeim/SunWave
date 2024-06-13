@@ -52,7 +52,6 @@ PlayerShape::PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::ve
 
 void PlayerShape::update(GLFWwindow* window, float deltaTime)
 {
-    float blockY = entityPosition.y;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
         {
             entityPosition.x -= velocity * deltaTime;
@@ -73,8 +72,6 @@ void PlayerShape::update(GLFWwindow* window, float deltaTime)
             entityRotation += 40.0f*deltaTime;
             if(entityRotation > 360)
                 entityRotation = 0;
-        }
-    if(entityPosition.y < 0.1f)
-        entityPosition.y = blockY;
+        }   
 }
 

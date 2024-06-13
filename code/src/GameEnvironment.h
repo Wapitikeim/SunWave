@@ -62,6 +62,8 @@ class GameEnvironment
         //DeltaTime
         float deltaTime = 0.0f;	// Time between current frame and last frame
         float lastFrame = 0.0f; // Time of last frame
+        double prevTime = glfwGetTime();
+        float fps = 0;
 
         //Mouse Movement
         bool firstMouse = true;
