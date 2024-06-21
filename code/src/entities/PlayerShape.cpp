@@ -73,5 +73,9 @@ void PlayerShape::update(GLFWwindow* window, float deltaTime)
             if(entityRotation > 360)
                 entityRotation = 0;
         }   
+    for(auto &comp:this->componentsOfThisEntity)
+    {
+        comp->update();
+    }
 }
 

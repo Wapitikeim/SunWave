@@ -20,12 +20,22 @@
 #include "util/glfwPrep.h"
 #include "util/InfiniteGrid.h"
 #include "util/Camera.h"
-#include "util/CollisionTester.h"
 #include "shaders/ShaderContainer.h"
 #include "mesh/MeshContainer.h"
 #include "entities/Entity.h"
 #include "entities/Shape.h"
 #include "entities/PlayerShape.h"
+
+//Imgui
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+//ComponentTesting
+#include "physics/CollisionTester.h"
+#include "physics/PhysicsEngine.h"
+#include "components/Component.h"
+#include "components/PhysicsCollider.h"
 
 class GameEnvironment 
 {
@@ -38,6 +48,7 @@ class GameEnvironment
         float _angle = 0.f;
         float _power = 10.f;
         bool _kinematicActivated = false;
+        bool isGrounded = false;
 
         void activateKinematic(Entity* e);
         void updateKinematics(Entity* e);
@@ -63,7 +74,8 @@ class GameEnvironment
         float deltaTime = 0.0f;	// Time between current frame and last frame
         float lastFrame = 0.0f; // Time of last frame
         double prevTime = glfwGetTime();
-        float fps = 0;
+        int fps = 0;
+        int imGuiFPS = 0;
 
         //Mouse Movement
         bool firstMouse = true;
@@ -99,7 +111,13 @@ class GameEnvironment
 
     public:
         GameEnvironment();
-        ~GameEnvironment(){glfwTerminate();};
+        ~GameEnvironment()
+        {
+            glfwTerminate();
+            ImGui_ImplOpenGL3_Shutdown();
+            ImGui_ImplGlfw_Shutdown();
+            ImGui::DestroyContext();
+        };
 
         void run();
 

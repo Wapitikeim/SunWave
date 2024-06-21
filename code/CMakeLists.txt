@@ -44,6 +44,7 @@ add_subdirectory(extern/glfw)
 add_subdirectory(extern/glad)
 add_subdirectory(extern/glm)
 add_subdirectory(extern/stbimage)
+add_subdirectory(extern/imgui)
 
 # Cmake glfw stuff
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -54,7 +55,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_executable (HiddenInstinct ${SOURCEFILES} ${HEADERFILES})
 
 # opengl32.lib -> included in glad
-target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage)
+target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage imgui)
 
 # require C++ 17 compiler
 target_compile_features(HiddenInstinct PRIVATE cxx_std_17)

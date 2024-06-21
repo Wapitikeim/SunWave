@@ -56,23 +56,6 @@ void GameEnvironment::processInput(GLFWwindow *window)
     {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
-    /* const float cameraSpeed = 2.5f * deltaTime; // adjust accordingly
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
-        Camera::setCurrentCameraView(view);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
-        Camera::setCurrentCameraView(view);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
-        Camera::setCurrentCameraView(view);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, up);
-        Camera::setCurrentCameraView(view); */
 }
 
 float GameEnvironment::signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 objectScale, glm::vec3 objectPos, float rotation)
@@ -151,28 +134,41 @@ void GameEnvironment::createFrameBufferAndAttachTexture()
 
 void GameEnvironment::run()
 {
+    PhysicsEngine physicsEngine;
+    
     //Player? Prep
     auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(playerShape));
+    
+    //auto Test = new Component();
+    entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
 
     //Entities Prep
     auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(21.1f,0.0f,0.3f),glm::vec3(22.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallBottom));
+
     auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(21.1f,22.f,0.3f),glm::vec3(22.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallTop));
+
     auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(-1.0f,11.f,0.3f),glm::vec3(1.0f,11.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallLeft));
+
     auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(42.8f,11.f,0.3f),glm::vec3(1.f,11.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallRight));
-    auto wallMiddle = std::make_unique<Shape>("wallMiddle", glm::vec3(21.f,11.f,0.3f),glm::vec3(4.f,1.f,1.0f), 0.0f, true, "box");
+
+    auto wallMiddle = std::make_unique<Shape>("wallMiddle", glm::vec3(21.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallMiddle));
+
+    auto wallMiddleRight = std::make_unique<Shape>("wallMiddle", glm::vec3(10.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 45.0f, true, "box");
+    entities.push_back(std::move(wallMiddleRight));
 
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
     
     //Mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
     //glfwSetCursorPosCallback(window, mouse_callback);
     
     //Zoom
@@ -181,28 +177,37 @@ void GameEnvironment::run()
     //Grid Feature
     InfiniteGrid grid(ShaderContainer("gridVertexShader.vert", "gridFragmentShader.frag"));
 
+    //IMGUI ###############
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplOpenGL3_Init();
+    //#################
+
     //Loop
     while (!glfwWindowShouldClose(window))
-    {
-        
+    {   
         //Input
         processInput(window);
-
         //Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         //"z" Buffer - depth testing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        //Imgui Setup
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
         
         //"Physics" VOR Update
-        //#################
-        std::vector<glm::vec3> initialPosOfEntites;
-        std::vector<float> initialRotationOfEntites;
-        for(auto &entry:entities)
-        {
-            initialPosOfEntites.push_back(entry->getPosition());
-            initialRotationOfEntites.push_back(entry->getRotation());
-        }
+        physicsEngine.updateInfo();
         //#################  
 
         //FPS
@@ -210,32 +215,24 @@ void GameEnvironment::run()
         fps++;
         if (currentTime - prevTime >= 1.)
         {
-            std::cout << "FPS: " << fps << "\n";
+            imGuiFPS = fps;
             fps = 0;
             prevTime = currentTime;
         }
-            
-              
 
         //Kinematic testing stuff
         /*
         if(!_kinematicActivated)
         {
-            activateKinematic(entities[1].get());
+            activateKinematic(entities[0].get());
             std::cout << "Init Pos: X: " << _initialPosition.x << " Y: " << _initialPosition.y << "\n";
             std::cout << "Init Velo: X: " << _initialVelocity.x << " Y: " << _initialVelocity.y << "\n";
         }
         else
-            updateKinematics(entities[1].get());
-        std::cout << entities[1]->getPosition().x << " " << entities[1]->getPosition().y << "\n";
+            updateKinematics(entities[0].get());
+        std::cout << entities[0]->getPosition().x << " " << entities[0]->getPosition().y << "\n";
         */
         
-        //glm::vec3 newScale = entities[0]->getScale();
-        //newScale.y +=deltaTime;
-        //entities[0]->setScale(newScale);
-
-
-        //std::cout<<"X: " << entities[0]->getPosition().x<<" Y: " << entities[0]->getPosition().y << "\n";
         //Camera Update (Theoriactically)
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
         Camera::setCurrentCameraView(view);
@@ -247,22 +244,26 @@ void GameEnvironment::run()
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
         grid.drawGrid(1.f);
-
+        
         //"Physics" Reset AFTER Update
-        //#################
-        bool checkToWallBottom = CollisionTester::areEntitiesColliding(entities[0].get(),entities[1].get());
-        bool checkToWallTop = CollisionTester::areEntitiesColliding(entities[0].get(),entities[2].get());
-        bool checkToWallLeft = CollisionTester::areEntitiesColliding(entities[0].get(),entities[3].get());
-        bool checkToWallRight = CollisionTester::areEntitiesColliding(entities[0].get(),entities[4].get());
-        bool checkToWallMiddle = CollisionTester::areEntitiesColliding(entities[0].get(),entities[5].get());
-        if(checkToWallBottom || checkToWallTop || checkToWallLeft || checkToWallRight || checkToWallMiddle)
-        {
-            entities[0]->setPosition(initialPosOfEntites[0]);
-            entities[0]->setZRotation(initialRotationOfEntites[0]);
-        }
+        physicsEngine.updatePhysics();
         //#################    
-
+        
         drawEntities();
+
+        //Imgui rendering ###############
+        ImGui::Begin("Info Panel");
+        ImGui::Text("FPS: %i", imGuiFPS);
+        ImGui::Text("Player Pos: X: %f Y: %f", entities[0]->getPosition().x, entities[0]->getPosition().y);
+        ImGui::Text("Entities in Scene: %i", entities.size());
+        ImGui::Text("Player is grounded: %s", isGrounded ? "true" : "false");
+        ImGui::End();
+
+        // Render dear imgui into screen
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        //############
+
         glfwSwapBuffers(window);
         updateDeltaTime(); 
         //BuffersAndEventHandeling

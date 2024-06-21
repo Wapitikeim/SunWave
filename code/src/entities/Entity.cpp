@@ -20,3 +20,24 @@ void Entity::switchTexture(std::string newTextureName)
     entityMesh.setTexture(newTextureName);
 }
 
+Component* Entity::getComponent(std::string componentName)
+{
+    for(auto &component:componentsOfThisEntity)
+    {
+        if(component->getName()==componentName)
+            return component.get();
+    }
+    return nullptr;  
+}
+void Entity::removeComponent(std::string componentName) 
+{
+    int componenttoDelete = -1;
+    for(int i = 0; i < componentsOfThisEntity.size(); i++)
+    {
+        if(componentsOfThisEntity[i]->getName()==componentName)
+            componenttoDelete = i;
+    }
+    if(componenttoDelete != -1)
+        componentsOfThisEntity.erase(componentsOfThisEntity.begin() + componenttoDelete);
+
+};
