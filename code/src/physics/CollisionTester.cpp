@@ -1,21 +1,20 @@
 #include "CollisionTester.h"
 
-std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(Entity* entity)
+std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(PhysicsCollider* entity)
 {
     //Order of Points: LeftBottom, RightTop, LeftTop, RightBottom
     std::vector<glm::vec2> calculatedPoints;
 
-    float xScale = entity->getScale().x*glm::cos(glm::radians(entity->getRotation())) - entity->getScale().y*glm::sin(glm::radians(entity->getRotation()));
-    float yScale = entity->getScale().x*glm::sin(glm::radians(entity->getRotation())) + entity->getScale().y*glm::cos(glm::radians(entity->getRotation()));
-    
-    glm::vec2 pointLeftBottom(entity->getPosition().x-(xScale), entity->getPosition().y-(yScale));
-    glm::vec2 pointRightTop(entity->getPosition().x+xScale, entity->getPosition().y+yScale);
+    float xScale = entity->getBody().colliderScale.x*glm::cos(glm::radians(entity->getBody().colliderZRotation)) - entity->getBody().colliderScale.y*glm::sin(glm::radians(entity->getBody().colliderZRotation));
+    float yScale = entity->getBody().colliderScale.x*glm::sin(glm::radians(entity->getBody().colliderZRotation)) + entity->getBody().colliderScale.y*glm::cos(glm::radians(entity->getBody().colliderZRotation));
+    glm::vec2 pointLeftBottom(entity->getBody().colliderPosition.x-(xScale), entity->getBody().colliderPosition.y-(yScale));
+    glm::vec2 pointRightTop(entity->getBody().colliderPosition.x+xScale, entity->getBody().colliderPosition.y+yScale);
 
-    xScale = entity->getScale().x*glm::cos(glm::radians(entity->getRotation())*-1) - entity->getScale().y*glm::sin(glm::radians(entity->getRotation())*-1);
-    yScale = entity->getScale().x*glm::sin(glm::radians(entity->getRotation())*-1) + entity->getScale().y*glm::cos(glm::radians(entity->getRotation())*-1);
+    xScale = entity->getBody().colliderScale.x*glm::cos(glm::radians(entity->getBody().colliderZRotation)*-1) - entity->getBody().colliderScale.y*glm::sin(glm::radians(entity->getBody().colliderZRotation)*-1);
+    yScale = entity->getBody().colliderScale.x*glm::sin(glm::radians(entity->getBody().colliderZRotation)*-1) + entity->getBody().colliderScale.y*glm::cos(glm::radians(entity->getBody().colliderZRotation)*-1);
     
-    glm::vec2 pointLeftTop(entity->getPosition().x-xScale, entity->getPosition().y+yScale);
-    glm::vec2 pointRightBottom(entity->getPosition().x+xScale, entity->getPosition().y-yScale);
+    glm::vec2 pointLeftTop(entity->getBody().colliderPosition.x-xScale, entity->getBody().colliderPosition.y+yScale);
+    glm::vec2 pointRightBottom(entity->getBody().colliderPosition.x+xScale, entity->getBody().colliderPosition.y-yScale);
 
     calculatedPoints.push_back(pointLeftBottom);
     calculatedPoints.push_back(pointRightTop);
@@ -97,7 +96,7 @@ bool CollisionTester::calcIfProjectionFieldIsOverlapping(glm::vec2 projectionFie
     return false;
 }
 
-bool CollisionTester::areEntitiesColliding(Entity* e1, Entity* e2)
+bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2)
 {
     if(!simpleCheckForCollision(e1, e2))
         return false;
@@ -123,33 +122,33 @@ bool CollisionTester::areEntitiesColliding(Entity* e1, Entity* e2)
     return true;
 }
 
-bool CollisionTester::simpleCheckForCollision(Entity* e1, Entity* e2)
+bool CollisionTester::simpleCheckForCollision(PhysicsCollider* e1, PhysicsCollider* e2)
 {
     float widthBoundingBoxE1, widthBoundingBoxE2;
     float gapXbetweeenE1E2, gapYbetweeenE1E2;
     
     //BoundingBox *1.2f because on unevenly Scales Boxes it sometimes is an Situation between perf/Precision
-    if(e1->getScale().x >= e1->getScale().y)
-        widthBoundingBoxE1 = e1->getScale().x*1.2f; // 1.2
+    if(e1->getBody().colliderScale.x >= e1->getBody().colliderScale.y)
+        widthBoundingBoxE1 = e1->getBody().colliderScale.x*1.2f; // 1.2
     else 
-        widthBoundingBoxE1 = e1->getScale().y*1.2f;
+        widthBoundingBoxE1 = e1->getBody().colliderScale.y*1.2f;
     
-    if(e2->getScale().x >= e2->getScale().y)
-        widthBoundingBoxE2 = e2->getScale().x*1.2f;
+    if(e2->getBody().colliderScale.x >= e2->getBody().colliderScale.y)
+        widthBoundingBoxE2 = e2->getBody().colliderScale.x*1.2f;
     else
-        widthBoundingBoxE2 = e2->getScale().y*1.2f;
+        widthBoundingBoxE2 = e2->getBody().colliderScale.y*1.2f;
 
     //X-GAP based on Position
-    if(e1->getPosition().x <= e2->getPosition().x)
-        gapXbetweeenE1E2 = (e2->getPosition().x - widthBoundingBoxE2) - (e1->getPosition().x + widthBoundingBoxE1);
+    if(e1->getBody().colliderPosition.x <= e2->getBody().colliderPosition.x)
+        gapXbetweeenE1E2 = (e2->getBody().colliderPosition.x - widthBoundingBoxE2) - (e1->getBody().colliderPosition.x + widthBoundingBoxE1);
     else 
-        gapXbetweeenE1E2 = (e1->getPosition().x - widthBoundingBoxE1) - (e2->getPosition().x + widthBoundingBoxE2);
+        gapXbetweeenE1E2 = (e1->getBody().colliderPosition.x - widthBoundingBoxE1) - (e2->getBody().colliderPosition.x + widthBoundingBoxE2);
     
     //Y-GAP based on Position
-    if(e1->getPosition().y <= e2->getPosition().y)
-        gapYbetweeenE1E2 = (e2->getPosition().y - widthBoundingBoxE2) - (e1->getPosition().y + widthBoundingBoxE1);
+    if(e1->getBody().colliderPosition.y <= e2->getBody().colliderPosition.y)
+        gapYbetweeenE1E2 = (e2->getBody().colliderPosition.y - widthBoundingBoxE2) - (e1->getBody().colliderPosition.y + widthBoundingBoxE1);
     else 
-        gapYbetweeenE1E2 = (e1->getPosition().y - widthBoundingBoxE1) - (e2->getPosition().y + widthBoundingBoxE2);
+        gapYbetweeenE1E2 = (e1->getBody().colliderPosition.y - widthBoundingBoxE1) - (e2->getBody().colliderPosition.y + widthBoundingBoxE2);
 
     //std::cout << "gapX: " << gapXbetweeenE1E2 << "\n";
     //std::cout << "gapY: " << gapYbetweeenE1E2 << "\n";

@@ -9,17 +9,18 @@
 
 #include <array>
 #include "../entities/Entity.h"
+#include "../components/PhysicsCollider.h"
 
 class CollisionTester
 {
     private:
-        static std::vector<glm::vec2> calcPointsWithRespectToRotation(Entity* entity);
+        static std::vector<glm::vec2> calcPointsWithRespectToRotation(PhysicsCollider* entity);
         static std::vector<glm::vec2> calcProjectionFieldOutOfPoints(std::vector<glm::vec2> pointsToUse);
         static bool calcIfProjectionFieldIsOverlapping(glm::vec2 projectionField, std::vector<glm::vec2> pointsE1, std::vector<glm::vec2> pointsE2);
         
     public:
         static float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 posScale, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
-        static bool simpleCheckForCollision(Entity* e1, Entity* e2);
+        static bool simpleCheckForCollision(PhysicsCollider* e1, PhysicsCollider* e2);
 
-        static bool areEntitiesColliding(Entity* e1, Entity* e2);
+        static bool arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2);
 };

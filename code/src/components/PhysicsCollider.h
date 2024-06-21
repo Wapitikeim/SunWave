@@ -22,8 +22,8 @@ class PhysicsCollider : public Component
         PhysicsBody colliderBody;
         Entity* entityThisIsAttachedTo;
         bool isStatic = true;
+        void updateEntityPosAndRot();
         
-    protected:
         
     public:
         PhysicsCollider(Entity* entityToAttachTo, bool _isStatic):entityThisIsAttachedTo(entityToAttachTo),isStatic(_isStatic)
@@ -35,7 +35,11 @@ class PhysicsCollider : public Component
         };
 
         [[nodiscard]] const PhysicsBody &getBody()const{return colliderBody;};
-        void setBody(const PhysicsBody &newBody);
+        void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
+        void setPos(const glm::vec3 &newPos){colliderBody.colliderPosition = newPos; updateEntityPosAndRot();};
+        void setRot(const float &newRot){colliderBody.colliderZRotation = newRot; updateEntityPosAndRot();};
+
+        [[nodiscard]] const bool &getIsStatic()const{return isStatic;};
         
         void update() override;
 

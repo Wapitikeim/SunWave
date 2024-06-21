@@ -1,10 +1,9 @@
 #include "PhysicsCollider.h"
 
-void PhysicsCollider::setBody(const PhysicsBody &newBody)
+void PhysicsCollider::updateEntityPosAndRot()
 {
-    colliderBody = newBody;
-    entityThisIsAttachedTo->setPosition(newBody.colliderPosition);
-    entityThisIsAttachedTo->setZRotation(newBody.colliderZRotation);
+    entityThisIsAttachedTo->setPosition(colliderBody.colliderPosition);
+    entityThisIsAttachedTo->setZRotation(colliderBody.colliderZRotation);
 }
 
 void PhysicsCollider::update()
