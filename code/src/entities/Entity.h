@@ -6,6 +6,7 @@
 #include "../util/Camera.h"
 #include "../components/Component.h"
 
+
 #include <glm/vec4.hpp>
 
 
@@ -52,5 +53,9 @@ class Entity
         void addComponent(std::unique_ptr<Component> componentToAdd){componentsOfThisEntity.push_back(std::move(componentToAdd));};
         Component* getComponent(std::string componentName);
         void removeComponent(std::string componentName);
+
+        int getComponentArraySize(){return componentsOfThisEntity.size();};
+
+        std::string getEntityName(){return entityName;};
 
 };

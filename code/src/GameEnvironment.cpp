@@ -137,7 +137,7 @@ void GameEnvironment::run()
     PhysicsEngine physicsEngine;
     
     //Player? Prep
-    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f,1.f,1.0f), 0.0f, true, "box");
+    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box");
     entities.push_back(std::move(playerShape));
     entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
@@ -173,6 +173,11 @@ void GameEnvironment::run()
     entities[6]->addComponent(std::make_unique<PhysicsCollider>(entities[6].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[6]->getComponent("Physics")));
 
+    auto aDynamicBox = std::make_unique<Shape>("aDynamicBox", glm::vec3(10.f,5.f,0.3f),glm::vec3(1.f), 0, true, "box");
+    entities.push_back(std::move(aDynamicBox));
+    entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
+    
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
@@ -217,7 +222,7 @@ void GameEnvironment::run()
         ImGui::NewFrame();
         
         //Physics pre Update
-        physicsEngine.getInitialTransform();
+        physicsEngine.getInitialTransform(deltaTime);
 
         //FPS
         double currentTime = glfwGetTime();
@@ -228,7 +233,11 @@ void GameEnvironment::run()
             fps = 0;
             prevTime = currentTime;
         }
+        
+        srand(time(0));
+        dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
 
+        //std::cout << glm::distance(entities[0]->getPosition(), entities[7]->getPosition()) << "\n";
         //Kinematic testing stuff
         /*
         if(!_kinematicActivated)
@@ -241,7 +250,6 @@ void GameEnvironment::run()
             updateKinematics(entities[0].get());
         std::cout << entities[0]->getPosition().x << " " << entities[0]->getPosition().y << "\n";
         */
-        
         //Camera Update (Theoriactically)
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
         Camera::setCurrentCameraView(view);
@@ -259,13 +267,16 @@ void GameEnvironment::run()
         //#################    
         
         drawEntities();
-
+        
         //Imgui rendering ###############
         ImGui::Begin("Info Panel");
         ImGui::Text("FPS: %i", imGuiFPS);
         ImGui::Text("Player Pos: X: %f Y: %f", entities[0]->getPosition().x, entities[0]->getPosition().y);
         ImGui::Text("Entities in Scene: %i", entities.size());
-        ImGui::Text("Player is grounded: %s", isGrounded ? "true" : "false");
+        ImGui::Text("Player is grounded: %s", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getIsGrounded() ? "true" : "false");
+        ImGui::Text("Player Velocity X:%f Y: %f", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getVelocity().x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getVelocity().y);
+        ImGui::Text("Player Acceleration X: %f Y:%f",  dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getAcceleration().x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getAcceleration().y);
+        ImGui::SliderFloat("Speed", &dynamic_cast<PlayerShape*>(entities[0].get())->velocity,10, 25,"%.3f",0);
         ImGui::End();
 
         // Render dear imgui into screen

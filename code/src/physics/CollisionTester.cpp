@@ -100,7 +100,7 @@ bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsC
 {
     if(!simpleCheckForCollision(e1, e2))
         return false;
-    
+    //std::cout << e1->getNameOfEntityThisIsAttachedTo() << " AND " << e2->getNameOfEntityThisIsAttachedTo() << " \n";
     std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
     std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(e2);
 
@@ -155,4 +155,25 @@ bool CollisionTester::simpleCheckForCollision(PhysicsCollider* e1, PhysicsCollid
     if((gapXbetweeenE1E2 <= 0) && (gapYbetweeenE1E2 <= 0))
         return true;
     return false;
+}
+
+bool CollisionTester::simpleCollisionCheckBasedOnDistanceAndScale(PhysicsCollider *e1, PhysicsCollider *e2)
+{
+    float xGapBetween = abs(e1->getBody().colliderPosition.x - e2->getBody().colliderPosition.x);
+    xGapBetween = xGapBetween - e1->getBody().colliderScale.x - e2->getBody().colliderScale.x;
+
+    float yGapBetween = abs(e1->getBody().colliderPosition.y - e2->getBody().colliderPosition.y);
+    yGapBetween = yGapBetween - e1->getBody().colliderScale.y - e2->getBody().colliderScale.y;
+
+    if(xGapBetween <= 0 && yGapBetween <= 0)
+        return true;
+    return false;
+}
+
+bool CollisionTester::aAABCollisionCheck(PhysicsCollider *e1, PhysicsCollider *e2)
+{
+    return (e1->getPos().x < e2->getPos().x + e2->getBody().colliderScale.x &&
+            e1->getPos().x + e1->getBody().colliderScale.x > e2->getPos().x &&
+            e1->getPos().y < e2->getPos().y + e2->getBody().colliderScale.y &&
+            e1->getPos().y + e1->getBody().colliderScale.y > e2->getPos().y);;
 }

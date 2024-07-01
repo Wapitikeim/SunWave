@@ -52,20 +52,23 @@ PlayerShape::PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::ve
 
 void PlayerShape::update(GLFWwindow* window, float deltaTime)
 {
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) 
         {
-            entityPosition.x -= velocity * deltaTime;
+            dynamic_cast<PhysicsCollider*>(getComponent("Physics"))->applyForce(glm::vec3(-velocity,0,0));;
         }
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) 
         {
-            entityPosition.x += velocity * deltaTime;
+            dynamic_cast<PhysicsCollider*>(getComponent("Physics"))->applyForce(glm::vec3(velocity,0,0));
         }
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            entityPosition.y += velocity * deltaTime;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
+        {
+            //entityPosition.y += velocity * deltaTime;
+            dynamic_cast<PhysicsCollider*>(getComponent("Physics"))->applyForce(glm::vec3(0,velocity,0));
         }
 
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            entityPosition.y -= velocity * deltaTime;
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) 
+        {
+            dynamic_cast<PhysicsCollider*>(getComponent("Physics"))->applyForce(glm::vec3(0,-velocity,0));;
         }
         if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
         {
