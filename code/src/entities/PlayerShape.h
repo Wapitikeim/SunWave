@@ -17,5 +17,5 @@ class PlayerShape: public Entity
         PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, std::string texturePath);
         PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, bool letFragmentShaderDraw , std::string fragmentShapeName);
         void update(GLFWwindow* window, float deltaTime) override;
-        float velocity = 15.f; // 7.5
+        float velocity = 10.f; // 7.5
 };

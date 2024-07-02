@@ -42,6 +42,7 @@ class GameEnvironment
     private:
 
         //Physics testing
+        PhysicsEngine physicsEngine;
         glm::vec2 _initialVelocity;
         glm::vec2 _initialPosition;
         float _time = 0.f;
@@ -107,6 +108,9 @@ class GameEnvironment
 
         //Update
         void update();
+
+        void initEntities();
+        void resetLevel();
 
 
     public:

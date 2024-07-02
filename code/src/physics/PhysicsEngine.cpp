@@ -18,6 +18,7 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
 void PhysicsEngine::getInitialTransform(float _deltatime)
 {
     deltatime = _deltatime;
+    tickTime += _deltatime;
     for(auto& obj:physicsObjects)
     {
         colliderInitialPos.push_back(obj->getBody().colliderPosition);
@@ -30,48 +31,53 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 
 void PhysicsEngine::updatePhysics()
 {
-    for(auto& obj:physicsObjects)
+    while (tickTime >= getTimeStep())
     {
-        if(!obj->getIsStatic())
+        for(auto& obj:physicsObjects)
         {
-            //ForcesApply
-            obj->applyForce(glm::vec3(0,-9.81,0));
-                
+            if(!obj->getIsStatic())
+            {
+                //ForcesApply
+                obj->applyForce(glm::vec3(0,-9.81,0));
+                    
 
-            //ApplyGravity
-            //Friction ? NormalForce
-            //Integrate
-            obj->setVelocity(obj->getVelocity()+(obj->getAcceleration()*deltatime));
-            obj->setPos(obj->getPos()+(obj->getVelocity()*deltatime));
-            obj->setAcceleration(glm::vec3(0));
-            
-            //Collision Test
-            for(auto& objectToTestTo : physicsObjects)
-            {   
-                if(objectToTestTo!=obj)
-                {
-                    if(CollisionTester::arePhysicsCollidersColliding(obj, objectToTestTo))
+                //ApplyGravity
+                //Friction ? NormalForce
+                //Integrate
+                obj->setVelocity(obj->getVelocity()+(obj->getAcceleration()*getTimeStep()));
+                obj->setPos(obj->getPos()+(obj->getVelocity()*getTimeStep()));
+                obj->setAcceleration(glm::vec3(0));
+                
+                //Collision Test
+                for(auto& objectToTestTo : physicsObjects)
+                {   
+                    if(objectToTestTo!=obj)
                     {
-                        restoreInitialPosAndRot(obj);
-                        
-                        if((abs(obj->getVelocity().x) > 0.1f) || (abs(obj->getVelocity().y) > 0.1f))
+                        if(CollisionTester::arePhysicsCollidersColliding(obj, objectToTestTo))
                         {
-                            //Poor mans attempt to trade forces
-                            glm::vec3 velocityToTrade(-obj->getVelocity()*objectToTestTo->getElascicity());
-                            obj->setVelocity(velocityToTrade);
-                            if(!objectToTestTo->getIsStatic())
-                                objectToTestTo->setVelocity(-velocityToTrade);
-                        }
-                        else
-                        {
-                            obj->setVelocity(glm::vec3(0));
-                            obj->setIsGrounded(true);
-                        }                
-                    }   
-                }  
+                            restoreInitialPosAndRot(obj);
+                            
+                            if((abs(obj->getVelocity().x) > 0.1f) || (abs(obj->getVelocity().y) > 0.1f))
+                            {
+                                //Poor mans attempt to trade forces
+                                glm::vec3 velocityToTrade(-obj->getVelocity()*objectToTestTo->getElascicity());
+                                obj->setVelocity(velocityToTrade);
+                                if(!objectToTestTo->getIsStatic())
+                                    objectToTestTo->setVelocity(-velocityToTrade);
+                            }
+                            else
+                            {
+                                obj->setVelocity(glm::vec3(0));
+                                obj->setIsGrounded(true);
+                            }                
+                        }   
+                    }  
+                }
             }
+            
         }
-        
+        tickTime -= (1/tickrateOfSimulation);
     }
     initTransformOfColliders.clear();
+    
 }

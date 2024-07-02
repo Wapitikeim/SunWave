@@ -23,9 +23,17 @@ class PhysicsEngine
         //void isCollisionDetected();
         //void resolveCollision();
         void restoreInitialPosAndRot(PhysicsCollider* collider);
-        float deltatime;
+        float deltatime = 0;
+        float tickTime = 0;
+        
     public:
         void registerPhysicsCollider(PhysicsCollider* colliderToRegister){physicsObjects.push_back(colliderToRegister);};
         void getInitialTransform(float _deltatime);
         void updatePhysics();
+
+        void clearPhysicsObjects(){physicsObjects.clear();};
+
+        float speedOfSimulation = 1;
+        float tickrateOfSimulation = 150;
+        float getTimeStep(){return (1/tickrateOfSimulation/(1/speedOfSimulation));};
 };

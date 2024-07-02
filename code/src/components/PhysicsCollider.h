@@ -38,7 +38,8 @@ class PhysicsCollider : public Component
             this->componentName = "Physics";
             update();
             colliderBody.mass = 1.f;
-            colliderBody.colliderVelocity = glm::vec3(0.);
+            colliderBody.colliderVelocity = glm::vec3(0);
+            colliderBody.colliderAcceleration = glm::vec3(0);
             if(isStatic)
                 elasticity = 0.5f;
         };
