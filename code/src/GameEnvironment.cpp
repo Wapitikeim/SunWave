@@ -132,10 +132,11 @@ void GameEnvironment::initEntities()
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
-    auto aRandomPoint = std::make_unique<Shape>("aRandomPoint", glm::vec3(21.15f,13.f,0),glm::vec3(0.1f), 0, true, "circle");
-    entities.push_back(std::move(aRandomPoint));
-    //entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
-    //physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
+    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(21.15f,13.f,0),glm::vec3(1.f,2.f,1.f), 45, true, "box");
+    entities.push_back(std::move(aRandomTriggerBox));
+    entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
+    dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics"))->setIsTrigger(1);
 }
 
 void GameEnvironment::resetLevel()
@@ -234,6 +235,8 @@ void GameEnvironment::run()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+
+        
         
         //Physics pre Update
         physicsEngine.getInitialTransform(deltaTime);
@@ -281,7 +284,7 @@ void GameEnvironment::run()
         //#################    
         
         drawEntities();
-        
+
         //Imgui rendering ###############
         ImGui::Begin("Info Panel");
         ImGui::Text("FPS: %i", imGuiFPS);
@@ -296,14 +299,13 @@ void GameEnvironment::run()
         ImGui::Begin("Physics Engine Control");
         ImGui::SliderFloat("Tickrate:", &physicsEngine.tickrateOfSimulation, 60, 300, "%.3f",0);
         ImGui::SliderFloat("Speed:", &physicsEngine.speedOfSimulation, 0.1, 3, "%.3f",0);
-        //ImGui::Button("Reset Level",ImVec2(1,1));
         if(ImGui::Button("Reset Level"))
             resetLevel();
         ImGui::End();
 
         ImGui::Begin("Player Extra Info");
         ImGui::Text("Corner left bottom: X:%f Y:%f", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.y);
-        ImGui::Text("TestSDF d=%f",CollisionTester::signedDistancePointAnd2DBox(entities[8]->getPosition(),dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))));
+        ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")),dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))));
         ImGui::End();
 
         

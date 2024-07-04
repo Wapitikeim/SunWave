@@ -34,6 +34,7 @@ class PhysicsCollider : public Component
     private:
         bool isGrounded = false;
         bool isStatic = true;
+        bool isTrigger = false;
         float elasticity = 0.2; // 0 = perfectly inalastic 1 = perfectly elastic
         
         PhysicsBody colliderBody;
@@ -69,6 +70,7 @@ class PhysicsCollider : public Component
         [[nodiscard]] const float &getRot()const{return colliderBody.colliderZRotation;};
         
         [[nodiscard]] const bool &getIsStatic()const{return isStatic;};
+        [[nodiscard]] const bool &getIsTrigger()const{return isTrigger;};
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
 
@@ -78,6 +80,7 @@ class PhysicsCollider : public Component
         void setAcceleration(const glm::vec3 &newAcceleration){colliderBody.colliderAcceleration = newAcceleration;};
         void setRot(const float &newRot){colliderBody.colliderZRotation = newRot; updateEntityPosAndRot();};
         void setIsGrounded(const bool &newGround){isGrounded = newGround;};
+        void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*colliderBody.mass;};
 

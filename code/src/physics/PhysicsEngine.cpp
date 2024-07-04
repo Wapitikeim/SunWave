@@ -35,6 +35,9 @@ void PhysicsEngine::updatePhysics()
     {
         for(auto& collider:physicsObjects)
         {
+            if(collider->getIsTrigger())
+                continue;
+            
             if(!collider->getIsStatic())
             {
                 //ForcesApply
@@ -54,7 +57,7 @@ void PhysicsEngine::updatePhysics()
                 //Collision Test
                 for(auto& colliderToCheckCollisionFor : physicsObjects)
                 {   
-                    if(colliderToCheckCollisionFor!=collider)
+                    if(colliderToCheckCollisionFor!=collider && !colliderToCheckCollisionFor->getIsTrigger())
                     {
                         if(CollisionTester::arePhysicsCollidersColliding(collider, colliderToCheckCollisionFor))
                         {

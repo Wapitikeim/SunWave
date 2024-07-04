@@ -24,26 +24,27 @@ std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(PhysicsC
     return calculatedPoints;
 }
 
-float CollisionTester::signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 posScale, glm::vec3 objectScale, glm::vec3 objectPos, float rotation)
-{
-    float angle = rotation *3.14159 * 2 * -1;
-    objectPos.x = (objectPos.x * glm::cos(angle)) - (objectPos.y * glm::sin(angle));
-    objectPos.y = (objectPos.x * glm::sin(angle)) + (objectPos.y * glm::cos(angle));
-    //Translation
-    glm::vec2 position = glm::vec2(posToCheckTo.x, posToCheckTo.y)-glm::vec2(objectPos.x, objectPos.y) + glm::vec2(posScale.x/2, posScale.y/2);
-    
-    glm::vec2 distance = glm::abs(position) - glm::vec2(objectScale.x/2,objectScale.y/2);
-    
-    //glm::vec2 distance = glm::abs(posToCheckTo) - (objectScale);
-    //std::cout << distance.x << " " << distance.y << "\n";
-    return glm::length(glm::max(distance,0.0f)) + glm::min(glm::max(distance.x, distance.y),0.0f);
-}
-
 float CollisionTester::signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider *colliderToCheck)
 {
     glm::mat3 rotationMatrix = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheck->getRot()), glm::vec3(0,0,1)));
     glm::vec3 localPoint = glm::transpose(rotationMatrix)*(pointPos - colliderToCheck->getPos());
     glm::vec3 q = glm::abs(localPoint) - colliderToCheck->getBody().colliderScale;
+    glm::vec3 clampedQ = glm::max(q, glm::vec3(0.0f));
+    float outsideDistance = glm::length(clampedQ);
+    float insideDistance = glm::min(glm::max(q.x, glm::max(q.y, q.z)), 0.0f);
+
+    return outsideDistance+insideDistance;
+}
+
+float CollisionTester::signedDistance2DBoxAnd2DBox(PhysicsCollider *colliderToCheckOne, PhysicsCollider *colliderToCheckTwo)
+{
+    glm::mat3 rotationMatrixOne = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheckOne->getRot()), glm::vec3(0,0,1)));
+    glm::mat3 rotationMatrixTwo = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheckTwo->getRot()), glm::vec3(0,0,1)));
+    glm::vec3 pointOne = glm::transpose(rotationMatrixOne)* colliderToCheckOne->getPos();
+    glm::vec3 pointTwo = glm::transpose(rotationMatrixOne)* colliderToCheckTwo->getPos();
+    
+    glm::vec3 localPoint = (pointOne - pointTwo);
+    glm::vec3 q = glm::abs(localPoint) - colliderToCheckOne->getBody().colliderScale - colliderToCheckTwo->getBody().colliderScale;
     glm::vec3 clampedQ = glm::max(q, glm::vec3(0.0f));
     float outsideDistance = glm::length(clampedQ);
     float insideDistance = glm::min(glm::max(q.x, glm::max(q.y, q.z)), 0.0f);
