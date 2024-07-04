@@ -39,6 +39,18 @@ float CollisionTester::signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 pos
     return glm::length(glm::max(distance,0.0f)) + glm::min(glm::max(distance.x, distance.y),0.0f);
 }
 
+float CollisionTester::signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider *colliderToCheck)
+{
+    glm::mat3 rotationMatrix = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheck->getRot()), glm::vec3(0,0,1)));
+    glm::vec3 localPoint = glm::transpose(rotationMatrix)*(pointPos - colliderToCheck->getPos());
+    glm::vec3 q = glm::abs(localPoint) - colliderToCheck->getBody().colliderScale;
+    glm::vec3 clampedQ = glm::max(q, glm::vec3(0.0f));
+    float outsideDistance = glm::length(clampedQ);
+    float insideDistance = glm::min(glm::max(q.x, glm::max(q.y, q.z)), 0.0f);
+
+    return outsideDistance+insideDistance;
+}
+
 std::vector<glm::vec2> CollisionTester::calcProjectionFieldOutOfPoints(std::vector<glm::vec2> pointsToUse)
 {
     std::vector<glm::vec2> calculatedProjectionFields;
@@ -100,7 +112,7 @@ bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsC
 {
     if(!simpleCheckForCollision(e1, e2))
         return false;
-    //std::cout << e1->getNameOfEntityThisIsAttachedTo() << " AND " << e2->getNameOfEntityThisIsAttachedTo() << " \n";
+    //
     std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
     std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(e2);
 
@@ -118,7 +130,7 @@ bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsC
         if(!calcIfProjectionFieldIsOverlapping(projField, e1EdgePoints, e2EdgePoints))
             return false;
     }
-    
+    //std::cout << e1->getNameOfEntityThisIsAttachedTo() << " AND " << e2->getNameOfEntityThisIsAttachedTo() << " \n";
     return true;
 }
 

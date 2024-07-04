@@ -50,7 +50,19 @@ class Entity
 
         void switchTexture(std::string newTextureName);
 
-        void addComponent(std::unique_ptr<Component> componentToAdd){componentsOfThisEntity.push_back(std::move(componentToAdd));};
+        void addComponent(std::unique_ptr<Component> componentToAdd)
+        {
+            bool checkIfComponentExist = false;
+            for(auto& componentName : componentsOfThisEntity)
+                if(componentName->getName() == componentToAdd->getName())
+                    checkIfComponentExist = true;
+                
+            if(!checkIfComponentExist)
+                componentsOfThisEntity.push_back(std::move(componentToAdd));
+            else
+                std::cout << "The Component: " <<componentToAdd->getName() << " on " << this->getEntityName() << " cannot be added it already has one.\n";
+            
+        };
         Component* getComponent(std::string componentName);
         void removeComponent(std::string componentName);
 

@@ -6,6 +6,7 @@
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <array>
 #include "../entities/Entity.h"
@@ -22,7 +23,7 @@ class CollisionTester
         static bool aAABCollisionCheck(PhysicsCollider* e1, PhysicsCollider* e2);
     public:
         static float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 posScale, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
-        
+        static float signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider* colliderToCheck);        
 
         static bool arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2);
 };

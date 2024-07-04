@@ -131,6 +131,11 @@ void GameEnvironment::initEntities()
     entities.push_back(std::move(aDynamicBox));
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
+    
+    auto aRandomPoint = std::make_unique<Shape>("aRandomPoint", glm::vec3(21.15f,13.f,0),glm::vec3(0.1f), 0, true, "circle");
+    entities.push_back(std::move(aRandomPoint));
+    //entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
+    //physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
 }
 
 void GameEnvironment::resetLevel()
@@ -294,6 +299,11 @@ void GameEnvironment::run()
         //ImGui::Button("Reset Level",ImVec2(1,1));
         if(ImGui::Button("Reset Level"))
             resetLevel();
+        ImGui::End();
+
+        ImGui::Begin("Player Extra Info");
+        ImGui::Text("Corner left bottom: X:%f Y:%f", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.y);
+        ImGui::Text("TestSDF d=%f",CollisionTester::signedDistancePointAnd2DBox(entities[8]->getPosition(),dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))));
         ImGui::End();
 
         

@@ -33,44 +33,48 @@ void PhysicsEngine::updatePhysics()
 {
     while (tickTime >= getTimeStep())
     {
-        for(auto& obj:physicsObjects)
+        for(auto& collider:physicsObjects)
         {
-            if(!obj->getIsStatic())
+            if(!collider->getIsStatic())
             {
                 //ForcesApply
-                obj->applyForce(glm::vec3(0,-9.81,0));
+                if(collider->getVelocity().y >0)
+                    collider->setIsGrounded(false);
+                if(!collider->getIsGrounded())
+                    collider->applyForce(glm::vec3(0,-9.81,0));
                     
 
                 //ApplyGravity
                 //Friction ? NormalForce
                 //Integrate
-                obj->setVelocity(obj->getVelocity()+(obj->getAcceleration()*getTimeStep()));
-                obj->setPos(obj->getPos()+(obj->getVelocity()*getTimeStep()));
-                obj->setAcceleration(glm::vec3(0));
+                collider->setVelocity(collider->getVelocity()+(collider->getAcceleration()*getTimeStep()));
+                collider->setPos(collider->getPos()+(collider->getVelocity()*getTimeStep()));
+                collider->setAcceleration(glm::vec3(0));
                 
                 //Collision Test
-                for(auto& objectToTestTo : physicsObjects)
+                for(auto& colliderToCheckCollisionFor : physicsObjects)
                 {   
-                    if(objectToTestTo!=obj)
+                    if(colliderToCheckCollisionFor!=collider)
                     {
-                        if(CollisionTester::arePhysicsCollidersColliding(obj, objectToTestTo))
+                        if(CollisionTester::arePhysicsCollidersColliding(collider, colliderToCheckCollisionFor))
                         {
-                            restoreInitialPosAndRot(obj);
-                            
-                            if((abs(obj->getVelocity().x) > 0.1f) || (abs(obj->getVelocity().y) > 0.1f))
+                            restoreInitialPosAndRot(collider);
+                            collider->setColliderThisIsInContactWith(colliderToCheckCollisionFor);
+                            if((abs(collider->getVelocity().x) > 0.1f) || (abs(collider->getVelocity().y) > 0.1f))
                             {
                                 //Poor mans attempt to trade forces
-                                glm::vec3 velocityToTrade(-obj->getVelocity()*objectToTestTo->getElascicity());
-                                obj->setVelocity(velocityToTrade);
-                                if(!objectToTestTo->getIsStatic())
-                                    objectToTestTo->setVelocity(-velocityToTrade);
+                                glm::vec3 velocityToTrade(-collider->getVelocity()*colliderToCheckCollisionFor->getElascicity());
+                                collider->setVelocity(velocityToTrade);
+                                if(!colliderToCheckCollisionFor->getIsStatic())
+                                    colliderToCheckCollisionFor->setVelocity(-velocityToTrade);
                             }
                             else
                             {
-                                obj->setVelocity(glm::vec3(0));
-                                obj->setIsGrounded(true);
+                                collider->setVelocity(glm::vec3(0));
+                                collider->setIsGrounded(true);
                             }                
-                        }   
+                        }
+                        collider->removeColliderFromContactList(colliderToCheckCollisionFor);   
                     }  
                 }
             }
