@@ -152,31 +152,6 @@ GameEnvironment::GameEnvironment()
 }
 
 
-//Physics Testing
-void GameEnvironment::activateKinematic(Entity* e)
-{
-    _kinematicActivated = true;
-
-    _initialVelocity = glm::vec2(cos(_angle*3.14159f/180.f), sin(_angle*3.14159f /180.f)) *_power;
-    _initialPosition = glm::vec2(e->getPosition().x, e->getPosition().y);
-}
-
-void GameEnvironment::updateKinematics(Entity* e)
-{
-    _time += deltaTime;
-
-    float newPosX = kinematicCalculation(0,_initialVelocity.x, _initialPosition.x, _time);
-    float newPosY = kinematicCalculation(-0.981f, _initialVelocity.y, _initialPosition.y, _time);
-
-    e->setPosition(glm::vec3(newPosX,newPosY,e->getPosition().z));
-
-}
-
-float GameEnvironment::kinematicCalculation(float acceleration, float velocity, float position, float time)
-{
-    return 0.5f*acceleration*time*time + velocity*time + position;
-}
-
 //Framebuffer Testing
 void GameEnvironment::createFrameBufferAndAttachTexture()
 {
@@ -254,19 +229,6 @@ void GameEnvironment::run()
         srand(time(0));
         dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
 
-        //std::cout << glm::distance(entities[0]->getPosition(), entities[7]->getPosition()) << "\n";
-        //Kinematic testing stuff
-        /*
-        if(!_kinematicActivated)
-        {
-            activateKinematic(entities[0].get());
-            std::cout << "Init Pos: X: " << _initialPosition.x << " Y: " << _initialPosition.y << "\n";
-            std::cout << "Init Velo: X: " << _initialVelocity.x << " Y: " << _initialVelocity.y << "\n";
-        }
-        else
-            updateKinematics(entities[0].get());
-        std::cout << entities[0]->getPosition().x << " " << entities[0]->getPosition().y << "\n";
-        */
         //Camera Update (Theoriactically)
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
         Camera::setCurrentCameraView(view);
@@ -277,7 +239,8 @@ void GameEnvironment::run()
 
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
-        grid.drawGrid(1.f);
+        if(showGrid)
+            grid.drawGrid(gridSize);
         
         //"Physics" Reset AFTER Update
         physicsEngine.updatePhysics();
@@ -285,15 +248,17 @@ void GameEnvironment::run()
         
         drawEntities();
 
+
+        
         //Imgui rendering ###############
         ImGui::Begin("Info Panel");
         ImGui::Text("FPS: %i", imGuiFPS);
-        ImGui::Text("Player Pos: X: %f Y: %f", entities[0]->getPosition().x, entities[0]->getPosition().y);
+        ImGui::Text("Player Pos: X: %f Y: %f", getEntityFromName<PlayerShape>("Player")->getPosition().x, getEntityFromName<PlayerShape>("Player")->getPosition().y);
         ImGui::Text("Entities in Scene: %i", entities.size());
-        ImGui::Text("Player is grounded: %s", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getIsGrounded() ? "true" : "false");
-        ImGui::Text("Player Velocity X:%f Y: %f", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getVelocity().x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getVelocity().y);
-        ImGui::Text("Player Acceleration X: %f Y:%f",  dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getAcceleration().x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getAcceleration().y);
-        ImGui::SliderFloat("Speed", &dynamic_cast<PlayerShape*>(entities[0].get())->velocity,10, 25,"%.3f",0);
+        ImGui::Text("Player is grounded: %s", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getIsGrounded() ? "true" : "false");
+        ImGui::Text("Player Velocity X:%f Y: %f", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().y);
+        ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
+        ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
         ImGui::End();
 
         ImGui::Begin("Physics Engine Control");
@@ -304,8 +269,13 @@ void GameEnvironment::run()
         ImGui::End();
 
         ImGui::Begin("Player Extra Info");
-        ImGui::Text("Corner left bottom: X:%f Y:%f", dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.x, dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->getCornerPos().leftBottom.y);
-        ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")),dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))));
+        ImGui::Text("Corner left bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.y);
+        ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
+        ImGui::End();
+
+        ImGui::Begin("World Control");
+        ImGui::Checkbox("Grid", &showGrid);
+        ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
         ImGui::End();
 
         

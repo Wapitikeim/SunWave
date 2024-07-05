@@ -43,17 +43,6 @@ class GameEnvironment
 
         //Physics testing
         PhysicsEngine physicsEngine;
-        glm::vec2 _initialVelocity;
-        glm::vec2 _initialPosition;
-        float _time = 0.f;
-        float _angle = 0.f;
-        float _power = 10.f;
-        bool _kinematicActivated = false;
-        bool isGrounded = false;
-
-        void activateKinematic(Entity* e);
-        void updateKinematics(Entity* e);
-        float kinematicCalculation(float acceleration, float velocity, float position, float time);
 
         //Framebuffer Testing for Texture->Shader
         GLuint fbo;
@@ -111,6 +100,26 @@ class GameEnvironment
 
         void initEntities();
         void resetLevel();
+        bool showGrid=true;
+        float gridSize = 1.f;
+
+        template<typename entityTypeToGet>
+        entityTypeToGet* getEntityFromName(std::string entityName)
+        {
+            for(auto& entry: entities)
+                if(entry->getEntityName() == entityName)
+                    return dynamic_cast<entityTypeToGet*>(entry.get());
+            return nullptr;
+        };
+
+        template<typename componentToGet, typename = std::enable_if<std::is_base_of<Component, componentToGet>::value> >
+        componentToGet* getComponentOfEntity(std::string entityName, std::string componentName)
+        {
+            for(auto& entry: entities)
+                if(entry->getEntityName() == entityName)
+                    return dynamic_cast<componentToGet*>(entry->getComponent(componentName));
+            return nullptr;
+        };
 
 
     public:
