@@ -112,7 +112,7 @@ class GameEnvironment
             return nullptr;
         };
 
-        template<typename componentToGet, typename = std::enable_if<std::is_base_of<Component, componentToGet>::value> >
+        template<class componentToGet, typename = std::enable_if<std::is_base_of<Component, componentToGet>::value> >
         componentToGet* getComponentOfEntity(std::string entityName, std::string componentName)
         {
             for(auto& entry: entities)

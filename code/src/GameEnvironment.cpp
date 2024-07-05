@@ -122,8 +122,8 @@ void GameEnvironment::initEntities()
     entities[5]->addComponent(std::make_unique<PhysicsCollider>(entities[5].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[5]->getComponent("Physics")));
 
-    auto wallMiddleRight = std::make_unique<Shape>("wallMiddle", glm::vec3(10.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 45.0f, true, "box");
-    entities.push_back(std::move(wallMiddleRight));
+    auto wallMiddleLeft = std::make_unique<Shape>("wallMiddleLeft", glm::vec3(10.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 45.0f, true, "box");
+    entities.push_back(std::move(wallMiddleLeft));
     entities[6]->addComponent(std::make_unique<PhysicsCollider>(entities[6].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[6]->getComponent("Physics")));
 
@@ -132,7 +132,7 @@ void GameEnvironment::initEntities()
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(entities[7].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
-    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(21.15f,13.f,0),glm::vec3(1.f,2.f,1.f), 45, true, "box");
+    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(21.15f,15.f,0),glm::vec3(1.f,2.f,1.f), 45, true, "box");
     entities.push_back(std::move(aRandomTriggerBox));
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
@@ -276,6 +276,32 @@ void GameEnvironment::run()
         ImGui::Begin("World Control");
         ImGui::Checkbox("Grid", &showGrid);
         ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
+        if(ImGui::CollapsingHeader("Entitys Info"))
+        {
+            for(int i=0; i< entities.size(); i++)
+            {
+                auto* colliderRef = getComponentOfEntity<PhysicsCollider>(entities[i]->getEntityName(),"Physics");
+                ImGui::PushID(i);
+                ImGui::Text("%s", entities[i]->getEntityName().c_str());
+                if(ImGui::CollapsingHeader("Physics"))
+                {
+                    ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
+                    
+                    bool iTrigger = colliderRef->getIsTrigger();
+                    ImGui::Checkbox("Is Trigger", &iTrigger);
+                    if(ImGui::Button("Change Trigger"))
+                        colliderRef->setIsTrigger(!iTrigger);
+                
+                    bool iStatic = colliderRef->getIsStatic();
+                    ImGui::Checkbox("Is Static", &iStatic);
+                    if(ImGui::Button("Change Static"))
+                        colliderRef->setIsStatic(!iStatic);
+                }    
+                ImGui::PopID();    
+                ImGui::Text("");
+            }
+        }    
+        
         ImGui::End();
 
         

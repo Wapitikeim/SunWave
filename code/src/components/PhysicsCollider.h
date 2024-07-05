@@ -81,6 +81,7 @@ class PhysicsCollider : public Component
         void setRot(const float &newRot){colliderBody.colliderZRotation = newRot; updateEntityPosAndRot();};
         void setIsGrounded(const bool &newGround){isGrounded = newGround;};
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
+        void setIsStatic(const bool &newStatic){isStatic = newStatic;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*colliderBody.mass;};
 
