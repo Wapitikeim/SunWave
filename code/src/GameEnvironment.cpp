@@ -82,22 +82,22 @@ void GameEnvironment::initEntities()
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
 
     //Entities Prep
-    auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(22.08f,0.5f,0.3f),glm::vec3(22.08f,1.f,1.0f), 0.0f, true, "box");
+    auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallBottom));
     entities[1]->addComponent(std::make_unique<PhysicsCollider>(entities[1].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
 
-    auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(22.08f,24.34f,0.3f),glm::vec3(22.08f,1.f,1.0f), 0.0f, true, "box");
+    auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallTop));
     entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
 
-    auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,12.426f,0.3f),glm::vec3(1.0f,12.426f,1.0f), 0.0f, true, "box");
+    auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallLeft));
     entities[3]->addComponent(std::make_unique<PhysicsCollider>(entities[3].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[3]->getComponent("Physics")));
 
-    auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(44.1f,12.426f,0.3f),glm::vec3(1.f,12.426f,1.0f), 0.0f, true, "box");
+    auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallRight));
     entities[4]->addComponent(std::make_unique<PhysicsCollider>(entities[4].get(),1));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[4]->getComponent("Physics")));
@@ -117,7 +117,7 @@ void GameEnvironment::initEntities()
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("aDynamicBox"),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
-    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(22.1f, 12.426f,0.f),glm::vec3(0.5f), 0, true, "circle");
+    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", whatCameraSeesBottomRight,glm::vec3(0.5f), 0, true, "circle");
     entities.push_back(std::move(aRandomTriggerBox));
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
@@ -258,7 +258,7 @@ void GameEnvironment::run()
 
     //ImGui
     setupImGui();
-
+    
     //Loop
     while (!glfwWindowShouldClose(window))
     {   

@@ -50,9 +50,13 @@ class GameEnvironment
 
         void createFrameBufferAndAttachTexture();
 
+        //Zoom
+        float fov = 45.0f;
+        void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+
         //Camera
         glm::mat4 view;
-        //glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
+        //glm::vec3 cameraPos = glm::vec3(30.f, 20.f, 30.f);  
         glm::vec3 cameraPos = glm::vec3(22.1f, 12.426f, 30.f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -60,6 +64,13 @@ class GameEnvironment
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
         glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+        float yHalf = std::sin(glm::radians(fov/2)) * (cameraPos.z/glm::sin(glm::radians((180-fov/2-90))));
+        float xHalf = yHalf*SCREEN_WIDTH/SCREEN_LENGTH;
+        glm::vec3 whatCameraSeesBottomLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y-yHalf,0);
+        glm::vec3 whatCameraSeesTopLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y+yHalf,0);;
+        glm::vec3 whatCameraSeesTopRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y+yHalf,0);;
+        glm::vec3 whatCameraSeesBottomRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y-yHalf,0);;
+        
 
         //DeltaTime
         float deltaTime = 0.0f;	// Time between current frame and last frame
@@ -80,9 +91,7 @@ class GameEnvironment
         std::vector<std::unique_ptr<Entity>> entities;
         void drawEntities();
 
-        //Zoom
-        float fov = 45.0f;
-        void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+        
 
         //Grab Input for ESC key
         void processInput(GLFWwindow* window);      

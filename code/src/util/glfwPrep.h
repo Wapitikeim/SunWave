@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <stb_image.h> // For Icon
+#include "fileReader.h"
 #include <iostream>
 
 class glfwPrep 

@@ -23,6 +23,12 @@ GLFWwindow *glfwPrep::prepGLFWAndGladThenGiveBackWindow(unsigned int width, unsi
     }
     glfwMakeContextCurrent(window);
 
+    //Icon Set // Could divide in 16x16 and 32x32 
+    GLFWimage images[1]; 
+    images[0].pixels = stbi_load(fileReader::getPathToFileInFolder("ico.png", "assets").string().c_str(), &images[0].width, &images[0].height, 0, 4);
+    glfwSetWindowIcon(window, 1, images); 
+    stbi_image_free(images[0].pixels);
+
     //GladInit
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
