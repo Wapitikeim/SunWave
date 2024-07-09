@@ -50,7 +50,7 @@ class ShaderContainer
             std::swap(this->vertexShader, other.vertexShader);
         }
 
-
+        unsigned int& getShaderID(){return fragmentShaderID;};
         void useShader();
 
         void setUniformVec4(const std::string &uniformName, const glm::vec4 &valuesToSet) const;

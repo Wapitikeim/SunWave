@@ -4,7 +4,7 @@ out vec4 FragColor;
 //in vec3 ourColor;
 in vec2 TexCoord;
 uniform sampler2D ourTexture;
-uniform vec4 colorChange;
+uniform vec4 colorChange = vec4(0,0,0,1);
 
 vec3 makeSquare(float d_Left, float d_Top, float d_Right, float d_Bottom, vec2 normalisedCoord)
 {

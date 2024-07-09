@@ -52,7 +52,8 @@ class GameEnvironment
 
         //Camera
         glm::mat4 view;
-        glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
+        //glm::vec3 cameraPos = glm::vec3(21.f, 10.f, 30.f);  
+        glm::vec3 cameraPos = glm::vec3(22.1f, 12.426f, 30.f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
@@ -84,10 +85,7 @@ class GameEnvironment
         void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
         //Grab Input for ESC key
-        void processInput(GLFWwindow* window);
-        
-        //SDF
-        float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
+        void processInput(GLFWwindow* window);      
 
         //Update Delta
         void updateDeltaTime();
@@ -98,6 +96,7 @@ class GameEnvironment
         //Update
         void update();
 
+        //Entity Stuff
         void initEntities();
         void resetLevel();
         bool showGrid=true;
@@ -121,6 +120,9 @@ class GameEnvironment
             return nullptr;
         };
 
+        //ImGui 
+        void setupImGui();
+        void drawImGuiWindows();
 
     public:
         GameEnvironment();

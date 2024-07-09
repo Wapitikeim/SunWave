@@ -1,5 +1,7 @@
 #pragma once
 #include <glm/glm.hpp> 
+#include <glm/vec4.hpp>
+#include <glm/gtx/io.hpp>
 
 class Camera 
 {
@@ -10,6 +12,7 @@ class Camera
     
         static glm::mat4 projection;
         static glm::mat4 view;
+
     
     public:
 
@@ -18,5 +21,4 @@ class Camera
 
         static void setCurrentCameraView(const glm::mat4 &viewToSet);
         static void setCurrentCameraProjection(const glm::mat4 &projectionToSet);
-
 };

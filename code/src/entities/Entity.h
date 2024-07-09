@@ -29,6 +29,7 @@ class Entity
         MeshContainer entityMesh;
         //Components
         ShaderContainer entityShader;
+        bool dontDraw = false;
 
     public:
         Entity(std::string Name, ShaderContainer shader, MeshContainer mesh, glm::vec3 position, glm::vec3 scale, float rotation )
@@ -44,12 +45,14 @@ class Entity
         [[nodiscard]] const glm::vec3 &getScale() const { return entityScale; }
         [[nodiscard]] float getRotation() const { return entityRotation; }
         [[nodiscard]] const glm::vec3 &getPosition() const {return entityPosition; }
-
         [[nodiscard]] const ShaderContainer &getShaderContainer() const {return entityShader;}
+        [[nodiscard]] const bool &getDontDraw() const {return dontDraw;}
         
         void setScale(const glm::vec3 &scale) { Entity::entityScale = scale; }
         void setZRotation(float zRotation) { Entity::entityRotation = zRotation; }
         void setPosition(const glm::vec3 &position) { Entity::entityPosition = position; }
+
+        void setDontDraw(const bool &newIsDisabeld){dontDraw = newIsDisabeld;};
 
         void switchTexture(std::string newTextureName);
 

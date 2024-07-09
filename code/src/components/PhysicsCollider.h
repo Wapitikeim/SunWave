@@ -73,6 +73,7 @@ class PhysicsCollider : public Component
         [[nodiscard]] const bool &getIsTrigger()const{return isTrigger;};
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
+        [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
 
         void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
         void setPos(const glm::vec3 &newPos){colliderBody.colliderPosition = newPos; updateEntityPosAndRot();};
@@ -83,7 +84,8 @@ class PhysicsCollider : public Component
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
         void setIsStatic(const bool &newStatic){isStatic = newStatic;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
-        void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*colliderBody.mass;};
+        void setMass(const float &newMass){colliderBody.mass = newMass;};
+        void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};
 
         std::vector<PhysicsCollider*> getTheColliderThisColliderIsInContactWith(){return isInContactWith;};
         void setColliderThisIsInContactWith(PhysicsCollider* collider)

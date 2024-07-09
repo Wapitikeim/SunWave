@@ -24,3 +24,4 @@ void Camera::setCurrentCameraProjection(const glm::mat4 &projectionToSet)
 {
     Camera::projection = projectionToSet;
 }
+

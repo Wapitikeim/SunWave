@@ -67,20 +67,20 @@ void ShaderContainer::useShader()
     glUseProgram(shaderID);
 }
 
-
-
+//glUseProgramm must be set before because it uses the last active Programm
 void ShaderContainer::setUniformVec4(const std::string &uniformName, const glm::vec4 &valuesToSet) const
 {
     //Sets value in order x y z w
+    glUseProgram(shaderID);
     glUniform4f(glGetUniformLocation(shaderID, uniformName.c_str()), valuesToSet.x, valuesToSet.y, valuesToSet.z, valuesToSet.w);
 }
-
 void ShaderContainer::setUniformMat4(const std::string &uniformName, const glm::mat4 &valuesToSet) const
 {
+    glUseProgram(shaderID);
     glUniformMatrix4fv(glGetUniformLocation(shaderID, uniformName.c_str()), 1, GL_FALSE, glm::value_ptr(valuesToSet));
 }
-
 void ShaderContainer::setUniformFloat(const std::string &uniformName, const float &valueToSet) const
 {
+    glUseProgram(shaderID);
     glUniform1f(glGetUniformLocation(shaderID, uniformName.c_str()),valueToSet);
 }
