@@ -111,8 +111,8 @@ bool CollisionTester::calcIfProjectionFieldIsOverlapping(glm::vec2 projectionFie
 
 bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2)
 {
-    if(!simpleCheckForCollision(e1, e2))
-        return false;
+    //if(!simpleCheckForCollision(e1, e2))
+    //    return false;
     //
     std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
     std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(e2);

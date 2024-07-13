@@ -27,7 +27,7 @@ void PhysicsCollider::updateCornerPositions()
         colliderBody.colliderPosition.x-xScale,
         colliderBody.colliderPosition.y+yScale,
         colliderBody.colliderPosition.z);
-    cornerPos.rightTop = glm::vec3(
+    cornerPos.rightBottom = glm::vec3(
         colliderBody.colliderPosition.x+xScale,
         colliderBody.colliderPosition.y-yScale,
         colliderBody.colliderPosition.z);

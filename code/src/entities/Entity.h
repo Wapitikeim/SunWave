@@ -38,7 +38,7 @@ class Entity
 
         virtual ~Entity() = default;
 
-        virtual void update(GLFWwindow* window, float deltaTime){};
+        virtual void update(GLFWwindow* window, float deltaTime);
         virtual void draw();
 
         //Getter/Setter

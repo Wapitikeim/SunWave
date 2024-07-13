@@ -1,5 +1,13 @@
 #include "Entity.h"
 
+void Entity::update(GLFWwindow *window, float deltaTime)
+{
+    for(auto &comp:this->componentsOfThisEntity)
+    {
+        comp->update();
+    }
+}
+
 void Entity::draw()
 {
     if(dontDraw)

@@ -117,11 +117,11 @@ void GameEnvironment::initEntities()
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("aDynamicBox"),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
-    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", whatCameraSeesBottomRight,glm::vec3(0.5f), 0, true, "circle");
+    /* auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", cameraPos,glm::vec3(0.5f), 0, true, "circle");
     entities.push_back(std::move(aRandomTriggerBox));
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
-    dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics"))->setIsTrigger(1);
+    dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics"))->setIsTrigger(1); */
 }
 
 void GameEnvironment::resetLevel()
@@ -165,8 +165,14 @@ void GameEnvironment::drawImGuiWindows()
     ImGui::End();
 
     ImGui::Begin("Player Extra Info");
-    ImGui::Text("Corner left bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.y);
-    ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
+    ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("WallTop","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("WallTop","Physics")->getCornerPos().rightBottom.y);
+    //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
+    float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
+    float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
+    ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
+    ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
+    glm::vec3 newScale(scaleX,scaleY, getEntityFromName<Entity>("Player")->getScale().z);
+    getEntityFromName<Entity>("Player")->setScale(newScale);
     ImGui::End();
     
     ImGui::Begin("World Control");
@@ -245,6 +251,8 @@ void GameEnvironment::run()
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
+    physicsEngine.setcameraXHalf(xHalf);
+    physicsEngine.setcameraYHalf(yHalf);
     
     //Mouse
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
@@ -258,6 +266,8 @@ void GameEnvironment::run()
 
     //ImGui
     setupImGui();
+
+    
     
     //Loop
     while (!glfwWindowShouldClose(window))
@@ -291,6 +301,85 @@ void GameEnvironment::run()
         srand(time(0));
         dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
 
+        /* int spacing = 4;
+        int tableSize = glm::ceil((xHalf*2*yHalf*2)/spacing);
+        auto colliderRef = getComponentOfEntity<PhysicsCollider>("Player", "Physics");
+        std::vector<int> indicies;
+        std::vector<glm::vec2> pointsToGetIndexesFor;
+        if(colliderRef->getBody().colliderScale.x > (spacing/2) || colliderRef->getBody().colliderScale.y > (spacing/2))
+        {
+            int segmentsX = glm::floor(colliderRef->getBody().colliderScale.x);
+            int segmentsY = glm::floor(colliderRef->getBody().colliderScale.y);
+            int segments = glm::max(segmentsX,segmentsY);
+            
+            glm::vec3 leftToRightBottom = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().leftBottom;
+            float deltaXBottom = leftToRightBottom.x / segments;
+            float deltaYBottom = leftToRightBottom.y / segments;
+
+            glm::vec3 rightToRight = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().rightTop;
+            float deltaXRight = rightToRight.x / segments;
+            float deltaYRight = rightToRight.y / segments;
+
+            glm::vec3 leftToLeft = colliderRef->getCornerPos().leftBottom - colliderRef->getCornerPos().leftTop;
+            float deltaXLeft = leftToLeft.x / segments;
+            float deltaYLeft = leftToLeft.y / segments;
+
+            glm::vec3 leftToRightTop = colliderRef->getCornerPos().rightTop - colliderRef->getCornerPos().leftTop;
+            float deltaXTop = leftToRightTop.x / segments;
+            float deltaYTop = leftToRightTop.y / segments;
+            //std:: cout << segments << "\n";
+            for(int i = 1; i < segments ; i++)
+            {
+                float newPointX = colliderRef->getCornerPos().leftBottom.x + deltaXBottom*i;
+                float newPointY = colliderRef->getCornerPos().leftBottom.y + deltaYBottom*i;
+                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
+                
+                newPointX = colliderRef->getCornerPos().rightTop.x + deltaXRight*i;
+                newPointY = colliderRef->getCornerPos().rightTop.y + deltaYRight*i;
+                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
+               
+                newPointX = colliderRef->getCornerPos().leftTop.x + deltaXTop*i;
+                newPointY = colliderRef->getCornerPos().leftTop.y + deltaYTop*i;
+                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
+
+                newPointX = colliderRef->getCornerPos().leftTop.x + deltaXLeft*i;
+                newPointY = colliderRef->getCornerPos().leftTop.y + deltaYLeft*i;
+                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
+               
+            }
+        }
+        glm::vec2 a(glm::floor((colliderRef->getCornerPos().leftBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().leftBottom.y) /spacing));
+        pointsToGetIndexesFor.push_back(a);
+        a = glm::vec2(glm::floor((colliderRef->getCornerPos().leftTop.x) /spacing), glm::floor((colliderRef->getCornerPos().leftTop.y) /spacing));
+        pointsToGetIndexesFor.push_back(a);
+        a = glm::vec2(glm::floor((colliderRef->getCornerPos().rightTop.x) /spacing), glm::floor((colliderRef->getCornerPos().rightTop.y) /spacing));
+        pointsToGetIndexesFor.push_back(a);
+        a = glm::vec2(glm::floor((colliderRef->getCornerPos().rightBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().rightBottom.y) /spacing));
+        pointsToGetIndexesFor.push_back(a);
+        //std::cout << pointsToGetIndexesFor.size() << "\n";
+        for(auto &entry:pointsToGetIndexesFor)
+        {
+            int index = entry.y* glm::ceil((xHalf*2)/(spacing-1))  + entry.x;
+            index = index;//%tableSize;
+            indicies.push_back(index); 
+        }
+
+        int xI = glm::floor((colliderRef->getCornerPos().leftBottom.x) /spacing);
+        int yI = glm::floor((colliderRef->getCornerPos().leftBottom.y) /spacing);
+        int index = yI*glm::ceil(colliderRef->getCornerPos().leftBottom.x)+xI;
+        index = glm::abs(index)%tableSize;
+        indicies.push_back(index); 
+
+        //std::cout << "Left Bottom: " << indicies[0] << " Left Top: " << indicies[1] << " Right Top: " << indicies[2] << " Right Bottom: " << indicies[3] << "\n";
+        std::sort(indicies.begin(), indicies.end());
+        indicies.erase(std::unique(indicies.begin(),indicies.end()), indicies.end());
+        for(auto &entry:indicies)
+            std::cout << entry << " ";
+        std::cout << std::endl; */
+        
+        /* for(auto &entry:getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getTableIndicies())
+            std::cout << entry << " ";
+        std::cout << "\n"; */
         //Camera Update (Theoriactically)
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_LENGTH, 0.1f, 100.0f));

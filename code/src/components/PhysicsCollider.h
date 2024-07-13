@@ -45,6 +45,8 @@ class PhysicsCollider : public Component
 
         CornerPositions cornerPos;
         void updateCornerPositions();
+
+        std::vector<int> indiciesInHashTable;
         
     protected:
 
@@ -57,9 +59,8 @@ class PhysicsCollider : public Component
             colliderBody.colliderAcceleration = glm::vec3(0);
             if(isStatic)
                 elasticity = 0.5f;
-            
-            updateCornerPositions(); // That static entites getting thier Corner Positions at least once
             update();
+            updateCornerPositions(); // That static entites getting thier Corner Positions at least once
             
         };
 
@@ -74,6 +75,7 @@ class PhysicsCollider : public Component
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
         [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
+        [[nodiscard]] const std::vector<int> &getTableIndicies()const{return indiciesInHashTable;};
 
         void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
         void setPos(const glm::vec3 &newPos){colliderBody.colliderPosition = newPos; updateEntityPosAndRot();};
@@ -86,7 +88,9 @@ class PhysicsCollider : public Component
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};
         void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};
-
+        void setIndiciesForHashTable(const std::vector<int> &newIndicies){indiciesInHashTable = newIndicies;};
+        void addOneIndexIntoIndiciesForHashTable(const int &index){indiciesInHashTable.push_back(index);};
+        void clearIndiciesForHashTableOfThisEntity(){indiciesInHashTable.clear();};
         std::vector<PhysicsCollider*> getTheColliderThisColliderIsInContactWith(){return isInContactWith;};
         void setColliderThisIsInContactWith(PhysicsCollider* collider)
         {
