@@ -31,6 +31,10 @@ void PhysicsCollider::updateCornerPositions()
         colliderBody.colliderPosition.x+xScale,
         colliderBody.colliderPosition.y-yScale,
         colliderBody.colliderPosition.z);
+    
+    //vecUpdate
+    cornerPos.cornerVec.clear();
+    cornerPos.cornerVec = {cornerPos.leftBottom, cornerPos.leftTop, cornerPos.rightTop, cornerPos.rightBottom};
 }
 
 void PhysicsCollider::update()

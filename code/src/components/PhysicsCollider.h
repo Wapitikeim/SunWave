@@ -27,6 +27,7 @@ struct CornerPositions
     glm::vec3 leftTop;
     glm::vec3 rightTop;
     glm::vec3 rightBottom;
+    std::vector<glm::vec3> cornerVec;
 };
 
 class PhysicsCollider : public Component
@@ -92,6 +93,7 @@ class PhysicsCollider : public Component
         void addOneIndexIntoIndiciesForHashTable(const int &index){indiciesInHashTable.push_back(index);};
         void clearIndiciesForHashTableOfThisEntity(){indiciesInHashTable.clear();};
         std::vector<PhysicsCollider*> getTheColliderThisColliderIsInContactWith(){return isInContactWith;};
+        std::vector<glm::vec3> getCornerPosAsVector(){return cornerPos.cornerVec;};
         void setColliderThisIsInContactWith(PhysicsCollider* collider)
         {
             int checkBeforeAdd = std::count(isInContactWith.begin(),isInContactWith.end(),collider);

@@ -126,6 +126,9 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 
 void PhysicsEngine::updatePhysics()
 {
+    if(isHalting) //Kinda just works if physicsObjects are not moving
+        return;
+    
     //Nessecary for Right HashTable Insertion because Corner Positions are getting calculated to late
     if(!initDone)
     {
@@ -141,7 +144,7 @@ void PhysicsEngine::updatePhysics()
         //Force Apply + Update
         for(auto& collider:physicsObjects)
         {
-            if(collider->getIsTrigger() || collider->getIsStatic())
+            if(collider->getIsTrigger() || collider->getIsStatic()&&(collider->getVelocity()==glm::vec3(0)))
                 continue;
             /* if(!(abs(collider->getVelocity().x) > 0.1f) || !(abs(collider->getVelocity().y) > 0.1f))
             {
@@ -155,7 +158,23 @@ void PhysicsEngine::updatePhysics()
                 collider->setIsGrounded(false);
             if(!collider->getIsGrounded())
                 collider->applyForce(glm::vec3(0,-9.81,0));
-                
+
+            //Angular Momentum? TODO
+            //Pivot at Center
+           /*  float inertia = (1/12) * collider->getMass() * (glm::pow(collider->getBody().colliderScale.x*2,2)+glm::pow(collider->getBody().colliderScale.y*2,2) );
+            //Torgue
+            float torgueWidth = collider->getBody().colliderScale.x*glm::cos(glm::degrees(collider->getBody().colliderZRotation));
+            float torgueHeight = collider->getBody().colliderScale.y*glm::cos(glm::degrees(collider->getBody().colliderZRotation));
+            float torgue = (torgueWidth+torgueHeight);//*-9.81f*collider->getMass();
+
+            float angularMomentum = 0;
+            if(inertia!=0)
+                angularMomentum = (torgue/inertia)*getTimeStep();
+            if(collider->getNameOfEntityThisIsAttachedTo() == "Player")
+                std::cout << angularMomentum <<"Torgue: " << torgue << " Inertia " << inertia << "\n";
+            collider->setRot(collider->getRot()+angularMomentum); */
+            
+            
             //Friction ? NormalForce
             //Integrate
             collider->setVelocity(collider->getVelocity()+(collider->getAcceleration()*getTimeStep()));
@@ -196,7 +215,7 @@ void PhysicsEngine::updatePhysics()
             bool dontAddIfAllStatic = true;
             if(val.size() > 1)
                 for(auto &entry:val)
-                    if(!entry->getIsStatic())
+                    if(!entry->getIsStatic()||entry->getIsStatic()&&(entry->getVelocity()!=glm::vec3(0)))
                     {
                         dontAddIfAllStatic = false;
                         break;
@@ -215,7 +234,106 @@ void PhysicsEngine::updatePhysics()
                         continue;
                     if(CollisionTester::arePhysicsCollidersColliding(entry, collisiontoCheckFor))
                     {
+                        //Getting the Edge of the collision contact
+                        //Get the 'Save' point
+                        int index = 0;
+                        float shortestDistance = 100;
+                        int indexShortestDistance;
+                        auto& refCornerVec = collisiontoCheckFor->getCornerPosAsVector(); 
+                        //"Save" Corner Pos calc
+                        for(auto &cornerToCheck:refCornerVec)
+                        {
+                            float distanceToCalculate = 0;
+                            //Go Through all Corners of Entity
+                            for(auto &cornerOfEntity:entry->getCornerPosAsVector())
+                                distanceToCalculate+=glm::distance(cornerToCheck, cornerOfEntity);
+                            
+                            if(distanceToCalculate<shortestDistance)
+                            {
+                                shortestDistance = distanceToCalculate;
+                                indexShortestDistance = index;
+                            }   
+                            index++;
+                        }
+                        //Possible Edge Index Calc (Maybe smarter/Better way)
+                        int possibleEdgeIndexes1[2];possibleEdgeIndexes1[0] = indexShortestDistance;
+                        int possibleEdgeIndexes2[2];possibleEdgeIndexes2[0] = indexShortestDistance;
+                        if((indexShortestDistance+1)>3)
+                            possibleEdgeIndexes1[1] = 0;
+                        else
+                            possibleEdgeIndexes1[1] = indexShortestDistance+1;
+                        if((indexShortestDistance-1)<0)
+                            possibleEdgeIndexes2[1] = 3;
+                        else
+                            possibleEdgeIndexes2[1] = indexShortestDistance-1;
+                        //Which Edge is the correct one?
+                        //Which possible edge is the shorter one?
+                        int theShorterOne = 0;
+                        
+                        float dEdge1 = glm::distance(refCornerVec[possibleEdgeIndexes1[0]], refCornerVec[possibleEdgeIndexes1[1]]);
+                        float dEdge2 = glm::distance(refCornerVec[possibleEdgeIndexes2[0]], refCornerVec[possibleEdgeIndexes2[1]]);
+                        if(dEdge1>dEdge2)
+                            theShorterOne = 2;
+                        else
+                            theShorterOne = 1;
+                        
+                        //Vector Calc
+                        glm::vec3 edge1 = refCornerVec[possibleEdgeIndexes1[1]]-refCornerVec[possibleEdgeIndexes1[0]];
+                        glm::vec3 edge2 = refCornerVec[possibleEdgeIndexes2[1]]-refCornerVec[possibleEdgeIndexes2[0]]; 
+                        float scalingFactor = 0;
+                        glm::vec3 pointThatDeterminesTheShorterEdge;
+                        if(theShorterOne == 2)
+                        {
+                            scalingFactor = dEdge2/dEdge1;
+                            pointThatDeterminesTheShorterEdge = refCornerVec[possibleEdgeIndexes1[0]] + scalingFactor * edge1;
+                        }   
+                        else
+                        {
+                            scalingFactor = dEdge1/dEdge2; 
+                            pointThatDeterminesTheShorterEdge = refCornerVec[possibleEdgeIndexes2[0]] + scalingFactor * edge2;
+                        }
+                        float distanceToTheLongEdgePoint = 0;
+                        float distanceToTheShortSidePoint = 0;
+                        for(auto &cornerOfEntity:entry->getCornerPosAsVector())
+                        {
+                            distanceToTheLongEdgePoint+=glm::distance(pointThatDeterminesTheShorterEdge, cornerOfEntity);
+                            if(theShorterOne == 2)
+                                distanceToTheShortSidePoint+=glm::distance(refCornerVec[possibleEdgeIndexes2[1]], cornerOfEntity);
+                            else
+                                distanceToTheShortSidePoint+=glm::distance(refCornerVec[possibleEdgeIndexes1[1]], cornerOfEntity);
+                        }
+                        //Now we finally can determine which edge is the right one      
+                        int longerEdge = 0;
+                        if(glm::length(edge1)> glm::length(edge2))
+                            longerEdge = 1;
+                        else
+                            longerEdge = 2;
+                        glm::vec3 edgeToUseCalculationsWith;
+                        if(distanceToTheLongEdgePoint < distanceToTheShortSidePoint)
+                            if(longerEdge == 1)
+                                edgeToUseCalculationsWith = edge1;
+                            else
+                                edgeToUseCalculationsWith = edge2;
+                        else
+                            if(longerEdge == 1)
+                                edgeToUseCalculationsWith = edge2;
+                            else
+                                edgeToUseCalculationsWith = edge1;
+                            
+                        glm::vec2 normVector1(-edgeToUseCalculationsWith.y, edgeToUseCalculationsWith.x);
+                        glm::vec2 normVector2(edgeToUseCalculationsWith.y, -edgeToUseCalculationsWith.x);
+
+                        
+                                                 
+                        
                         restoreInitialPosAndRot(entry);
+                        if(entry->getNameOfEntityThisIsAttachedTo() == "Player")
+                        {
+                            //std::cout << glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y)) << "\n";
+                            //std::cout << glm::degrees(glm::atan((normVector2/glm::length(normVector2)).x,(normVector2/glm::length(normVector2)).y)) << "\n";
+                            //std::cout << "\n";
+                            entry->setRot(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y)));
+                        }
                         if((abs(entry->getVelocity().x) > 0.1f) || (abs(entry->getVelocity().y) > 0.1f))
                         {
                             //Poor mans attempt to trade forces
@@ -229,12 +347,11 @@ void PhysicsEngine::updatePhysics()
                             entry->setVelocity(glm::vec3(0));
                             entry->setIsGrounded(true);
                         } 
-                    }
-                    entry->removeColliderFromContactList(collisiontoCheckFor);             
+                    }            
                 }
             }
         }
-        std::cout << collisionsToResolve.size() << "\n";
+        //std::cout << collisionsToResolve.size() << "\n";
         collisionsToResolve.clear();
         tickTime -= (1/tickrateOfSimulation);
     }

@@ -120,6 +120,26 @@ class GameEnvironment
             return nullptr;
         };
 
+        void deleteEntityFromName(std::string entityName)
+        {
+            std::cout << "Trying to delete " << entityName << "\n";
+            if(getEntityFromName<Entity>(entityName) == nullptr)
+            {
+                std::cout << entityName << " dosent exist. Cannot remove. \n";
+                return;
+            }
+                
+            physicsEngine.unregisterCollider(getComponentOfEntity<PhysicsCollider>(entityName,"Physics"));
+            for(auto& entry:entities)
+                if(entry->getEntityName() == entityName)
+                {
+                    entities.erase(std::remove(entities.begin(), entities.end(), entry),entities.end());
+                    break;
+                }
+            std::cout << "Deleted " << entityName << "\n";
+                    
+        };
+        
         template<class componentToGet, typename = std::enable_if<std::is_base_of<Component, componentToGet>::value> >
         componentToGet* getComponentOfEntity(std::string entityName, std::string componentName)
         {

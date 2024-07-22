@@ -117,11 +117,45 @@ void GameEnvironment::initEntities()
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("aDynamicBox"),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
-    /* auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", cameraPos,glm::vec3(0.5f), 0, true, "circle");
+    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(cameraPos.x,cameraPos.y,0.3f),glm::vec3(0.3f), 0, true, "circle");
     entities.push_back(std::move(aRandomTriggerBox));
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
-    dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics"))->setIsTrigger(1); */
+    
+    /* auto physicsTesting_1 = std::make_unique<Shape>("physicsTesting_1", glm::vec3(cameraPos.x+5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.5f), 0, true, "circle");
+    entities.push_back(std::move(physicsTesting_1));
+    entities[9]->addComponent(std::make_unique<PhysicsCollider>(entities[9].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics")));
+
+    auto physicsTesting_2 = std::make_unique<Shape>("physicsTesting_2", glm::vec3(cameraPos.x+8.f,cameraPos.y+6.f,0.3f),glm::vec3(0.75f), 0, true, "circle");
+    entities.push_back(std::move(physicsTesting_2));
+    entities[10]->addComponent(std::make_unique<PhysicsCollider>(entities[10].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[10]->getComponent("Physics")));
+
+    auto physicsTesting_3 = std::make_unique<Shape>("physicsTesting_3", glm::vec3(cameraPos.x+10.f,cameraPos.y+8.f,0.3f),glm::vec3(1), 0, true, "circle");
+    entities.push_back(std::move(physicsTesting_3));
+    entities[11]->addComponent(std::make_unique<PhysicsCollider>(entities[11].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[11]->getComponent("Physics")));
+
+    auto physicsTesting_4 = std::make_unique<Shape>("physicsTesting_4", glm::vec3(cameraPos.x-5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.7f), 0, true, "circle");
+    entities.push_back(std::move(physicsTesting_4));
+    entities[12]->addComponent(std::make_unique<PhysicsCollider>(entities[12].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[12]->getComponent("Physics")));
+
+    auto physicsTesting_5 = std::make_unique<Shape>("physicsTesting_5", glm::vec3(cameraPos.x-8.f,cameraPos.y+5.f,0.3f),glm::vec3(1.2f), 0, true, "circle");
+    entities.push_back(std::move(physicsTesting_5));
+    entities[13]->addComponent(std::make_unique<PhysicsCollider>(entities[13].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[13]->getComponent("Physics")));
+
+    auto physicsTesting_6 = std::make_unique<Shape>("physicsTesting_6", glm::vec3(cameraPos.x-12.f,cameraPos.y+8.f,0.3f),glm::vec3(2.1f), 0, true, "box");
+    entities.push_back(std::move(physicsTesting_6));
+    entities[14]->addComponent(std::make_unique<PhysicsCollider>(entities[14].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[14]->getComponent("Physics")));
+
+    auto physicsTesting_7 = std::make_unique<Shape>("physicsTesting_7", glm::vec3(cameraPos.x-16.f,cameraPos.y+6.f,0.3f),glm::vec3(1.3f), 0, true, "cross");
+    entities.push_back(std::move(physicsTesting_7));
+    entities[15]->addComponent(std::make_unique<PhysicsCollider>(entities[15].get(),0));
+    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[15]->getComponent("Physics"))); */
 }
 
 void GameEnvironment::resetLevel()
@@ -160,8 +194,25 @@ void GameEnvironment::drawImGuiWindows()
     ImGui::Begin("Physics Engine Control");
     ImGui::SliderFloat("Tickrate:", &physicsEngine.tickrateOfSimulation, 60, 300, "%.3f",0);
     ImGui::SliderFloat("Speed:", &physicsEngine.speedOfSimulation, 0, 3, "%.3f",0);
+    bool engineHalting = physicsEngine.getIsHalting();
+    ImGui::Checkbox("Is Halting", &engineHalting);
+    if(ImGui::Button("Halt Engine"))
+        physicsEngine.setIsHalting(!engineHalting);
     if(ImGui::Button("Reset Level"))
         resetLevel();
+    if(ImGui::Button("Test Deletion"))
+    {
+        deleteEntityFromName("aRandomTriggerBox");
+    }
+    if(ImGui::Button("Test Insertion"))
+    {
+        auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(cameraPos.x,cameraPos.y,0.3f),glm::vec3(0.3f), 0, true, "circle");
+        entities.push_back(std::move(aRandomTriggerBox));
+        auto ref = getEntityFromName<Entity>("aRandomTriggerBox");
+        ref->addComponent(std::make_unique<PhysicsCollider>(ref,0));
+        physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"));
+    }
+        
     ImGui::End();
 
     ImGui::Begin("Player Extra Info");
@@ -298,8 +349,8 @@ void GameEnvironment::run()
             prevTime = currentTime;
         }
         //Random
-        srand(time(0));
-        dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
+        //srand(time(0));
+        //dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
 
         /* int spacing = 4;
         int tableSize = glm::ceil((xHalf*2*yHalf*2)/spacing);

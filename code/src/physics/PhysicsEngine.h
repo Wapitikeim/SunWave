@@ -44,21 +44,50 @@ class PhysicsEngine
         std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
 
         bool initDone = false;
+        bool isHalting = false;
         
     public:
         void registerPhysicsCollider(PhysicsCollider* colliderToRegister)
         {
+            if(colliderToRegister == nullptr)
+            {
+                std::cout << "Tryed to insert a nullptr";
+                return;
+            }
+            for(auto& entry: physicsObjects)
+                if(entry == colliderToRegister)
+                {
+                    std::cout << "Tryed to register a already existing Physicscollider: " << colliderToRegister->getNameOfEntityThisIsAttachedTo() << "\n";
+                    return;
+                }
+            std::cout << "Registering the collider of " << colliderToRegister->getNameOfEntityThisIsAttachedTo() << " to the Physics Engine. \n";        
             physicsObjects.push_back(colliderToRegister);
+        };
+        void unregisterCollider(PhysicsCollider* colliderToRemove)
+        {
+            if(colliderToRemove == nullptr)
+            {
+                std::cout << "Tryed to remove a nullptr from the Physics Engine \n";
+                return;
+            }
+                
+            removeColliderFromHashTable(colliderToRemove);
+            for(auto entry:physicsObjects)
+                physicsObjects.erase(std::remove(physicsObjects.begin(), physicsObjects.end(), colliderToRemove),physicsObjects.end());
+            std::cout << "Removed Physicscollider form " << colliderToRemove->getNameOfEntityThisIsAttachedTo() << " from the Physics engine\n";
         };
         void getInitialTransform(float _deltatime);
         void updatePhysics();
 
-        void clearPhysicsObjects(){physicsObjects.clear();};
+        void clearPhysicsObjects(){physicsObjects.clear();hashTable.clear();initDone = false;};
 
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;
         float getTimeStep(){return (1/tickrateOfSimulation/(1/speedOfSimulation));};
 
         void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
-        void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};  
+        void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
+
+        void setIsHalting(const bool &newHalt){isHalting = newHalt;};
+        bool getIsHalting(){return isHalting;};  
 };
