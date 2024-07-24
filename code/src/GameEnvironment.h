@@ -1,6 +1,6 @@
 #pragma once
 #define SCREEN_WIDTH 1920.0f
-#define SCREEN_LENGTH 1080.0f
+#define SCREEN_HEIGHT 1080.0f
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -15,6 +15,7 @@
 #include <filesystem>
 
 #include <math.h>
+#include <random>
 
 
 #include "util/glfwPrep.h"
@@ -65,7 +66,7 @@ class GameEnvironment
         glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
         float yHalf = std::sin(glm::radians(fov/2)) * (cameraPos.z/glm::sin(glm::radians((180-fov/2-90))));
-        float xHalf = yHalf*SCREEN_WIDTH/SCREEN_LENGTH;
+        float xHalf = yHalf*(SCREEN_WIDTH/SCREEN_HEIGHT);
         glm::vec3 whatCameraSeesBottomLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y-yHalf,0);
         glm::vec3 whatCameraSeesTopLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y+yHalf,0);;
         glm::vec3 whatCameraSeesTopRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y+yHalf,0);;
@@ -82,7 +83,7 @@ class GameEnvironment
         //Mouse Movement
         bool firstMouse = true;
         glm::vec3 direction;
-        float lastX = SCREEN_WIDTH/2, lastY = SCREEN_LENGTH/2;
+        float lastX = SCREEN_WIDTH/2, lastY = SCREEN_HEIGHT/2;
         float pitch = 0.0f;
         float yaw = -90.f; 
         void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -108,6 +109,7 @@ class GameEnvironment
         //Entity Stuff
         void initEntities();
         void resetLevel();
+        void loadWallLevel();
         bool showGrid=true;
         float gridSize = 1.f;
 
@@ -148,6 +150,17 @@ class GameEnvironment
                     return dynamic_cast<componentToGet*>(entry->getComponent(componentName));
             return nullptr;
         };
+
+        void addEntity(std::unique_ptr<Entity> entityToAdd)
+        {
+            for(auto &entry:entities)
+                if(entry->getEntityName() == entityToAdd->getEntityName())
+                {
+                    std::cout << "The Name " << entityToAdd->getEntityName() << " already exist in entities.\n";
+                    return;
+                }
+            entities.push_back(std::move(entityToAdd));
+        }
 
         //ImGui 
         void setupImGui();

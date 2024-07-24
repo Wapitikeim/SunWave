@@ -1,5 +1,31 @@
 #include "GameEnvironment.h"
 
+//Just a random string generator (https://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c)
+std::string random_string( size_t length )
+{
+    auto randchar = []() -> char
+    {
+        const char charset[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+        const size_t max_index = (sizeof(charset) - 1);
+        return charset[ rand() % max_index ];
+    };
+    std::string str(length,0);
+    std::generate_n( str.begin(), length, randchar );
+    return str;
+}
+
+//Just a random Int generator (https://stackoverflow.com/questions/7560114/random-number-c-in-some-range)
+int getRandomNumber(int min, int max)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> distr(min, max);
+    return distr(gen);
+}
+
 void GameEnvironment::mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse) // initially set to true
@@ -165,6 +191,39 @@ void GameEnvironment::resetLevel()
     initEntities();
 }
 
+void GameEnvironment::loadWallLevel()
+{
+    entities.clear();
+    physicsEngine.clearPhysicsObjects();
+    
+    //Player
+    addEntity(std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box"));
+    auto player = getEntityFromName<Entity>("Player");
+    player->addComponent(std::make_unique<PhysicsCollider>(player,0));
+    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Player","Physics"));
+
+    //Entities Prep
+    addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+    auto WallBottom = getEntityFromName<Entity>("WallBottom");
+    WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,0));
+    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
+
+    addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+    auto WallTop = getEntityFromName<Entity>("WallTop");
+    WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,0));
+    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
+
+    addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
+    auto wallLeft = getEntityFromName<Entity>("wallLeft");
+    wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,0));
+    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
+
+    addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
+    auto wallRight = getEntityFromName<Entity>("wallRight");
+    wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,0));
+    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
+}
+
 void GameEnvironment::setupImGui()
 {
     IMGUI_CHECKVERSION();
@@ -200,17 +259,27 @@ void GameEnvironment::drawImGuiWindows()
         physicsEngine.setIsHalting(!engineHalting);
     if(ImGui::Button("Reset Level"))
         resetLevel();
-    if(ImGui::Button("Test Deletion"))
+    if(ImGui::Button("Load just walls"))
+        loadWallLevel();
+    if(ImGui::Button("Test Stuff"))
     {
-        deleteEntityFromName("aRandomTriggerBox");
-    }
-    if(ImGui::Button("Test Insertion"))
-    {
-        auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(cameraPos.x,cameraPos.y,0.3f),glm::vec3(0.3f), 0, true, "circle");
-        entities.push_back(std::move(aRandomTriggerBox));
-        auto ref = getEntityFromName<Entity>("aRandomTriggerBox");
-        ref->addComponent(std::make_unique<PhysicsCollider>(ref,0));
-        physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"));
+        physicsEngine.setIsHalting(true);
+        int howManyTryingToAdd = 50;
+        for(int i = 0; i< howManyTryingToAdd ; i++)
+        {
+            glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
+            glm::vec3 scale(1.f);
+            float rotZ(getRandomNumber(0,180));
+            if(!physicsEngine.checkIfShellWouldCollide(pos,scale,rotZ))
+            {
+                std::string name = random_string(4);
+                addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, "box"));
+                auto randomEntity = getEntityFromName<Entity>(name);
+                randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+                physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
+
+            }
+        }
     }
         
     ImGui::End();
@@ -280,7 +349,7 @@ void GameEnvironment::drawImGuiWindows()
 
 GameEnvironment::GameEnvironment()
 {
-    window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_LENGTH, "Game");
+    window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game");
 }
 
 //Framebuffer Testing
@@ -296,12 +365,22 @@ void GameEnvironment::createFrameBufferAndAttachTexture()
 
 }
 
+//Maybe handeld through IMGUI -> Discard?
+static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    //mousePosX = xpos;
+    //mousePosY = abs(ypos-SCREEN_HEIGHT);
+}
+
+
 void GameEnvironment::run()
 {
     initEntities();
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
+    
+    
     physicsEngine.setcameraXHalf(xHalf);
     physicsEngine.setcameraYHalf(yHalf);
     
@@ -317,14 +396,28 @@ void GameEnvironment::run()
 
     //ImGui
     setupImGui();
-
-    
+ 
     
     //Loop
     while (!glfwWindowShouldClose(window))
     {   
         //Input
         processInput(window);
+        //glfwSetCursorPosCallback(window, cursor_position_callback);
+        int w,h;
+        glfwGetWindowSize(window, &w, &h);
+        float yPos = glm::abs(ImGui::GetMousePos().y-h);
+        float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/w;
+        float mouseY = (yPos*(yHalf*2))/h;
+        float rot = 0;
+        auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.1f),rot);
+        if(refCollider != nullptr)
+        {
+            std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
+            refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
+        }
+
+
         //Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -335,6 +428,7 @@ void GameEnvironment::run()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        
 
         //Physics pre Update
         physicsEngine.getInitialTransform(deltaTime);
@@ -348,92 +442,10 @@ void GameEnvironment::run()
             fps = 0;
             prevTime = currentTime;
         }
-        //Random
-        //srand(time(0));
-        //dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics"))->applyForce(glm::vec3(rand()%50+(-25),rand()%50+(-25),0));
-
-        /* int spacing = 4;
-        int tableSize = glm::ceil((xHalf*2*yHalf*2)/spacing);
-        auto colliderRef = getComponentOfEntity<PhysicsCollider>("Player", "Physics");
-        std::vector<int> indicies;
-        std::vector<glm::vec2> pointsToGetIndexesFor;
-        if(colliderRef->getBody().colliderScale.x > (spacing/2) || colliderRef->getBody().colliderScale.y > (spacing/2))
-        {
-            int segmentsX = glm::floor(colliderRef->getBody().colliderScale.x);
-            int segmentsY = glm::floor(colliderRef->getBody().colliderScale.y);
-            int segments = glm::max(segmentsX,segmentsY);
-            
-            glm::vec3 leftToRightBottom = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().leftBottom;
-            float deltaXBottom = leftToRightBottom.x / segments;
-            float deltaYBottom = leftToRightBottom.y / segments;
-
-            glm::vec3 rightToRight = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().rightTop;
-            float deltaXRight = rightToRight.x / segments;
-            float deltaYRight = rightToRight.y / segments;
-
-            glm::vec3 leftToLeft = colliderRef->getCornerPos().leftBottom - colliderRef->getCornerPos().leftTop;
-            float deltaXLeft = leftToLeft.x / segments;
-            float deltaYLeft = leftToLeft.y / segments;
-
-            glm::vec3 leftToRightTop = colliderRef->getCornerPos().rightTop - colliderRef->getCornerPos().leftTop;
-            float deltaXTop = leftToRightTop.x / segments;
-            float deltaYTop = leftToRightTop.y / segments;
-            //std:: cout << segments << "\n";
-            for(int i = 1; i < segments ; i++)
-            {
-                float newPointX = colliderRef->getCornerPos().leftBottom.x + deltaXBottom*i;
-                float newPointY = colliderRef->getCornerPos().leftBottom.y + deltaYBottom*i;
-                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-                
-                newPointX = colliderRef->getCornerPos().rightTop.x + deltaXRight*i;
-                newPointY = colliderRef->getCornerPos().rightTop.y + deltaYRight*i;
-                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-               
-                newPointX = colliderRef->getCornerPos().leftTop.x + deltaXTop*i;
-                newPointY = colliderRef->getCornerPos().leftTop.y + deltaYTop*i;
-                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-
-                newPointX = colliderRef->getCornerPos().leftTop.x + deltaXLeft*i;
-                newPointY = colliderRef->getCornerPos().leftTop.y + deltaYLeft*i;
-                pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-               
-            }
-        }
-        glm::vec2 a(glm::floor((colliderRef->getCornerPos().leftBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().leftBottom.y) /spacing));
-        pointsToGetIndexesFor.push_back(a);
-        a = glm::vec2(glm::floor((colliderRef->getCornerPos().leftTop.x) /spacing), glm::floor((colliderRef->getCornerPos().leftTop.y) /spacing));
-        pointsToGetIndexesFor.push_back(a);
-        a = glm::vec2(glm::floor((colliderRef->getCornerPos().rightTop.x) /spacing), glm::floor((colliderRef->getCornerPos().rightTop.y) /spacing));
-        pointsToGetIndexesFor.push_back(a);
-        a = glm::vec2(glm::floor((colliderRef->getCornerPos().rightBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().rightBottom.y) /spacing));
-        pointsToGetIndexesFor.push_back(a);
-        //std::cout << pointsToGetIndexesFor.size() << "\n";
-        for(auto &entry:pointsToGetIndexesFor)
-        {
-            int index = entry.y* glm::ceil((xHalf*2)/(spacing-1))  + entry.x;
-            index = index;//%tableSize;
-            indicies.push_back(index); 
-        }
-
-        int xI = glm::floor((colliderRef->getCornerPos().leftBottom.x) /spacing);
-        int yI = glm::floor((colliderRef->getCornerPos().leftBottom.y) /spacing);
-        int index = yI*glm::ceil(colliderRef->getCornerPos().leftBottom.x)+xI;
-        index = glm::abs(index)%tableSize;
-        indicies.push_back(index); 
-
-        //std::cout << "Left Bottom: " << indicies[0] << " Left Top: " << indicies[1] << " Right Top: " << indicies[2] << " Right Bottom: " << indicies[3] << "\n";
-        std::sort(indicies.begin(), indicies.end());
-        indicies.erase(std::unique(indicies.begin(),indicies.end()), indicies.end());
-        for(auto &entry:indicies)
-            std::cout << entry << " ";
-        std::cout << std::endl; */
         
-        /* for(auto &entry:getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getTableIndicies())
-            std::cout << entry << " ";
-        std::cout << "\n"; */
         //Camera Update (Theoriactically)
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
-        Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_LENGTH, 0.1f, 100.0f));
+        Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
         
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();

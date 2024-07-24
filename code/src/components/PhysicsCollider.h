@@ -114,4 +114,6 @@ class PhysicsCollider : public Component
         std::string getNameOfEntityThisIsAttachedTo(){return entityThisIsAttachedTo->getEntityName();};
 
         CornerPositions& getCornerPos(){return cornerPos;};
+
+        Entity* getEntityThisIsAttachedTo(){return entityThisIsAttachedTo;};
 };

@@ -16,6 +16,7 @@ class CollisionTester
 {
     private:
         static std::vector<glm::vec2> calcPointsWithRespectToRotation(PhysicsCollider* entity);
+        static std::vector<glm::vec2> calcPointsWithRespectToRotation(glm::vec3 &pos, glm::vec3 &scale, float &rot);
         static std::vector<glm::vec2> calcProjectionFieldOutOfPoints(std::vector<glm::vec2> pointsToUse);
         static bool calcIfProjectionFieldIsOverlapping(glm::vec2 projectionField, std::vector<glm::vec2> pointsE1, std::vector<glm::vec2> pointsE2);
         static bool simpleCheckForCollision(PhysicsCollider* e1, PhysicsCollider* e2);
@@ -27,4 +28,5 @@ class CollisionTester
         static float signedDistance2DBoxAnd2DBox(PhysicsCollider* colliderToCheckOne, PhysicsCollider* colliderToCheckTwo);                
 
         static bool arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2);
+        static bool isColliderCollidingWithShell(PhysicsCollider* e1, glm::vec3 &posE2, glm::vec3 &scaleE2, float &rotzE2);
 };

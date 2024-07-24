@@ -51,7 +51,7 @@ class PhysicsEngine
         {
             if(colliderToRegister == nullptr)
             {
-                std::cout << "Tryed to insert a nullptr";
+                std::cout << "Tryed to insert a nullptr into the Physics Engine \n";
                 return;
             }
             for(auto& entry: physicsObjects)
@@ -79,7 +79,7 @@ class PhysicsEngine
         void getInitialTransform(float _deltatime);
         void updatePhysics();
 
-        void clearPhysicsObjects(){physicsObjects.clear();hashTable.clear();initDone = false;};
+        void clearPhysicsObjects(){physicsObjects.clear();hashTable.clear();initDone = false;initTransformOfColliders.clear();};
 
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;
@@ -88,6 +88,9 @@ class PhysicsEngine
         void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
         void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
 
-        void setIsHalting(const bool &newHalt){isHalting = newHalt;};
-        bool getIsHalting(){return isHalting;};  
+        void setIsHalting(const bool &newHalt){isHalting = newHalt; hashTable.clear(); initDone=false;tickTime=0;};
+        bool getIsHalting(){return isHalting;};
+
+        bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
+        PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
 };

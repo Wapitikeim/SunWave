@@ -24,6 +24,30 @@ std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(PhysicsC
     return calculatedPoints;
 }
 
+std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(glm::vec3 &pos, glm::vec3 &scale, float &rot)
+{
+    //Order of Points: LeftBottom, RightTop, LeftTop, RightBottom
+    std::vector<glm::vec2> calculatedPoints;
+
+    float xScale = scale.x*glm::cos(glm::radians(rot)) - scale.y*glm::sin(glm::radians(rot));
+    float yScale = scale.x*glm::sin(glm::radians(rot)) + scale.y*glm::cos(glm::radians(rot));
+    glm::vec2 pointLeftBottom(pos.x-(xScale), pos.y-(yScale));
+    glm::vec2 pointRightTop(pos.x+xScale, pos.y+yScale);
+
+    xScale = scale.x*glm::cos(glm::radians(rot)*-1) - scale.y*glm::sin(glm::radians(rot)*-1);
+    yScale = scale.x*glm::sin(glm::radians(rot)*-1) + scale.y*glm::cos(glm::radians(rot)*-1);
+    
+    glm::vec2 pointLeftTop(pos.x-xScale, pos.y+yScale);
+    glm::vec2 pointRightBottom(pos.x+xScale, pos.y-yScale);
+
+    calculatedPoints.push_back(pointLeftBottom);
+    calculatedPoints.push_back(pointRightTop);
+    calculatedPoints.push_back(pointLeftTop);
+    calculatedPoints.push_back(pointRightBottom);
+
+    return calculatedPoints;
+}
+
 float CollisionTester::signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider *colliderToCheck)
 {
     glm::mat3 rotationMatrix = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheck->getRot()), glm::vec3(0,0,1)));
@@ -116,6 +140,29 @@ bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsC
     //
     std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
     std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(e2);
+
+    std::vector<glm::vec2> projFieldForEntity1 = calcProjectionFieldOutOfPoints(e1EdgePoints);
+    std::vector<glm::vec2> projFieldForEntity2 = calcProjectionFieldOutOfPoints(e2EdgePoints);
+
+    for(glm::vec2 projField : projFieldForEntity1)
+    {
+        if(!calcIfProjectionFieldIsOverlapping(projField, e1EdgePoints, e2EdgePoints))
+            return false;
+    }
+    
+    for(glm::vec2 projField : projFieldForEntity2)
+    {
+        if(!calcIfProjectionFieldIsOverlapping(projField, e1EdgePoints, e2EdgePoints))
+            return false;
+    }
+    //std::cout << e1->getNameOfEntityThisIsAttachedTo() << " AND " << e2->getNameOfEntityThisIsAttachedTo() << " \n";
+    return true;
+}
+
+bool CollisionTester::isColliderCollidingWithShell(PhysicsCollider *e1, glm::vec3 &posE2, glm::vec3 &scaleE2, float &rotzE2)
+{
+    std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
+    std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(posE2, scaleE2, rotzE2);
 
     std::vector<glm::vec2> projFieldForEntity1 = calcProjectionFieldOutOfPoints(e1EdgePoints);
     std::vector<glm::vec2> projFieldForEntity2 = calcProjectionFieldOutOfPoints(e2EdgePoints);

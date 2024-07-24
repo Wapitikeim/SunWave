@@ -124,6 +124,8 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 
 }
 
+
+
 void PhysicsEngine::updatePhysics()
 {
     if(isHalting) //Kinda just works if physicsObjects are not moving
@@ -356,4 +358,23 @@ void PhysicsEngine::updatePhysics()
         tickTime -= (1/tickrateOfSimulation);
     }
     initTransformOfColliders.clear();
+}
+
+
+
+//Helper Functions meant To Use Outside
+bool PhysicsEngine::checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ)
+{
+    for(auto &entry:physicsObjects)
+        if(CollisionTester::isColliderCollidingWithShell(entry, pos, scale, rotZ))
+            return true;
+    return false;
+}
+
+PhysicsCollider *PhysicsEngine::getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ)
+{
+    for(auto &entry:physicsObjects)
+        if(CollisionTester::isColliderCollidingWithShell(entry, pos, scale, rotZ))
+            return entry;
+    return nullptr;
 }
