@@ -112,7 +112,7 @@ void PhysicsEngine::addColliderNeighboursAlso(PhysicsCollider *colliderRef)
 
 void PhysicsEngine::getInitialTransform(float _deltatime)
 {
-    deltatime = _deltatime;
+    deltatime += _deltatime;
     tickTime += _deltatime;
     for(auto& obj:physicsObjects)
     {
@@ -128,6 +128,8 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 
 void PhysicsEngine::updatePhysics()
 {
+    ticksLastFrame = 0;
+    
     if(isHalting) //Kinda just works if physicsObjects are not moving
         return;
     
@@ -147,14 +149,8 @@ void PhysicsEngine::updatePhysics()
         for(auto& collider:physicsObjects)
         {
             if(collider->getIsTrigger() || collider->getIsStatic()&&(collider->getVelocity()==glm::vec3(0)))
-                continue;
-            /* if(!(abs(collider->getVelocity().x) > 0.1f) || !(abs(collider->getVelocity().y) > 0.1f))
-            {
-                addColliderIntoHashTable(collider);
-                addColliderNeighboursAlso(collider);
-            }  */   
-            addColliderIntoHashTable(collider);
-            //addColliderNeighboursAlso(collider);
+                continue;  
+
             //ForcesApply
             if(glm::abs(collider->getVelocity().y) >0)
                 collider->setIsGrounded(false);
@@ -182,49 +178,49 @@ void PhysicsEngine::updatePhysics()
             collider->setVelocity(collider->getVelocity()+(collider->getAcceleration()*getTimeStep()));
             collider->setPos(collider->getPos()+(collider->getVelocity()*getTimeStep()));
             collider->setAcceleration(glm::vec3(0));
+
+            if(collider->getVelocity() != glm::vec3(0))
+                addColliderIntoHashTable(collider);
             
-            //Collision Test
-            /* for(auto& colliderToCheckCollisionFor : physicsObjects)
-            {   
-                if(colliderToCheckCollisionFor!=collider && !colliderToCheckCollisionFor->getIsTrigger())
-                {
-                    if(CollisionTester::arePhysicsCollidersColliding(collider, colliderToCheckCollisionFor))
-                    {
-                        restoreInitialPosAndRot(collider);
-                        collider->setColliderThisIsInContactWith(colliderToCheckCollisionFor);
-                        if((abs(collider->getVelocity().x) > 0.1f) || (abs(collider->getVelocity().y) > 0.1f))
-                        {
-                            //Poor mans attempt to trade forces
-                            glm::vec3 velocityToTrade(-collider->getVelocity()*colliderToCheckCollisionFor->getElascicity());
-                            collider->setVelocity(velocityToTrade);
-                            if(!colliderToCheckCollisionFor->getIsStatic())
-                                colliderToCheckCollisionFor->setVelocity(-velocityToTrade);
-                        }
-                        else
-                        {
-                            collider->setVelocity(glm::vec3(0));
-                            collider->setIsGrounded(true);
-                        }                
-                    }
-                    collider->removeColliderFromContactList(colliderToCheckCollisionFor);   
-                }  
-            }
-              */
         }
-        //"Smarter" Collision Test
+        
+        //"Smarter" Collision gathering
         for (auto& [key, val] : hashTable)
         {
             bool dontAddIfAllStatic = true;
+            bool dontAddIfAllResting = true;
             if(val.size() > 1)
+            {
                 for(auto &entry:val)
                     if(!entry->getIsStatic()||entry->getIsStatic()&&(entry->getVelocity()!=glm::vec3(0)))
                     {
                         dontAddIfAllStatic = false;
                         break;
-                    }             
-            if(!dontAddIfAllStatic)
+                    }
+                for(auto &entry:val)
+                    if(!entry->getIsResting())
+                    {
+                        dontAddIfAllResting = false;
+                        break;
+                    }            
+            }
+            if(!dontAddIfAllStatic&&!dontAddIfAllResting)
+            {
                 collisionsToResolve.push_back(val);
+                continue;
+            }           
+                
         }
+        maxCollisionsResolvedLastTick = collisionsToResolve.size();
+
+        /* for(auto &entry:collisionsToResolve)
+        {
+            std::cout << "COLLISION: \n";
+            for(auto& val:entry)
+                std::cout << val->getNameOfEntityThisIsAttachedTo() << "\n";
+        } */
+
+
         //Collision Response
         for(auto &listOfCollisionEntry:collisionsToResolve)
         {
@@ -353,10 +349,28 @@ void PhysicsEngine::updatePhysics()
                 }
             }
         }
-        //std::cout << collisionsToResolve.size() << "\n";
+        
         collisionsToResolve.clear();
         tickTime -= (1/tickrateOfSimulation);
+        ticksLastFrame++;
     }
+    
+    //TicksPerSecondCalc
+    if(deltatime < 1.0f)
+        ticksBuffer+=ticksLastFrame;
+    else
+    {
+        deltatime = 0;
+        ticksCalculatedInOneSecond = ticksBuffer;
+        ticksBuffer = 0;
+    }
+    //AfterTickTime For CollisionGathering
+    for(auto entry:physicsObjects)
+        if(entry->getVelocity() == glm::vec3(0))
+            entry->setIsResting(true);
+        else
+            entry->setIsResting(false);
+
     initTransformOfColliders.clear();
 }
 

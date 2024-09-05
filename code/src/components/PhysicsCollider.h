@@ -36,6 +36,7 @@ class PhysicsCollider : public Component
         bool isGrounded = false;
         bool isStatic = true;
         bool isTrigger = false;
+        bool isResting = false;
         float elasticity = 0.2; // 0 = perfectly inalastic 1 = perfectly elastic
         
         PhysicsBody colliderBody;
@@ -73,6 +74,7 @@ class PhysicsCollider : public Component
         
         [[nodiscard]] const bool &getIsStatic()const{return isStatic;};
         [[nodiscard]] const bool &getIsTrigger()const{return isTrigger;};
+        [[nodiscard]] const bool &getIsResting()const{return isResting;};
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
         [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
@@ -85,6 +87,7 @@ class PhysicsCollider : public Component
         void setRot(const float &newRot){colliderBody.colliderZRotation = newRot; updateEntityPosAndRot();};
         void setIsGrounded(const bool &newGround){isGrounded = newGround;};
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
+        void setIsResting(const bool &newResting){isResting = newResting;};
         void setIsStatic(const bool &newStatic){isStatic = newStatic;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};

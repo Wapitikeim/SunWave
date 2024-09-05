@@ -1,6 +1,7 @@
 #pragma once
 #define SCREEN_WIDTH 1920.0f
 #define SCREEN_HEIGHT 1080.0f
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -65,13 +66,15 @@ class GameEnvironment
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
         glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-        float yHalf = std::sin(glm::radians(fov/2)) * (cameraPos.z/glm::sin(glm::radians((180-fov/2-90))));
-        float xHalf = yHalf*(SCREEN_WIDTH/SCREEN_HEIGHT);
-        glm::vec3 whatCameraSeesBottomLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y-yHalf,0);
-        glm::vec3 whatCameraSeesTopLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y+yHalf,0);;
-        glm::vec3 whatCameraSeesTopRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y+yHalf,0);;
-        glm::vec3 whatCameraSeesBottomRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y-yHalf,0);;
         
+        //World Translate Information
+        void updateWorldTranslationInfo();
+        float yHalf;
+        float xHalf;
+        glm::vec3 whatCameraSeesBottomLeft;
+        glm::vec3 whatCameraSeesTopLeft;
+        glm::vec3 whatCameraSeesTopRight;
+        glm::vec3 whatCameraSeesBottomRight;   
 
         //DeltaTime
         float deltaTime = 0.0f;	// Time between current frame and last frame

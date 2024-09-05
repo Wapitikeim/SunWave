@@ -76,6 +76,16 @@ void GameEnvironment::scroll_callback(GLFWwindow* window, double xoffset, double
         fov = 90.0f;
 }
 
+void GameEnvironment::updateWorldTranslationInfo()
+{
+    yHalf = std::sin(glm::radians(fov/2)) * (cameraPos.z/glm::sin(glm::radians((180-fov/2-90))));
+    xHalf = yHalf*(SCREEN_WIDTH/SCREEN_HEIGHT);
+    whatCameraSeesBottomLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y-yHalf,0);
+    whatCameraSeesTopLeft = glm::vec3(cameraPos.x-xHalf, cameraPos.y+yHalf,0);
+    whatCameraSeesTopRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y+yHalf,0);
+    whatCameraSeesBottomRight = glm::vec3(cameraPos.x+xHalf, cameraPos.y-yHalf,0);
+}
+
 void GameEnvironment::processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -247,6 +257,8 @@ void GameEnvironment::drawImGuiWindows()
     ImGui::Text("Player is grounded: %s", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getIsGrounded() ? "true" : "false");
     ImGui::Text("Player Velocity X:%f Y: %f", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().y);
     ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
+    ImGui::Text("Collisions resolved LastTick: %i", physicsEngine.getCurrentCollisions());
+    ImGui::Text("Ticks calculated last Second: %i", physicsEngine.getTicksLastSecond());
     ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
     ImGui::End();
 
@@ -308,11 +320,17 @@ void GameEnvironment::drawImGuiWindows()
             if(ImGui::CollapsingHeader("Physics"))
             {
                 ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
+                ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
+                ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
                 
                 bool iTrigger = colliderRef->getIsTrigger();
                 ImGui::Checkbox("Is Trigger", &iTrigger);
                 if(ImGui::Button("Change Trigger"))
                     colliderRef->setIsTrigger(!iTrigger);
+                
+                bool iResting = colliderRef->getIsResting();
+                ImGui::Checkbox("Is Resting", &iResting);
+                
             
                 bool iStatic = colliderRef->getIsStatic();
                 ImGui::Checkbox("Is Static", &iStatic);
@@ -375,15 +393,15 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
 void GameEnvironment::run()
 {
-    initEntities();
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
     
-    
+    //Physics Engine Prep
+    updateWorldTranslationInfo();
     physicsEngine.setcameraXHalf(xHalf);
     physicsEngine.setcameraYHalf(yHalf);
-    
+
     //Mouse
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
     //glfwSetCursorPosCallback(window, mouse_callback);
@@ -394,29 +412,56 @@ void GameEnvironment::run()
     //Grid Feature
     InfiniteGrid grid(ShaderContainer("gridVertexShader.vert", "gridFragmentShader.frag"));
 
+
+    //Load Level
+    initEntities();
     //ImGui
     setupImGui();
  
     
+    //Mouse testing remove later
+    PhysicsCollider* refEntityForMouseCurrent = nullptr;
+    PhysicsCollider* refEntityForMouseOld = nullptr;
+
+    glfwMaximizeWindow(window);
+
     //Loop
     while (!glfwWindowShouldClose(window))
     {   
         //Input
         processInput(window);
+
+
         //glfwSetCursorPosCallback(window, cursor_position_callback);
-        int w,h;
-        glfwGetWindowSize(window, &w, &h);
-        float yPos = glm::abs(ImGui::GetMousePos().y-h);
-        float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/w;
-        float mouseY = (yPos*(yHalf*2))/h;
+
+        //MouseCursorTesting
+        float yPos = glm::abs(ImGui::GetMousePos().y-glfwPrep::getCurrentWindowHeight());
+        float xPos = ImGui::GetMousePos().x;
+        //float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/glfwPrep::getCurrentWindowWidth();
+        float mouseX = (xPos*(glm::abs((xHalf*2))-glm::abs(whatCameraSeesBottomLeft.x)))/(float)glfwPrep::getCurrentWindowWidth();
+        float mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
         float rot = 0;
-        auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.1f),rot);
+        //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
+        //if(getEntityFromName<Entity>("aRandomTriggerBox"))
+        //    getEntityFromName<Entity>("aRandomTriggerBox")->setPosition(glm::vec3(mouseX,mouseY,0));
+        auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
+        refEntityForMouseCurrent = refCollider;
+        
         if(refCollider != nullptr)
         {
-            std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
+            //std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
             refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
         }
-
+        //CheckIn/OutBound 
+        if(refEntityForMouseCurrent != refEntityForMouseOld)
+        {
+            if(refEntityForMouseOld != nullptr)
+                refEntityForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+            
+            refEntityForMouseOld = refEntityForMouseCurrent;
+        }
+        
+        //std::cout << mouseX << " " << mouseY << "\n";
 
         //Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);

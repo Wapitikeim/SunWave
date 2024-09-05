@@ -1,6 +1,7 @@
 #pragma once 
 #include <glm/glm.hpp>
 #include <map>
+#include <unordered_map>
 #include <algorithm>
 
 #include "CollisionTester.h"
@@ -32,7 +33,7 @@ class PhysicsEngine
         int spacing = 4; // double the size of standard collider 
         float cameraXHalf;
         float cameraYHalf;
-        std::map<int, std::vector<PhysicsCollider*>> hashTable; //<index,colliderRef>
+        std::unordered_map<int, std::vector<PhysicsCollider*>> hashTable; //<index,colliderRef>
         std::vector<int> indiciesForHashTable;
         std::vector<glm::vec2> pointsToGetIndexesFor;
 
@@ -42,6 +43,13 @@ class PhysicsEngine
         //std::vector<PhysicsCollider&> getNearEntitysFromHashTable(){return;};
         
         std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
+        
+        
+        //Debug/Info Helpers
+        int maxCollisionsResolvedLastTick = 0;
+        int ticksLastFrame = 0;
+        int ticksBuffer = 0;
+        int ticksCalculatedInOneSecond = 0;
 
         bool initDone = false;
         bool isHalting = false;
@@ -90,6 +98,9 @@ class PhysicsEngine
 
         void setIsHalting(const bool &newHalt){isHalting = newHalt; hashTable.clear(); initDone=false;tickTime=0;};
         bool getIsHalting(){return isHalting;};
+        const int& getCurrentCollisions(){return maxCollisionsResolvedLastTick;};
+        const int& getTicksLastFrame(){return ticksLastFrame;};
+        const int& getTicksLastSecond(){return ticksCalculatedInOneSecond;};
 
         bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
         PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);

@@ -47,7 +47,7 @@ std::vector<glm::vec2> CollisionTester::calcPointsWithRespectToRotation(glm::vec
 
     return calculatedPoints;
 }
-
+//Functional
 float CollisionTester::signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider *colliderToCheck)
 {
     glm::mat3 rotationMatrix = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheck->getRot()), glm::vec3(0,0,1)));
@@ -59,7 +59,7 @@ float CollisionTester::signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCo
 
     return outsideDistance+insideDistance;
 }
-
+//Not Really Functional
 float CollisionTester::signedDistance2DBoxAnd2DBox(PhysicsCollider *colliderToCheckOne, PhysicsCollider *colliderToCheckTwo)
 {
     glm::mat3 rotationMatrixOne = glm::toMat3(glm::angleAxis(glm::radians(colliderToCheckOne->getRot()), glm::vec3(0,0,1)));
@@ -75,7 +75,7 @@ float CollisionTester::signedDistance2DBoxAnd2DBox(PhysicsCollider *colliderToCh
 
     return outsideDistance+insideDistance;
 }
-
+//SAT Helper Function
 std::vector<glm::vec2> CollisionTester::calcProjectionFieldOutOfPoints(std::vector<glm::vec2> pointsToUse)
 {
     std::vector<glm::vec2> calculatedProjectionFields;
@@ -132,7 +132,7 @@ bool CollisionTester::calcIfProjectionFieldIsOverlapping(glm::vec2 projectionFie
             
     return false;
 }
-
+//Uses SAT
 bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2)
 {
     //if(!simpleCheckForCollision(e1, e2))

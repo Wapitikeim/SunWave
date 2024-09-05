@@ -1,8 +1,12 @@
 #include "glfwPrep.h"
 
+int glfwPrep::currentWindowHeight = 0;
+int glfwPrep::currentWindowWidth = 0;
+
 void glfwPrep::framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
+    glfwGetWindowSize(window, &currentWindowWidth, &currentWindowHeight);
 }
 
 GLFWwindow *glfwPrep::prepGLFWAndGladThenGiveBackWindow(unsigned int width, unsigned int height, const std::string &name)
@@ -39,8 +43,10 @@ GLFWwindow *glfwPrep::prepGLFWAndGladThenGiveBackWindow(unsigned int width, unsi
     //"z buffer" for Faces to get discarded if overlap
     glEnable(GL_DEPTH_TEST);
 
-    //Call Resize if Window Changes
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwGetWindowSize(window, &currentWindowWidth, &currentWindowHeight);
 
     return window;
 }
+
+
