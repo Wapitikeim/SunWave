@@ -59,6 +59,70 @@ void GameEnvironment::mouse_callback(GLFWwindow* window, double xpos, double ypo
     cameraFront = glm::normalize(direction);
 }
 
+void GameEnvironment::mousePositionUpdate()
+{
+    //MouseCursorTesting
+    float yPos = glm::abs(ImGui::GetMousePos().y-glfwPrep::getCurrentWindowHeight());
+    float xPos = ImGui::GetMousePos().x;
+    //float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/glfwPrep::getCurrentWindowWidth();
+    mouseX = (xPos*(glm::abs((xHalf*2))-glm::abs(whatCameraSeesBottomLeft.x)))/(float)glfwPrep::getCurrentWindowWidth();
+    mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
+    float rot = 0;
+    //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
+    //if(getEntityFromName<Entity>("aRandomTriggerBox"))
+    //    getEntityFromName<Entity>("aRandomTriggerBox")->setPosition(glm::vec3(mouseX,mouseY,0));
+    auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
+    refColliderForMouseCurrent = refCollider;
+    
+    if(refCollider != nullptr)
+    {
+        //std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
+        refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
+    }
+    //CheckIn/OutBound 
+    if(refColliderForMouseCurrent != refColliderForMouseOld)
+    {
+        if(refColliderForMouseOld != nullptr)
+            refColliderForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+        
+        refColliderForMouseOld = refColliderForMouseCurrent;
+    }
+    
+    //0 = Release
+    //1 = Press 
+    currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    if (currentMouseLeftButtonState!= lastMouseLeftButtonState)
+    {
+        //From Press to Release ("It was Pressed now released")
+        if(lastMouseLeftButtonState)
+        {
+            pressedAndHoldingSomething = false;
+            if(refColliderForMouseCurrent != nullptr)
+                refColliderForMouseCurrent->setIsStatic(staticPrevRef);
+        }
+        //From Release to Press ("It was Resting now Pressed")
+        if(!lastMouseLeftButtonState)
+        {
+            if(refColliderForMouseCurrent != nullptr)
+            {
+                pressedAndHoldingSomething = true;
+                staticPrevRef = refColliderForMouseCurrent->getIsStatic();
+                refColliderForMouseCurrent->setIsStatic(false);
+            }
+                    
+        }
+        lastMouseLeftButtonState = currentMouseLeftButtonState;
+    }
+    if(pressedAndHoldingSomething)
+    {
+        refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
+        physicsEngine.addColliderIntoHashTable(refColliderForMouseCurrent);
+    }
+        
+        
+    //std::cout << mouseX << " " << mouseY << "\n";
+}
+
 void GameEnvironment::drawEntities()
 {
     for(auto &entity: entities)
@@ -250,6 +314,61 @@ void GameEnvironment::setupImGui()
 
 void GameEnvironment::drawImGuiWindows()
 {
+    //Needs to be on Top That it dosent crash if other levels are loaded and the Header is collpased
+    ImGui::Begin("World Control");
+    ImGui::Checkbox("Grid", &showGrid);
+    ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
+    if(ImGui::CollapsingHeader("Entitys Info"))
+    {
+        for(int i=0; i< entities.size(); i++)
+        {
+            auto* colliderRef = getComponentOfEntity<PhysicsCollider>(entities[i]->getEntityName(),"Physics");
+            ImGui::PushID(i);
+            ImGui::Text("%s", entities[i]->getEntityName().c_str());
+            if(ImGui::CollapsingHeader("Physics"))
+            {
+                ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
+                ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
+                ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
+                
+                bool iTrigger = colliderRef->getIsTrigger();
+                ImGui::Checkbox("Is Trigger", &iTrigger);
+                if(ImGui::Button("Change Trigger"))
+                    colliderRef->setIsTrigger(!iTrigger);
+                
+                bool iResting = colliderRef->getIsResting();
+                ImGui::Checkbox("Is Resting", &iResting);
+                
+            
+                bool iStatic = colliderRef->getIsStatic();
+                ImGui::Checkbox("Is Static", &iStatic);
+                if(ImGui::Button("Change Static"))
+                    colliderRef->setIsStatic(!iStatic);
+
+                bool iDontDraw = entities[i]->getDontDraw();
+                ImGui::Checkbox("Dont Draw", &iDontDraw);
+                if(ImGui::Button("Hide"))
+                    entities[i]->setDontDraw(!iDontDraw);
+
+                if(ImGui::Button("ChangeColor"))
+                    entities[i]->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1,0,0,1));
+            
+                float massRef = colliderRef->getBody().mass;
+                ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
+                colliderRef->setMass(massRef);
+
+                ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
+                
+            }
+
+
+
+            ImGui::PopID();    
+            ImGui::Text("");
+        }
+    }    
+    ImGui::End();
+    
     ImGui::Begin("Info Panel");
     ImGui::Text("FPS: %i", imGuiFPS);
     ImGui::Text("Player Pos: X: %f Y: %f", getEntityFromName<PlayerShape>("Player")->getPosition().x, getEntityFromName<PlayerShape>("Player")->getPosition().y);
@@ -292,12 +411,12 @@ void GameEnvironment::drawImGuiWindows()
 
             }
         }
-    }
-        
+    }  
+    ImGui::Text("Hash Table Size: %i ", physicsEngine.getHashTableIndicesSize());
     ImGui::End();
 
     ImGui::Begin("Player Extra Info");
-    ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("WallTop","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("WallTop","Physics")->getCornerPos().rightBottom.y);
+    ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.y);
     //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
     float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
     float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
@@ -305,59 +424,18 @@ void GameEnvironment::drawImGuiWindows()
     ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
     glm::vec3 newScale(scaleX,scaleY, getEntityFromName<Entity>("Player")->getScale().z);
     getEntityFromName<Entity>("Player")->setScale(newScale);
+    ImGui::Text("Player rot %f", getEntityFromName<Entity>("Player")->getRotation());
     ImGui::End();
     
-    ImGui::Begin("World Control");
-    ImGui::Checkbox("Grid", &showGrid);
-    ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
-    if(ImGui::CollapsingHeader("Entitys Info"))
-    {
-        for(int i=0; i< entities.size(); i++)
-        {
-            auto* colliderRef = getComponentOfEntity<PhysicsCollider>(entities[i]->getEntityName(),"Physics");
-            ImGui::PushID(i);
-            ImGui::Text("%s", entities[i]->getEntityName().c_str());
-            if(ImGui::CollapsingHeader("Physics"))
-            {
-                ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
-                ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
-                ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
-                
-                bool iTrigger = colliderRef->getIsTrigger();
-                ImGui::Checkbox("Is Trigger", &iTrigger);
-                if(ImGui::Button("Change Trigger"))
-                    colliderRef->setIsTrigger(!iTrigger);
-                
-                bool iResting = colliderRef->getIsResting();
-                ImGui::Checkbox("Is Resting", &iResting);
-                
-            
-                bool iStatic = colliderRef->getIsStatic();
-                ImGui::Checkbox("Is Static", &iStatic);
-                if(ImGui::Button("Change Static"))
-                    colliderRef->setIsStatic(!iStatic);
-
-                bool iDontDraw = entities[i]->getDontDraw();
-                ImGui::Checkbox("Dont Draw", &iDontDraw);
-                if(ImGui::Button("Hide"))
-                    entities[i]->setDontDraw(!iDontDraw);
-
-                if(ImGui::Button("ChangeColor"))
-                    entities[i]->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1,0,0,1));
-            
-                float massRef = colliderRef->getBody().mass;
-                ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
-                colliderRef->setMass(massRef);
-                
-            }
-
-
-
-            ImGui::PopID();    
-            ImGui::Text("");
-        }
-    }    
     
+
+    ImGui::Begin("Mouse Information");
+    ImGui::Text("Mouse X: %f", mouseX);
+    ImGui::Text("Mouse Y: %f", mouseY);
+    if(refColliderForMouseCurrent == nullptr)
+        ImGui::Text("Mouse in contact with: none");
+    else
+        ImGui::Text("Mouse in contact with: %s", refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName().c_str());
     ImGui::End();
 
     //Nessecary
@@ -391,6 +469,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 }
 
 
+
 void GameEnvironment::run()
 {
     //Camera Prep
@@ -418,11 +497,6 @@ void GameEnvironment::run()
     //ImGui
     setupImGui();
  
-    
-    //Mouse testing remove later
-    PhysicsCollider* refEntityForMouseCurrent = nullptr;
-    PhysicsCollider* refEntityForMouseOld = nullptr;
-
     glfwMaximizeWindow(window);
 
     //Loop
@@ -433,35 +507,6 @@ void GameEnvironment::run()
 
 
         //glfwSetCursorPosCallback(window, cursor_position_callback);
-
-        //MouseCursorTesting
-        float yPos = glm::abs(ImGui::GetMousePos().y-glfwPrep::getCurrentWindowHeight());
-        float xPos = ImGui::GetMousePos().x;
-        //float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/glfwPrep::getCurrentWindowWidth();
-        float mouseX = (xPos*(glm::abs((xHalf*2))-glm::abs(whatCameraSeesBottomLeft.x)))/(float)glfwPrep::getCurrentWindowWidth();
-        float mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
-        float rot = 0;
-        //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
-        //if(getEntityFromName<Entity>("aRandomTriggerBox"))
-        //    getEntityFromName<Entity>("aRandomTriggerBox")->setPosition(glm::vec3(mouseX,mouseY,0));
-        auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
-        refEntityForMouseCurrent = refCollider;
-        
-        if(refCollider != nullptr)
-        {
-            //std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
-            refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
-        }
-        //CheckIn/OutBound 
-        if(refEntityForMouseCurrent != refEntityForMouseOld)
-        {
-            if(refEntityForMouseOld != nullptr)
-                refEntityForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
-            
-            refEntityForMouseOld = refEntityForMouseCurrent;
-        }
-        
-        //std::cout << mouseX << " " << mouseY << "\n";
 
         //Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -497,7 +542,8 @@ void GameEnvironment::run()
         if(showGrid)
             grid.drawGrid(gridSize);
         //"Physics" Reset AFTER Update
-        physicsEngine.updatePhysics();   
+        physicsEngine.updatePhysics(); 
+        mousePositionUpdate();  
         drawEntities();
         drawImGuiWindows();
         glfwSwapBuffers(window);

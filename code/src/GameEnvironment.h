@@ -90,6 +90,16 @@ class GameEnvironment
         float pitch = 0.0f;
         float yaw = -90.f; 
         void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+        //Mouse Seperate later
+        float mouseX;
+        float mouseY;
+        int currentMouseLeftButtonState;
+        int lastMouseLeftButtonState = 0;
+        bool pressedAndHoldingSomething = false;
+        bool staticPrevRef;
+        PhysicsCollider* refColliderForMouseCurrent = nullptr;
+        PhysicsCollider* refColliderForMouseOld = nullptr;
+        void mousePositionUpdate();
 
         //Entities
         std::vector<std::unique_ptr<Entity>> entities;

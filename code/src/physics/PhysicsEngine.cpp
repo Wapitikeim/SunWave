@@ -110,6 +110,17 @@ void PhysicsEngine::addColliderNeighboursAlso(PhysicsCollider *colliderRef)
     }
 }
 
+const int &PhysicsEngine::getHashTableIndicesSize()
+{
+    auto i = 0;
+    for (auto& [key, val] : hashTable)
+    {
+        if(val.size() != 0)
+         i++;
+    }
+    return i;
+}
+
 void PhysicsEngine::getInitialTransform(float _deltatime)
 {
     deltatime += _deltatime;
@@ -325,12 +336,14 @@ void PhysicsEngine::updatePhysics()
                                                  
                         
                         restoreInitialPosAndRot(entry);
+                        //WH 18.10.2024 Buggy regarding CornerPos Rots Leads to strange calculations
                         if(entry->getNameOfEntityThisIsAttachedTo() == "Player")
                         {
                             //std::cout << glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y)) << "\n";
                             //std::cout << glm::degrees(glm::atan((normVector2/glm::length(normVector2)).x,(normVector2/glm::length(normVector2)).y)) << "\n";
                             //std::cout << "\n";
-                            entry->setRot(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y)));
+                            //std::cout << glm::abs(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y))) << "\n";
+                            entry->setRot(glm::abs(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y))));
                         }
                         if((abs(entry->getVelocity().x) > 0.1f) || (abs(entry->getVelocity().y) > 0.1f))
                         {

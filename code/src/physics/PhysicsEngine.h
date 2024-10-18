@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <algorithm>
 
+
 #include "CollisionTester.h"
 #include "../components/PhysicsCollider.h"
 
@@ -37,9 +38,7 @@ class PhysicsEngine
         std::vector<int> indiciesForHashTable;
         std::vector<glm::vec2> pointsToGetIndexesFor;
 
-        void addColliderIntoHashTable(PhysicsCollider* colliderRef);
-        void removeColliderFromHashTable(PhysicsCollider* colliderRef);
-        void addColliderNeighboursAlso(PhysicsCollider* colliderRef);
+        
         //std::vector<PhysicsCollider&> getNearEntitysFromHashTable(){return;};
         
         std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
@@ -104,4 +103,10 @@ class PhysicsEngine
 
         bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
         PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
+
+        //HasTableFunctions
+        void addColliderIntoHashTable(PhysicsCollider* colliderRef);
+        void removeColliderFromHashTable(PhysicsCollider* colliderRef);
+        void addColliderNeighboursAlso(PhysicsCollider* colliderRef);
+        const int& getHashTableIndicesSize();
 };
