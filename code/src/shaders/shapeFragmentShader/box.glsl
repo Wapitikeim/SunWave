@@ -21,11 +21,12 @@ void main()
 {
     vec2 st = TexCoord;
     vec3 color = vec3(0.);
+    
     //Make Red "Dot" in the middle
-    if(st.x > 0.45f && st.x < 0.55f && st.y > 0.45f && st.y < 0.55f)
-        color = vec3(1.f,0,0);
-    else
-        color = makeSquare(0.1,0.1,0.1,0.1,st);
+    /* if(st.x > 0.45f && st.x < 0.55f && st.y > 0.45f && st.y < 0.55f)
+        color = vec3(1.f,0,0); */
+    //else
+    color = makeSquare(0.1,0.1,0.1,0.1,st);
     vec4 colorFull = vec4(color,1.f);
 
     if(colorFull.r == 1 && colorFull.g == 1)

@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec2 TexCoord;
 uniform sampler2D ourTexture;
+uniform vec4 colorChange = vec4(0,0,0,1);
 
 float box(in vec2 _st, in vec2 _size)
 {
@@ -28,8 +29,16 @@ void main()
     vec3 color = vec3(cross(st, 1.f));
     vec4 colorFull = vec4(color,1.f);
 
-
+    //Ecken am Kreuz
     if(colorFull.r == 0 && colorFull.g == 0)
         colorFull.w = 0;
+
+    //Kreuz initial weiß darum wechsel zu schwarz
+    if(colorFull.w == 1)
+        colorFull.rgb = vec3(1);
+
+    if(colorFull.w == 1)
+        colorFull.xyz = colorChange.xyz;
+
     FragColor = colorFull;
 }

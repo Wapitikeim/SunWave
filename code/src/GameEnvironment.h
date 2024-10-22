@@ -10,6 +10,8 @@
 #include <glm/gtx/io.hpp>
 
 #include <iostream>
+#include <thread>
+#include <future>
 
 #include <vector>
 #include <memory>
@@ -100,6 +102,25 @@ class GameEnvironment
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
         PhysicsCollider* refColliderForMouseOld = nullptr;
         void mousePositionUpdate();
+        void mouseClickLogic();
+
+        //Level Logic / Functions
+        void initEntities();
+        void resetLevel();
+        void loadWallLevel();
+        void fillSceneWithEntitys();
+        
+        void updateFunctionEvents();
+        struct funcExecute
+        {
+            float timer;
+            std::function<void()> function;
+        };
+        std::vector<funcExecute> functionsToExecuteAfterTime;
+        bool shapeFound = false;
+        void startMiniGameLogic();
+
+        void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
 
         //Entities
         std::vector<std::unique_ptr<Entity>> entities;
@@ -119,13 +140,11 @@ class GameEnvironment
         //Update
         void update();
 
-        //Entity Stuff
-        void initEntities();
-        void resetLevel();
-        void loadWallLevel();
+        //Grid
         bool showGrid=true;
         float gridSize = 1.f;
 
+        //Entitys
         template<typename entityTypeToGet>
         entityTypeToGet* getEntityFromName(std::string entityName)
         {

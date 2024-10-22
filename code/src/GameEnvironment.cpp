@@ -88,6 +88,12 @@ void GameEnvironment::mousePositionUpdate()
         refColliderForMouseOld = refColliderForMouseCurrent;
     }
     
+    mouseClickLogic(); 
+    //std::cout << mouseX << " " << mouseY << "\n";
+}
+
+void GameEnvironment::mouseClickLogic()
+{
     //0 = Release
     //1 = Press 
     currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
@@ -115,12 +121,18 @@ void GameEnvironment::mousePositionUpdate()
     }
     if(pressedAndHoldingSomething)
     {
+        if(refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound)
+        {
+            shapeFound = true;
+            physicsEngine.tickrateOfSimulation = 30;
+            physicsEngine.setIsHalting(false);
+            deleteEntityFromName("WallBottom");
+            registerFunctionToExecuteWhen(3.f,[this]() {this->startMiniGameLogic();});
+        }    
+        
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
         physicsEngine.addColliderIntoHashTable(refColliderForMouseCurrent);
     }
-        
-        
-    //std::cout << mouseX << " " << mouseY << "\n";
 }
 
 void GameEnvironment::drawEntities()
@@ -298,6 +310,85 @@ void GameEnvironment::loadWallLevel()
     physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
 }
 
+void GameEnvironment::fillSceneWithEntitys()
+{
+    physicsEngine.setIsHalting(true);
+    
+    std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle"};
+    int shapeToFind = getRandomNumber(0,shapeNames.size());
+    std::string shapeToFindName = shapeNames[shapeToFind];
+    shapeNames.erase(shapeNames.begin() + shapeToFind);
+    shapeNames.resize(shapeNames.size());
+    bool shapeToFindPlaced = false;
+
+    int howManyTryingToAdd = 300;
+    
+    for(int i = 0; i< howManyTryingToAdd ; i++)
+    {
+        glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
+        glm::vec3 scale(getRandomNumber(1,10)*0.1f);
+        float rotZ(getRandomNumber(0,180));
+        if(!physicsEngine.checkIfShellWouldCollide(pos,scale,rotZ))
+        {
+            if(shapeToFindPlaced == false)
+            {
+                std::string name = "ShapeToFindHere";
+                addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeToFindName));
+                auto randomEntity = getEntityFromName<Entity>(name);
+                randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+                physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
+                shapeToFindPlaced = true;
+                continue;
+            }
+            
+            std::string name = random_string(4);
+            addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
+            auto randomEntity = getEntityFromName<Entity>(name);
+            randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+            physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
+
+        }
+    }
+}
+
+void GameEnvironment::updateFunctionEvents()
+{
+    for(auto it = functionsToExecuteAfterTime.begin(); it != functionsToExecuteAfterTime.end();)
+    {
+        it->timer -= deltaTime;
+
+        if (it->timer <= 0) 
+        {
+            // Execute the stored function
+            it->function();
+
+            // Erase the struct from the vector and get a valid iterator to the next element
+            it = functionsToExecuteAfterTime.erase(it);
+        } 
+        else 
+        {
+            // Move to the next element if not erasing
+            ++it;
+        }
+    }
+}
+
+void GameEnvironment::startMiniGameLogic()
+{
+    shapeFound = false;
+    loadWallLevel();
+    fillSceneWithEntitys();
+}
+
+void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute)
+{
+    funcExecute t;
+    t.timer = whenFunctionShouldStart;
+    t.function = functionToExecute;
+    functionsToExecuteAfterTime.push_back(t);
+    std::cout << "Function Registerd with timer: " << t.timer << "\n";
+}
+
 void GameEnvironment::setupImGui()
 {
     IMGUI_CHECKVERSION();
@@ -394,23 +485,7 @@ void GameEnvironment::drawImGuiWindows()
         loadWallLevel();
     if(ImGui::Button("Test Stuff"))
     {
-        physicsEngine.setIsHalting(true);
-        int howManyTryingToAdd = 50;
-        for(int i = 0; i< howManyTryingToAdd ; i++)
-        {
-            glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
-            glm::vec3 scale(1.f);
-            float rotZ(getRandomNumber(0,180));
-            if(!physicsEngine.checkIfShellWouldCollide(pos,scale,rotZ))
-            {
-                std::string name = random_string(4);
-                addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, "box"));
-                auto randomEntity = getEntityFromName<Entity>(name);
-                randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
-                physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
-
-            }
-        }
+        fillSceneWithEntitys();
     }  
     ImGui::Text("Hash Table Size: %i ", physicsEngine.getHashTableIndicesSize());
     ImGui::End();
@@ -426,7 +501,6 @@ void GameEnvironment::drawImGuiWindows()
     getEntityFromName<Entity>("Player")->setScale(newScale);
     ImGui::Text("Player rot %f", getEntityFromName<Entity>("Player")->getRotation());
     ImGui::End();
-    
     
 
     ImGui::Begin("Mouse Information");
@@ -467,8 +541,6 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
     //mousePosX = xpos;
     //mousePosY = abs(ypos-SCREEN_HEIGHT);
 }
-
-
 
 void GameEnvironment::run()
 {
@@ -536,7 +608,10 @@ void GameEnvironment::run()
         //Camera Update (Theoriactically)
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
-        
+
+        //GameLogic Testing        
+        updateFunctionEvents();
+
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
         if(showGrid)
