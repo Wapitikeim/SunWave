@@ -46,6 +46,7 @@ void ShaderContainer::cleanUpShaders()
 {
     glDeleteShader(fragmentShaderID);
     glDeleteShader(vertexShaderID);
+    
 }
 
 void ShaderContainer::checkForShaderCompileError(unsigned int shaderToCheckFor, const char *shaderSource)

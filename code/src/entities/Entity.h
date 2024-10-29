@@ -17,8 +17,6 @@ class Entity
         //Misc for now
         std::string entityName;
         
-        
-        
     protected:
         std::vector<std::unique_ptr<Component>> componentsOfThisEntity;
         //World Data 

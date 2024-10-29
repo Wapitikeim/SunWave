@@ -17,6 +17,9 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
 
 void PhysicsEngine::addColliderIntoHashTable(PhysicsCollider* colliderRef)
 {
+    if(isHalting)
+        return;
+    
     removeColliderFromHashTable(colliderRef);
     colliderRef->clearIndiciesForHashTableOfThisEntity();
     
@@ -134,8 +137,6 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
     }
 
 }
-
-
 
 void PhysicsEngine::updatePhysics()
 {

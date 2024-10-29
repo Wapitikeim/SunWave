@@ -106,15 +106,12 @@ void MeshContainer::drawMesh()
     if(indicesForEBO)
         glDrawElements(GL_TRIANGLES, indicesForEBO->capacity(), GL_UNSIGNED_INT, 0);
     else
-    {
         glDrawArrays(GL_TRIANGLES, 0, trianglesToDraw);
-    }
-    
     
 }
 
 void MeshContainer::reinitMesh()
-{
+{   
     setupVAO();
     setupVBO();
     setupVertexAttributeInterpretation();

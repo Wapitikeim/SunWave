@@ -46,7 +46,7 @@ class GameEnvironment
     private:
 
         //Physics testing
-        PhysicsEngine physicsEngine;
+        std::unique_ptr<PhysicsEngine> physicsEngine;
 
         //Framebuffer Testing for Texture->Shader
         GLuint fbo;
@@ -105,6 +105,16 @@ class GameEnvironment
         void mouseClickLogic();
 
         //Level Logic / Functions
+        /* struct level
+        {
+
+        };
+        
+        struct levelLoadingManager
+        {
+
+        }; */
+        void prepareForLevelChange();
         void initEntities();
         void resetLevel();
         void loadWallLevel();
@@ -125,8 +135,6 @@ class GameEnvironment
         //Entities
         std::vector<std::unique_ptr<Entity>> entities;
         void drawEntities();
-
-        
 
         //Grab Input for ESC key
         void processInput(GLFWwindow* window);      
@@ -163,7 +171,7 @@ class GameEnvironment
                 return;
             }
                 
-            physicsEngine.unregisterCollider(getComponentOfEntity<PhysicsCollider>(entityName,"Physics"));
+            physicsEngine->unregisterCollider(getComponentOfEntity<PhysicsCollider>(entityName,"Physics"));
             for(auto& entry:entities)
                 if(entry->getEntityName() == entityName)
                 {

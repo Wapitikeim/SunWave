@@ -71,14 +71,12 @@ void GameEnvironment::mousePositionUpdate()
     //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
     //if(getEntityFromName<Entity>("aRandomTriggerBox"))
     //    getEntityFromName<Entity>("aRandomTriggerBox")->setPosition(glm::vec3(mouseX,mouseY,0));
-    auto refCollider = physicsEngine.getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
+    auto refCollider = physicsEngine->getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
     refColliderForMouseCurrent = refCollider;
     
+    //ChangeShaderByOverOverEffect---
     if(refCollider != nullptr)
-    {
-        //std::cout << refCollider->getNameOfEntityThisIsAttachedTo() << "\n";
         refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
-    }
     //CheckIn/OutBound 
     if(refColliderForMouseCurrent != refColliderForMouseOld)
     {
@@ -87,8 +85,8 @@ void GameEnvironment::mousePositionUpdate()
         
         refColliderForMouseOld = refColliderForMouseCurrent;
     }
-    
-    mouseClickLogic(); 
+    //---ChangeShaderByOverOverEffect
+    mouseClickLogic();
     //std::cout << mouseX << " " << mouseY << "\n";
 }
 
@@ -124,14 +122,14 @@ void GameEnvironment::mouseClickLogic()
         if(refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound)
         {
             shapeFound = true;
-            physicsEngine.tickrateOfSimulation = 30;
-            physicsEngine.setIsHalting(false);
+            physicsEngine->tickrateOfSimulation = 30;
+            physicsEngine->setIsHalting(false);
             deleteEntityFromName("WallBottom");
             registerFunctionToExecuteWhen(3.f,[this]() {this->startMiniGameLogic();});
         }    
         
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
-        physicsEngine.addColliderIntoHashTable(refColliderForMouseCurrent);
+        physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     }
 }
 
@@ -191,48 +189,48 @@ void GameEnvironment::initEntities()
     auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box");
     entities.push_back(std::move(playerShape));
     entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
 
     //Entities Prep
     auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallBottom));
     entities[1]->addComponent(std::make_unique<PhysicsCollider>(entities[1].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
 
     auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallTop));
     entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
 
     auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallLeft));
     entities[3]->addComponent(std::make_unique<PhysicsCollider>(entities[3].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[3]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[3]->getComponent("Physics")));
 
     auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallRight));
     entities[4]->addComponent(std::make_unique<PhysicsCollider>(entities[4].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[4]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[4]->getComponent("Physics")));
 
     auto wallMiddle = std::make_unique<Shape>("wallMiddle", glm::vec3(21.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallMiddle));
     entities[5]->addComponent(std::make_unique<PhysicsCollider>(entities[5].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[5]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[5]->getComponent("Physics")));
 
     auto wallMiddleLeft = std::make_unique<Shape>("wallMiddleLeft", glm::vec3(10.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 45.0f, true, "box");
     entities.push_back(std::move(wallMiddleLeft));
     entities[6]->addComponent(std::make_unique<PhysicsCollider>(entities[6].get(),1));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[6]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[6]->getComponent("Physics")));
 
     auto aDynamicBox = std::make_unique<Shape>("aDynamicBox", glm::vec3(10.f,5.f,0.3f),glm::vec3(1.f), 0, true, "box");
     entities.push_back(std::move(aDynamicBox));
     entities[7]->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("aDynamicBox"),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
     
     auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(cameraPos.x,cameraPos.y,0.3f),glm::vec3(0.3f), 0, true, "circle");
     entities.push_back(std::move(aRandomTriggerBox));
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
     
     /* auto physicsTesting_1 = std::make_unique<Shape>("physicsTesting_1", glm::vec3(cameraPos.x+5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.5f), 0, true, "circle");
     entities.push_back(std::move(physicsTesting_1));
@@ -270,83 +268,115 @@ void GameEnvironment::initEntities()
     physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[15]->getComponent("Physics"))); */
 }
 
+void GameEnvironment::prepareForLevelChange()
+{
+    physicsEngine->clearPhysicsObjects();
+    entities.clear();
+    refColliderForMouseCurrent = nullptr;
+    refColliderForMouseOld = nullptr;
+}
+
 void GameEnvironment::resetLevel()
 {
-    entities.clear();
-    physicsEngine.clearPhysicsObjects();
+    prepareForLevelChange();
     initEntities();
 }
 
 void GameEnvironment::loadWallLevel()
 {
-    entities.clear();
-    physicsEngine.clearPhysicsObjects();
-    
+    prepareForLevelChange();
+
     //Player
     addEntity(std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box"));
     auto player = getEntityFromName<Entity>("Player");
     player->addComponent(std::make_unique<PhysicsCollider>(player,0));
-    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Player","Physics"));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Player","Physics"));
 
     //Entities Prep
     addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
     auto WallBottom = getEntityFromName<Entity>("WallBottom");
     WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,0));
-    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
 
     addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
     auto WallTop = getEntityFromName<Entity>("WallTop");
     WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,0));
-    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
 
     addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
     auto wallLeft = getEntityFromName<Entity>("wallLeft");
     wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,0));
-    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
 
     addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
     auto wallRight = getEntityFromName<Entity>("wallRight");
     wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,0));
-    physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
 }
 
 void GameEnvironment::fillSceneWithEntitys()
 {
-    physicsEngine.setIsHalting(true);
-    
-    std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle"};
-    int shapeToFind = getRandomNumber(0,shapeNames.size());
-    std::string shapeToFindName = shapeNames[shapeToFind];
-    shapeNames.erase(shapeNames.begin() + shapeToFind);
-    shapeNames.resize(shapeNames.size());
-    bool shapeToFindPlaced = false;
+    prepareForLevelChange();
 
-    int howManyTryingToAdd = 300;
-    
-    for(int i = 0; i< howManyTryingToAdd ; i++)
+    physicsEngine->setIsHalting(true);
+    physicsEngine->tickrateOfSimulation  = 30;
+
+    //Walls
     {
-        glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
-        glm::vec3 scale(getRandomNumber(1,10)*0.1f);
-        float rotZ(getRandomNumber(0,180));
-        if(!physicsEngine.checkIfShellWouldCollide(pos,scale,rotZ))
+        addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+        auto WallBottom = getEntityFromName<Entity>("WallBottom");
+        WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,0));
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
+
+        addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+        auto WallTop = getEntityFromName<Entity>("WallTop");
+        WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,0));
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
+
+        addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
+        auto wallLeft = getEntityFromName<Entity>("wallLeft");
+        wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,0));
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
+
+        addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
+        auto wallRight = getEntityFromName<Entity>("wallRight");
+        wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,0));
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
+    }
+    //Random Entities
+    {
+        std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle"};
+        int shapeToFind = getRandomNumber(0,shapeNames.size()-1);
+        std::string shapeToFindName = shapeNames[shapeToFind];
+        shapeNames.erase(shapeNames.begin() + shapeToFind);
+        shapeNames.resize(shapeNames.size());
+        bool shapeToFindPlaced = false;
+
+        int howManyTryingToAdd = 300;
+        
+        for(int i = 0; i< howManyTryingToAdd ; i++)
         {
-            if(shapeToFindPlaced == false)
+            glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
+            glm::vec3 scale(getRandomNumber(1,10)*0.1f);
+            float rotZ(getRandomNumber(0,180));
+            if(!physicsEngine->checkIfShellWouldCollide(pos,scale,rotZ))
             {
-                std::string name = "ShapeToFindHere";
-                addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeToFindName));
+                if(shapeToFindPlaced == false)
+                {
+                    addEntity(std::make_unique<Shape>("ShapeToFindHere", pos,scale, rotZ, true, shapeToFindName));
+                    auto randomEntity = getEntityFromName<Entity>("ShapeToFindHere");
+                    randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+                    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("ShapeToFindHere","Physics"));
+                    shapeToFindPlaced = true;
+                    continue;
+                }
+                
+                std::string name = random_string(4);
+                addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
                 auto randomEntity = getEntityFromName<Entity>(name);
                 randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
-                physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
-                shapeToFindPlaced = true;
-                continue;
+                physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
             }
-            
-            std::string name = random_string(4);
-            addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
-            auto randomEntity = getEntityFromName<Entity>(name);
-            randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
-            physicsEngine.registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
-
         }
     }
 }
@@ -376,7 +406,6 @@ void GameEnvironment::updateFunctionEvents()
 void GameEnvironment::startMiniGameLogic()
 {
     shapeFound = false;
-    loadWallLevel();
     fillSceneWithEntitys();
 }
 
@@ -448,11 +477,10 @@ void GameEnvironment::drawImGuiWindows()
                 ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
                 colliderRef->setMass(massRef);
 
-                ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
+                if(physicsEngine->getHashTableIndicesSize() != 0)
+                    ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
                 
             }
-
-
 
             ImGui::PopID();    
             ImGui::Text("");
@@ -462,23 +490,18 @@ void GameEnvironment::drawImGuiWindows()
     
     ImGui::Begin("Info Panel");
     ImGui::Text("FPS: %i", imGuiFPS);
-    ImGui::Text("Player Pos: X: %f Y: %f", getEntityFromName<PlayerShape>("Player")->getPosition().x, getEntityFromName<PlayerShape>("Player")->getPosition().y);
     ImGui::Text("Entities in Scene: %i", entities.size());
-    ImGui::Text("Player is grounded: %s", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getIsGrounded() ? "true" : "false");
-    ImGui::Text("Player Velocity X:%f Y: %f", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().y);
-    ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
-    ImGui::Text("Collisions resolved LastTick: %i", physicsEngine.getCurrentCollisions());
-    ImGui::Text("Ticks calculated last Second: %i", physicsEngine.getTicksLastSecond());
-    ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
+    ImGui::Text("Collisions resolved LastTick: %i", physicsEngine->getCurrentCollisions());
+    //ImGui::Text("Ticks calculated last Second: %i", physicsEngine->getTicksLastSecond());
     ImGui::End();
 
     ImGui::Begin("Physics Engine Control");
-    ImGui::SliderFloat("Tickrate:", &physicsEngine.tickrateOfSimulation, 60, 300, "%.3f",0);
-    ImGui::SliderFloat("Speed:", &physicsEngine.speedOfSimulation, 0, 3, "%.3f",0);
-    bool engineHalting = physicsEngine.getIsHalting();
+    ImGui::SliderFloat("Tickrate:", &physicsEngine->tickrateOfSimulation, 60, 300, "%.3f",0);
+    ImGui::SliderFloat("Speed:", &physicsEngine->speedOfSimulation, 0, 3, "%.3f",0);
+    bool engineHalting = physicsEngine->getIsHalting();
     ImGui::Checkbox("Is Halting", &engineHalting);
     if(ImGui::Button("Halt Engine"))
-        physicsEngine.setIsHalting(!engineHalting);
+        physicsEngine->setIsHalting(!engineHalting);
     if(ImGui::Button("Reset Level"))
         resetLevel();
     if(ImGui::Button("Load just walls"))
@@ -487,22 +510,32 @@ void GameEnvironment::drawImGuiWindows()
     {
         fillSceneWithEntitys();
     }  
-    ImGui::Text("Hash Table Size: %i ", physicsEngine.getHashTableIndicesSize());
+    ImGui::Text("Hash Table Size: %i ", physicsEngine->getHashTableIndicesSize());
     ImGui::End();
-
+     
     ImGui::Begin("Player Extra Info");
-    ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.y);
-    //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
-    float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
-    float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
-    ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
-    ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
-    glm::vec3 newScale(scaleX,scaleY, getEntityFromName<Entity>("Player")->getScale().z);
-    getEntityFromName<Entity>("Player")->setScale(newScale);
-    ImGui::Text("Player rot %f", getEntityFromName<Entity>("Player")->getRotation());
+        if(getEntityFromName<Entity>("Player") != nullptr)
+        {
+            ImGui::Text("Player Pos: X: %f Y: %f", getEntityFromName<PlayerShape>("Player")->getPosition().x, getEntityFromName<PlayerShape>("Player")->getPosition().y);
+            ImGui::Text("Player is grounded: %s", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getIsGrounded() ? "true" : "false");
+            ImGui::Text("Player Velocity X:%f Y: %f", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().y);
+            ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
+            ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.y);
+            //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
+            ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
+            float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
+            float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
+            ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
+            ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
+            glm::vec3 newScale(scaleX,scaleY, getEntityFromName<Entity>("Player")->getScale().z);
+            getEntityFromName<Entity>("Player")->setScale(newScale);
+            ImGui::Text("Player rot %f", getEntityFromName<Entity>("Player")->getRotation());
+            
+        }
+        else
+            ImGui::Text("Player not found");
     ImGui::End();
     
-
     ImGui::Begin("Mouse Information");
     ImGui::Text("Mouse X: %f", mouseX);
     ImGui::Text("Mouse Y: %f", mouseY);
@@ -519,7 +552,7 @@ void GameEnvironment::drawImGuiWindows()
 
 GameEnvironment::GameEnvironment()
 {
-    window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game");
+    window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct");
 }
 
 //Framebuffer Testing
@@ -544,14 +577,16 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
 void GameEnvironment::run()
 {
+    physicsEngine = std::make_unique<PhysicsEngine>();
+    
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
     
     //Physics Engine Prep
     updateWorldTranslationInfo();
-    physicsEngine.setcameraXHalf(xHalf);
-    physicsEngine.setcameraYHalf(yHalf);
+    physicsEngine->setcameraXHalf(xHalf);
+    physicsEngine->setcameraYHalf(yHalf);
 
     //Mouse
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
@@ -577,7 +612,6 @@ void GameEnvironment::run()
         //Input
         processInput(window);
 
-
         //glfwSetCursorPosCallback(window, cursor_position_callback);
 
         //Rendering
@@ -593,7 +627,7 @@ void GameEnvironment::run()
         
 
         //Physics pre Update
-        physicsEngine.getInitialTransform(deltaTime);
+        physicsEngine->getInitialTransform(deltaTime);
 
         //FPS
         double currentTime = glfwGetTime();
@@ -609,6 +643,7 @@ void GameEnvironment::run()
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
 
+        mousePositionUpdate();
         //GameLogic Testing        
         updateFunctionEvents();
 
@@ -617,8 +652,8 @@ void GameEnvironment::run()
         if(showGrid)
             grid.drawGrid(gridSize);
         //"Physics" Reset AFTER Update
-        physicsEngine.updatePhysics(); 
-        mousePositionUpdate();  
+        physicsEngine->updatePhysics(); 
+          
         drawEntities();
         drawImGuiWindows();
         glfwSwapBuffers(window);
@@ -629,3 +664,5 @@ void GameEnvironment::run()
 
     
 }
+
+

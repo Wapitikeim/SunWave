@@ -15,7 +15,6 @@ struct PhysicColliderInitialTransform
     float colliderInitialRot;
 };
 
-
 class PhysicsEngine 
 {
     private:
@@ -86,7 +85,16 @@ class PhysicsEngine
         void getInitialTransform(float _deltatime);
         void updatePhysics();
 
-        void clearPhysicsObjects(){physicsObjects.clear();hashTable.clear();initDone = false;initTransformOfColliders.clear();};
+        void clearPhysicsObjects()
+        {
+            physicsObjects.clear(); 
+            hashTable.clear();
+            initTransformOfColliders.clear();
+            colliderInitialPos.clear();
+            colliderInitialRot.clear();
+            initDone = false;
+        
+        };
 
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;

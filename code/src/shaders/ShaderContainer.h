@@ -36,6 +36,7 @@ class ShaderContainer
         virtual ~ShaderContainer()
         {
             cleanUpShaders();
+            glDeleteProgram(shaderID);
         };
         //Delete Copy Constructor
         ShaderContainer(const ShaderContainer &shader) = delete;

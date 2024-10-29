@@ -1,7 +1,7 @@
 #include "GameEnvironment.h"
 
 int main()
-{
+{   
     try 
     {
         GameEnvironment hiddenInstinct;
