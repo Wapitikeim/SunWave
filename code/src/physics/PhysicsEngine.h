@@ -68,6 +68,7 @@ class PhysicsEngine
                 }
             std::cout << "Registering the collider of " << colliderToRegister->getNameOfEntityThisIsAttachedTo() << " to the Physics Engine. \n";        
             physicsObjects.push_back(colliderToRegister);
+            addColliderIntoHashTable(colliderToRegister);
         };
         void unregisterCollider(PhysicsCollider* colliderToRemove)
         {

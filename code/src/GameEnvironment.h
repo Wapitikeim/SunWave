@@ -218,4 +218,6 @@ class GameEnvironment
 
         void run();
 
+        void testing(const glm::vec3& ePos); //Random testing function
+
 };

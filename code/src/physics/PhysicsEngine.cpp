@@ -128,6 +128,7 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 {
     deltatime += _deltatime;
     tickTime += _deltatime;
+    
     for(auto& obj:physicsObjects)
     {
         colliderInitialPos.push_back(obj->getBody().colliderPosition);
@@ -135,6 +136,7 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
         
         initTransformOfColliders.push_back(PhysicColliderInitialTransform{obj,obj->getBody().colliderPosition, obj->getBody().colliderZRotation});
     }
+    
 
 }
 
@@ -191,7 +193,7 @@ void PhysicsEngine::updatePhysics()
             collider->setPos(collider->getPos()+(collider->getVelocity()*getTimeStep()));
             collider->setAcceleration(glm::vec3(0));
 
-            if(collider->getVelocity() != glm::vec3(0))
+            if(glm::abs(collider->getVelocity()) != glm::vec3(0))
                 addColliderIntoHashTable(collider);
             
         }
