@@ -48,7 +48,7 @@ class PhysicsCollider : public Component
         CornerPositions cornerPos;
         void updateCornerPositions();
 
-        std::vector<int> indiciesInHashTable;
+        std::vector<uint32_t> indiciesInHashTable;
         
     protected:
 
@@ -78,7 +78,7 @@ class PhysicsCollider : public Component
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
         [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
-        [[nodiscard]] const std::vector<int> &getTableIndicies()const{return indiciesInHashTable;};
+        [[nodiscard]] const std::vector<uint32_t> &getTableIndicies()const{return indiciesInHashTable;};
 
         void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
         void setPos(const glm::vec3 &newPos){colliderBody.colliderPosition = newPos; updateEntityPosAndRot();};
@@ -92,8 +92,14 @@ class PhysicsCollider : public Component
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};
         void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};
-        void setIndiciesForHashTable(const std::vector<int> &newIndicies){indiciesInHashTable = newIndicies;};
-        void addOneIndexIntoIndiciesForHashTable(const int &index){indiciesInHashTable.push_back(index);};
+        void setIndiciesForHashTable(const std::vector<uint32_t> &newIndicies){indiciesInHashTable = newIndicies;};
+        void addOneIndexIntoIndiciesForHashTable(const uint32_t &index)
+        {
+            for(auto& entry: indiciesInHashTable)
+                if(entry==index)
+                        return; 
+            indiciesInHashTable.push_back(index);
+        };
         void clearIndiciesForHashTableOfThisEntity(){indiciesInHashTable.clear();};
         std::vector<PhysicsCollider*> getTheColliderThisColliderIsInContactWith(){return isInContactWith;};
         std::vector<glm::vec3> getCornerPosAsVector(){return cornerPos.cornerVec;};

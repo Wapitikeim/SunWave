@@ -30,6 +30,13 @@ class PhysicsEngine
         float tickTime = 0;
 
         //Spitial Hash Grid (Maybe in another class later)
+        const int32_t OFFSET = 0;
+        const float BUCKETSIZE = 2.f; //2.f Bucketsize = 1.f Scale
+        auto interleaveBits(const uint16_t& intToInterleave);
+        uint32_t mortonEncode2D(const int& bucketX, const int& bucketY);
+        std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> mortonHashTable;
+        void testing();
+
         int spacing = 4; // double the size of standard collider 
         float cameraXHalf;
         float cameraYHalf;
@@ -42,6 +49,12 @@ class PhysicsEngine
         
         std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
         
+        //PhysicsUpdateLoop
+        void prepLoop();
+        void applyForces();
+        void collisionDetection();
+        void collisionRespone();
+
         
         //Debug/Info Helpers
         int maxCollisionsResolvedLastTick = 0;
