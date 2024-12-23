@@ -523,6 +523,8 @@ void GameEnvironment::drawImGuiWindows()
             ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
             ImGui::Text("Corner left bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.y);
             ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.y);
+            ImGui::Text("Corner left top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.y);
+            ImGui::Text("Corner right top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.y);
             //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
             ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
             float scaleX = getEntityFromName<Entity>("Player")->getScale().x;

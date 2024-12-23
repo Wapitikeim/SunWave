@@ -57,9 +57,54 @@ void PhysicsEngine::testing()
         for(auto& corner:ref->getCornerPos().cornerVec)
             ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((corner.x/BUCKETSIZE),(corner.y/BUCKETSIZE)));
         //Extra corners based on collider scale and bucketsize (2.f Bucketsize = 1.f Scale)
-        if(BUCKETSIZE < (ref->getBody().colliderScale.x*2) || BUCKETSIZE < (ref->getBody().colliderScale.y*2))
-            std::cout << "More Corners needed \n";
-        //std::cout << mortonEncode2D((ref->getCornerPos().leftBottom.x/BUCKETSIZE),(ref->getCornerPos().leftBottom.y/BUCKETSIZE)) << "\n";
+        //if X-Scale is bigger
+        if(BUCKETSIZE < (ref->getBody().colliderScale.x*2))
+        {
+            //leftBot<->RightBot
+            glm::vec2 leftBot(ref->getCornerPos().leftBottom);
+            glm::vec2 rightBot(ref->getCornerPos().rightBottom);
+            //leftTop<->RightTop
+            glm::vec2 leftTop(ref->getCornerPos().leftTop);
+            glm::vec2 rightTop(ref->getCornerPos().rightTop);
+            // Calculate the direction vectors
+            glm::vec2 directionBot = glm::normalize(rightBot - leftBot); // Direction along the bottom edge
+            glm::vec2 directionTop = glm::normalize(rightTop - leftTop); // Direction along the top edge
+            float distanceBot = glm::distance(leftBot, rightBot);        // Total distance for the bottom edge
+
+            // Start points offset by one BUCKETSIZE to exclude the starting point
+            glm::vec2 currentBot = leftBot + directionBot * BUCKETSIZE;
+            glm::vec2 currentTop = leftTop + directionTop * BUCKETSIZE;
+
+            // Adjust the remaining distance to exclude the starting point
+            distanceBot -= BUCKETSIZE;
+
+            // Loop through the bottom line and calculate top line points simultaneously
+            while (distanceBot > BUCKETSIZE)
+            {
+                //TODO Add to index now and do the same for Y
+                // Log the points between
+                std::cout << "Bottom Point: (" << currentBot.x << ", " << currentBot.y << ")\n";
+                std::cout << "Top Point: (" << currentTop.x << ", " << currentTop.y << ")\n";
+
+                // Move along the bottom and top lines
+                currentBot += directionBot * BUCKETSIZE;
+                currentTop += directionTop * BUCKETSIZE;
+
+                // Decrease remaining distance
+                distanceBot -= BUCKETSIZE;
+            }   
+        }
+        //If Y Scale is bigger
+        if(BUCKETSIZE < (ref->getBody().colliderScale.y*2))
+        {
+            //leftBot<->leftTop
+            glm::vec2 leftBot(ref->getCornerPos().leftBottom);
+            glm::vec2 leftTop(ref->getCornerPos().leftTop);
+            //rightBot<->rightTop
+            glm::vec2 rightBot(ref->getCornerPos().rightBottom);
+            glm::vec2 rightTop(ref->getCornerPos().rightTop);
+
+        }
         //Push Indicies into morton hash tabel
         for(auto& mortonEntry : ref->getTableIndicies())
             mortonHashTable[mortonEntry].push_back(ref);
