@@ -1,4 +1,6 @@
 #include "MortonHashTableLogic.h"
+#include <iostream>
+#include <algorithm>
 
 auto MortonHashTableLogic::interleaveBits(const uint16_t &intToInterleave)
 {
@@ -74,4 +76,18 @@ void MortonHashTableLogic::addMortonCodesForYScale(glm::vec3& leftBot, glm::vec3
         currentRight += directionRight * BUCKETSIZE;
         distanceLeft -= BUCKETSIZE;
     }
+}
+
+void MortonHashTableLogic::printColliderOccurrences(PhysicsCollider* ref, const std::unordered_map<uint32_t, std::vector<PhysicsCollider*>>& mortonHashTable) const
+{
+    int totalOccurrences = 0;
+    for (const auto& entry : mortonHashTable) 
+    {
+        int count = std::count(entry.second.begin(), entry.second.end(), ref);
+        if (count > 0) {
+            std::cout << "Key: " << entry.first << " has " << count << " occurrences of ref." << std::endl;
+            totalOccurrences += count;
+        }
+    }
+    std::cout << "Total occurrences of ref in table: " << totalOccurrences << std::endl;
 }

@@ -40,17 +40,7 @@ void PhysicsEngine::testing()
         for(auto& mortonEntry : ref->getTableIndicies())
             mortonHashTable[mortonEntry].push_back(ref);
         
-        // Print occurrences of "ref" in mortonHashTable
-        int totalOccurrences = 0;
-        for (const auto& entry : mortonHashTable) 
-        {
-            int count = std::count(entry.second.begin(), entry.second.end(), ref);
-            if (count > 0) {
-                std::cout << "Key: " << entry.first << " has " << count << " occurrences of ref." << std::endl;
-                totalOccurrences += count;
-            }
-        }
-        std::cout << "Total occurrences of ref in table: " << totalOccurrences << std::endl;
+        tableLogic.printColliderOccurrences(ref, mortonHashTable);
         std::cout << "\n";
     }
 }

@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <map>
 #include <unordered_map>
-#include <algorithm>
 
 
 class MortonHashTableLogic 
@@ -23,4 +22,6 @@ class MortonHashTableLogic
         void prepareIndices(PhysicsCollider* ref);
         void addMortonCodesForXScale(glm::vec3 &leftBot, glm::vec3 &rightBot, PhysicsCollider* ref);
         void addMortonCodesForYScale(glm::vec3 &leftBot, glm::vec3 &leftTop, PhysicsCollider* ref);
+
+        void printColliderOccurrences(PhysicsCollider* ref, const std::unordered_map<uint32_t, std::vector<PhysicsCollider*>>& mortonHashTable) const;
 };
