@@ -6,6 +6,7 @@
 
 
 #include "CollisionTester.h"
+#include "MortonHashTableLogic.h"
 #include "../components/PhysicsCollider.h"
 
 struct PhysicColliderInitialTransform
@@ -29,12 +30,9 @@ class PhysicsEngine
         float deltatime = 0;
         float tickTime = 0;
 
-        //Spitial Hash Grid (Maybe in another class later)
-        const int32_t OFFSET = 0;
-        const float BUCKETSIZE = 2.f; //2.f Bucketsize = 1.f Scale
-        auto interleaveBits(const uint16_t& intToInterleave);
-        uint32_t mortonEncode2D(const int& bucketX, const int& bucketY);
+        //Spitial Hash Grid 
         std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> mortonHashTable;
+        MortonHashTableLogic tableLogic;
         void testing();
 
         int spacing = 4; // double the size of standard collider 

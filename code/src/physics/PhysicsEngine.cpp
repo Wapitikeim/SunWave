@@ -16,108 +16,42 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
     //collider.setRot(colliderInitialRot);
 }
 
-auto PhysicsEngine::interleaveBits(const uint16_t &intToInterleave)
-{
-    uint32_t x = intToInterleave;
-    x = (x | (x << 8)) & 0x00FF00FF;
-    x = (x | (x << 4)) & 0x0F0F0F0F;
-    x = (x | (x << 2)) & 0x33333333;
-    x = (x | (x << 1)) & 0x55555555;
-    return x;
-}
-
-uint32_t PhysicsEngine::mortonEncode2D(const int& bucketX, const int& bucketY)
-{
-    // Shift negative coordinates to non-negative space
-    uint16_t xBits = static_cast<uint16_t>(bucketX + OFFSET);
-    uint16_t yBits = static_cast<uint16_t>(bucketY + OFFSET);
-
-    // Interleave bits to create Morton code
-    return interleaveBits(xBits) | (interleaveBits(yBits) << 1);
-}
-
 void PhysicsEngine::testing()
 {
     if(physicsObjects[0]->getEntityThisIsAttachedTo()->getEntityName() == "Player")
     {
         auto ref = physicsObjects[0];
         
-        //Remove Collider from HashTable
-        //Remove through inidies
-        for(auto& mortonEntry : ref->getTableIndicies())
+        tableLogic.removeColliderFromHashTable(ref, mortonHashTable);
+        tableLogic.prepareIndices(ref);
+
+        // Handle X scale
+        if(tableLogic.BUCKETSIZE < (ref->getBody().colliderScale.x * 2))
         {
-            auto& refTable = mortonHashTable[mortonEntry];
-            refTable.erase(std::remove(refTable.begin(), refTable.end(), ref),refTable.end());
+            tableLogic.addMortonCodesForXScale(ref->getCornerPos().leftBottom, ref->getCornerPos().rightBottom, ref);
         }
-        //Clean up Indicies for next Insertion
-        ref->clearIndiciesForHashTableOfThisEntity();
-        
-        //Prep Indicies
-        //Vanilla Corners
-        for(auto& corner:ref->getCornerPos().cornerVec)
-            ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((corner.x/BUCKETSIZE),(corner.y/BUCKETSIZE)));
-        //Extra corners based on collider scale and bucketsize (2.f Bucketsize = 1.f Scale)
-        //if X-Scale is bigger
-        if(BUCKETSIZE < (ref->getBody().colliderScale.x*2))
+
+        // Handle Y scale
+        if(tableLogic.BUCKETSIZE < (ref->getBody().colliderScale.y * 2))
         {
-            //leftBot<->RightBot
-            glm::vec2 leftBot(ref->getCornerPos().leftBottom);
-            glm::vec2 rightBot(ref->getCornerPos().rightBottom);
-            //leftTop<->RightTop
-            glm::vec2 leftTop(ref->getCornerPos().leftTop);
-            glm::vec2 rightTop(ref->getCornerPos().rightTop);
-            // Calculate the direction vectors
-            glm::vec2 directionBot = glm::normalize(rightBot - leftBot); // Direction along the bottom edge
-            glm::vec2 directionTop = glm::normalize(rightTop - leftTop); // Direction along the top edge
-            float distanceBot = glm::distance(leftBot, rightBot);        // Total distance for the bottom edge
-
-            // Start points offset by one BUCKETSIZE to exclude the starting point
-            glm::vec2 currentBot = leftBot + directionBot * BUCKETSIZE;
-            glm::vec2 currentTop = leftTop + directionTop * BUCKETSIZE;
-
-            // Adjust the remaining distance to exclude the starting point
-            distanceBot -= BUCKETSIZE;
-
-            // Loop through the bottom line and calculate top line points simultaneously
-            while (distanceBot > BUCKETSIZE)
-            {
-                //TODO Add to index now and do the same for Y
-                // Log the points between
-                std::cout << "Bottom Point: (" << currentBot.x << ", " << currentBot.y << ")\n";
-                std::cout << "Top Point: (" << currentTop.x << ", " << currentTop.y << ")\n";
-
-                // Move along the bottom and top lines
-                currentBot += directionBot * BUCKETSIZE;
-                currentTop += directionTop * BUCKETSIZE;
-
-                // Decrease remaining distance
-                distanceBot -= BUCKETSIZE;
-            }   
+            tableLogic.addMortonCodesForYScale(ref->getCornerPos().leftBottom, ref->getCornerPos().leftTop, ref);
         }
-        //If Y Scale is bigger
-        if(BUCKETSIZE < (ref->getBody().colliderScale.y*2))
-        {
-            //leftBot<->leftTop
-            glm::vec2 leftBot(ref->getCornerPos().leftBottom);
-            glm::vec2 leftTop(ref->getCornerPos().leftTop);
-            //rightBot<->rightTop
-            glm::vec2 rightBot(ref->getCornerPos().rightBottom);
-            glm::vec2 rightTop(ref->getCornerPos().rightTop);
 
-        }
-        //Push Indicies into morton hash tabel
         for(auto& mortonEntry : ref->getTableIndicies())
             mortonHashTable[mortonEntry].push_back(ref);
         
-
-        //Shows if the entity is removed correctly
-        /* int i = 0;
-        for (auto& [key, val] : mortonHashTable)
+        // Print occurrences of "ref" in mortonHashTable
+        int totalOccurrences = 0;
+        for (const auto& entry : mortonHashTable) 
         {
-            if(val.size() > 0)
-                i++;
+            int count = std::count(entry.second.begin(), entry.second.end(), ref);
+            if (count > 0) {
+                std::cout << "Key: " << entry.first << " has " << count << " occurrences of ref." << std::endl;
+                totalOccurrences += count;
+            }
         }
-        std::cout << i << "\n"; */
+        std::cout << "Total occurrences of ref in table: " << totalOccurrences << std::endl;
+        std::cout << "\n";
     }
 }
 
