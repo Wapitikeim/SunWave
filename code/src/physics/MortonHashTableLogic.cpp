@@ -1,4 +1,5 @@
 #include "MortonHashTableLogic.h"
+#include "../components/PhysicsCollider.h"
 #include <iostream>
 #include <algorithm>
 
@@ -32,7 +33,25 @@ void MortonHashTableLogic::removeColliderFromHashTable(PhysicsCollider* ref,std:
     ref->clearIndiciesForHashTableOfThisEntity();
 }
 
-void MortonHashTableLogic::prepareIndices(PhysicsCollider* ref)
+void MortonHashTableLogic::addColliderIntoHashTable(PhysicsCollider *ref, std::unordered_map<uint32_t, std::vector<PhysicsCollider *>> &table)
+{
+    removeColliderFromHashTable(ref, table);
+
+    addCornerIndiciesInMortonEncode(ref);
+
+    // Handle X scale
+    if(BUCKETSIZE < (ref->getBody().colliderScale.x * 2))
+        addMortonCodesForXScale(ref->getCornerPos().leftBottom, ref->getCornerPos().rightBottom, ref);
+
+    // Handle Y scale
+    if(BUCKETSIZE < (ref->getBody().colliderScale.y * 2))
+        addMortonCodesForYScale(ref->getCornerPos().leftBottom, ref->getCornerPos().leftTop, ref);
+
+    for(auto& mortonEntry : ref->getTableIndicies())
+        table[mortonEntry].push_back(ref);
+}
+
+void MortonHashTableLogic::addCornerIndiciesInMortonEncode(PhysicsCollider* ref)
 {
     for(auto& corner : ref->getCornerPos().cornerVec)
         ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((corner.x/BUCKETSIZE), (corner.y/BUCKETSIZE)));
@@ -76,6 +95,15 @@ void MortonHashTableLogic::addMortonCodesForYScale(glm::vec3& leftBot, glm::vec3
         currentRight += directionRight * BUCKETSIZE;
         distanceLeft -= BUCKETSIZE;
     }
+}
+
+int MortonHashTableLogic::getColliderOccurrences(PhysicsCollider* ref, const std::unordered_map<uint32_t, std::vector<PhysicsCollider*>>& mortonHashTable) const
+{
+    //Checks all entrys - kinda slow
+    int totalOccurrences = 0;
+    for (const auto& entry : mortonHashTable) 
+        totalOccurrences += std::count(entry.second.begin(), entry.second.end(), ref);
+    return totalOccurrences;
 }
 
 void MortonHashTableLogic::printColliderOccurrences(PhysicsCollider* ref, const std::unordered_map<uint32_t, std::vector<PhysicsCollider*>>& mortonHashTable) const

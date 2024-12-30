@@ -19,16 +19,16 @@ struct PhysicColliderInitialTransform
 class PhysicsEngine 
 {
     private:
+        float deltatime = 0;
+        float tickTime = 0;
+        
         std::vector<glm::vec3> colliderInitialPos;
         std::vector<float> colliderInitialRot;
 
         std::vector<PhysicColliderInitialTransform> initTransformOfColliders;
         std::vector<PhysicsCollider*> physicsObjects;
-        //void isCollisionDetected();
-        //void resolveCollision();
         void restoreInitialPosAndRot(PhysicsCollider* collider);
-        float deltatime = 0;
-        float tickTime = 0;
+        
 
         //Spitial Hash Grid 
         std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> mortonHashTable;
@@ -38,9 +38,6 @@ class PhysicsEngine
         int spacing = 4; // double the size of standard collider 
         float cameraXHalf;
         float cameraYHalf;
-        std::unordered_map<int, std::vector<PhysicsCollider*>> hashTable; //<index,colliderRef>
-        std::vector<int> indiciesForHashTable;
-        std::vector<glm::vec2> pointsToGetIndexesFor;
 
         
         //std::vector<PhysicsCollider&> getNearEntitysFromHashTable(){return;};
@@ -100,12 +97,11 @@ class PhysicsEngine
         void clearPhysicsObjects()
         {
             physicsObjects.clear(); 
-            hashTable.clear();
+            mortonHashTable.clear();
             initTransformOfColliders.clear();
             colliderInitialPos.clear();
             colliderInitialRot.clear();
-            initDone = false;
-        
+            initDone = false;  
         };
 
         float speedOfSimulation = 1;
@@ -115,7 +111,7 @@ class PhysicsEngine
         void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
         void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
 
-        void setIsHalting(const bool &newHalt){isHalting = newHalt; hashTable.clear(); initDone=false;tickTime=0;};
+        void setIsHalting(const bool &newHalt){isHalting = newHalt; mortonHashTable.clear(); initDone=false;tickTime=0;};
         bool getIsHalting(){return isHalting;};
         const int& getCurrentCollisions(){return maxCollisionsResolvedLastTick;};
         const int& getTicksLastFrame(){return ticksLastFrame;};
@@ -127,6 +123,5 @@ class PhysicsEngine
         //HasTableFunctions
         void addColliderIntoHashTable(PhysicsCollider* colliderRef);
         void removeColliderFromHashTable(PhysicsCollider* colliderRef);
-        void addColliderNeighboursAlso(PhysicsCollider* colliderRef);
-        const int& getHashTableIndicesSize();
+        int getHashTableIndicesSize();
 };

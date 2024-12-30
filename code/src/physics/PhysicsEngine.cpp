@@ -20,28 +20,8 @@ void PhysicsEngine::testing()
 {
     if(physicsObjects[0]->getEntityThisIsAttachedTo()->getEntityName() == "Player")
     {
-        auto ref = physicsObjects[0];
-        
-        tableLogic.removeColliderFromHashTable(ref, mortonHashTable);
-        tableLogic.prepareIndices(ref);
-
-        // Handle X scale
-        if(tableLogic.BUCKETSIZE < (ref->getBody().colliderScale.x * 2))
-        {
-            tableLogic.addMortonCodesForXScale(ref->getCornerPos().leftBottom, ref->getCornerPos().rightBottom, ref);
-        }
-
-        // Handle Y scale
-        if(tableLogic.BUCKETSIZE < (ref->getBody().colliderScale.y * 2))
-        {
-            tableLogic.addMortonCodesForYScale(ref->getCornerPos().leftBottom, ref->getCornerPos().leftTop, ref);
-        }
-
-        for(auto& mortonEntry : ref->getTableIndicies())
-            mortonHashTable[mortonEntry].push_back(ref);
-        
-        tableLogic.printColliderOccurrences(ref, mortonHashTable);
-        std::cout << "\n";
+        tableLogic.addColliderIntoHashTable(physicsObjects[0], mortonHashTable);  
+        std::cout << tableLogic.getColliderOccurrences(physicsObjects[0], mortonHashTable) << "\n";
     }
 }
 
@@ -83,7 +63,7 @@ void PhysicsEngine::applyForces()
         collider->update(); //Nessecarry for corner pos updates?
 
         if(glm::abs(collider->getVelocity()) != glm::vec3(0))
-            addColliderIntoHashTable(collider);
+            addColliderIntoHashTable(collider); 
     }
         
 }
@@ -91,7 +71,7 @@ void PhysicsEngine::applyForces()
 void PhysicsEngine::collisionDetection()
 {
     //"Smarter" Collision gathering
-    for (auto& [key, val] : hashTable)
+    for (auto& [key, val] : mortonHashTable)
     {
         bool dontAddIfAllStatic = true;
         bool dontAddIfAllResting = true;
@@ -259,103 +239,18 @@ void PhysicsEngine::addColliderIntoHashTable(PhysicsCollider* colliderRef)
 {
     if(isHalting)
         return;
-    
-    removeColliderFromHashTable(colliderRef);
-    
-    int tableSize = glm::ceil((cameraXHalf*2*cameraYHalf*2)/spacing);
-    if(colliderRef->getBody().colliderScale.x > (spacing/2) || colliderRef->getBody().colliderScale.y > (spacing/2))
-    {
-        int segmentsX = glm::floor(colliderRef->getBody().colliderScale.x);
-        int segmentsY = glm::floor(colliderRef->getBody().colliderScale.y);
-        int segments = glm::max(segmentsX,segmentsY);
-        
-        glm::vec3 leftToRightBottom = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().leftBottom;
-        float deltaXBottom = leftToRightBottom.x / segments;
-        float deltaYBottom = leftToRightBottom.y / segments;
-
-        glm::vec3 rightToRight = colliderRef->getCornerPos().rightBottom - colliderRef->getCornerPos().rightTop;
-        float deltaXRight = rightToRight.x / segments;
-        float deltaYRight = rightToRight.y / segments;
-
-        glm::vec3 leftToLeft = colliderRef->getCornerPos().leftBottom - colliderRef->getCornerPos().leftTop;
-        float deltaXLeft = leftToLeft.x / segments;
-        float deltaYLeft = leftToLeft.y / segments;
-
-        glm::vec3 leftToRightTop = colliderRef->getCornerPos().rightTop - colliderRef->getCornerPos().leftTop;
-        float deltaXTop = leftToRightTop.x / segments;
-        float deltaYTop = leftToRightTop.y / segments;
-        //std:: cout << segments << "\n";
-        for(int i = 1; i < segments ; i++)
-        {
-            float newPointX = colliderRef->getCornerPos().leftBottom.x + deltaXBottom*i;
-            float newPointY = colliderRef->getCornerPos().leftBottom.y + deltaYBottom*i;
-            pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-            
-            newPointX = colliderRef->getCornerPos().rightTop.x + deltaXRight*i;
-            newPointY = colliderRef->getCornerPos().rightTop.y + deltaYRight*i;
-            pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-            
-            newPointX = colliderRef->getCornerPos().leftTop.x + deltaXTop*i;
-            newPointY = colliderRef->getCornerPos().leftTop.y + deltaYTop*i;
-            pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-
-            newPointX = colliderRef->getCornerPos().leftTop.x + deltaXLeft*i;
-            newPointY = colliderRef->getCornerPos().leftTop.y + deltaYLeft*i;
-            pointsToGetIndexesFor.push_back(glm::vec2(glm::floor(newPointX/spacing), glm::floor(newPointY/spacing)));
-            
-        }
-    }
-        
-    glm::vec2 cornerPointX(glm::floor((colliderRef->getCornerPos().leftBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().leftBottom.y) /spacing));
-    pointsToGetIndexesFor.push_back(cornerPointX);
-    cornerPointX = glm::vec2(glm::floor((colliderRef->getCornerPos().leftTop.x) /spacing), glm::floor((colliderRef->getCornerPos().leftTop.y) /spacing));
-    pointsToGetIndexesFor.push_back(cornerPointX);
-    cornerPointX = glm::vec2(glm::floor((colliderRef->getCornerPos().rightTop.x) /spacing), glm::floor((colliderRef->getCornerPos().rightTop.y) /spacing));
-    pointsToGetIndexesFor.push_back(cornerPointX);
-    cornerPointX = glm::vec2(glm::floor((colliderRef->getCornerPos().rightBottom.x) /spacing), glm::floor((colliderRef->getCornerPos().rightBottom.y) /spacing));
-    pointsToGetIndexesFor.push_back(cornerPointX);
-
-    for(auto &entry:pointsToGetIndexesFor)
-    {
-        int index = entry.y* glm::ceil((cameraXHalf*2)/(spacing-1))  + entry.x;
-        index = index;//%tableSize;
-        indiciesForHashTable.push_back(index); 
-    }
-    std::sort(indiciesForHashTable.begin(), indiciesForHashTable.end());
-    indiciesForHashTable.erase(std::unique(indiciesForHashTable.begin(),indiciesForHashTable.end()), indiciesForHashTable.end());
-    
-    for(auto &entry:indiciesForHashTable)
-    {
-        hashTable[entry].push_back(colliderRef);
-        //colliderRef->addOneIndexIntoIndiciesForHashTable(entry);
-    } 
-    indiciesForHashTable.clear();
-    pointsToGetIndexesFor.clear();
+    tableLogic.addColliderIntoHashTable(colliderRef, mortonHashTable);
 }
 
 void PhysicsEngine::removeColliderFromHashTable(PhysicsCollider *colliderRef)
 {
-    for (auto& [key, val] : hashTable)
-    {
-        val.erase(std::remove(val.begin(), val.end(), colliderRef),val.end());
-    }
+    tableLogic.removeColliderFromHashTable(colliderRef, mortonHashTable);
 }
 
-void PhysicsEngine::addColliderNeighboursAlso(PhysicsCollider *colliderRef)
+int PhysicsEngine::getHashTableIndicesSize()
 {
-    for(auto &entry:colliderRef->getTableIndicies())
-    {
-        hashTable[entry+1].push_back(colliderRef);
-        hashTable[entry-1].push_back(colliderRef);
-        hashTable[entry+glm::ceil((cameraXHalf*2)/(spacing-1))].push_back(colliderRef);
-        hashTable[entry-glm::ceil((cameraXHalf*2)/(spacing-1))].push_back(colliderRef);
-    }
-}
-
-const int &PhysicsEngine::getHashTableIndicesSize()
-{
-    auto i = 0;
-    for (auto& [key, val] : hashTable)
+    int i = 0;
+    for (auto& [key, val] : mortonHashTable)
     {
         if(val.size() != 0)
          i++;
@@ -392,6 +287,7 @@ void PhysicsEngine::updatePhysics()
         for(auto& entry:physicsObjects)
         {    
             addColliderIntoHashTable(entry);
+            tableLogic.addColliderIntoHashTable(entry, mortonHashTable);
         }
         initDone = true;
     } 
@@ -430,7 +326,6 @@ void PhysicsEngine::updatePhysics()
     initTransformOfColliders.clear();
 
 }
-
 
 //Helper Functions meant To Use Outside
 bool PhysicsEngine::checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ)
