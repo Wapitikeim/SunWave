@@ -46,7 +46,7 @@ class PhysicsCollider : public Component
         void updateEntityPosAndRot();
 
         CornerPositions cornerPos;
-        void updateCornerPositions();
+        
 
         std::vector<uint32_t> indiciesInHashTable;
         
@@ -119,6 +119,7 @@ class PhysicsCollider : public Component
         int getSizeOfContacts(){return isInContactWith.size();};
 
         void update() override;
+        void updateCornerPositions();
 
         std::string getNameOfEntityThisIsAttachedTo(){return entityThisIsAttachedTo->getEntityName();};
 

@@ -9,6 +9,7 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
             {
                 collider->setPos(entry.colliderInitialPos);
                 collider->setRot(entry.colliderInitialRot);
+                collider->updateCornerPositions();
             }
         }
     
@@ -18,10 +19,38 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
 
 void PhysicsEngine::testing()
 {
-    if(physicsObjects[0]->getEntityThisIsAttachedTo()->getEntityName() == "Player")
+    if (collisionsToResolve.size() == 0)
+        return;
+
+    //std::cout << "Collisions to Resolve:" << std::endl;
+    for (const auto& collisionList : collisionsToResolve)
     {
-        tableLogic.addColliderIntoHashTable(physicsObjects[0], mortonHashTable);  
-        std::cout << tableLogic.getColliderOccurrences(physicsObjects[0], mortonHashTable) << "\n";
+        //std::cout << "Collision Group:" << std::endl;
+        for (const auto& collider : collisionList)
+        {
+            //std::cout << "  Collider: " << collider->getNameOfEntityThisIsAttachedTo() << std::endl;
+            // Change color to red if colliding
+            collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
+        }
+    }
+    //std::cout << "\n";
+
+    // Set color to black for colliders not in collisionsToResolve
+    for (const auto& collider : physicsObjects)
+    {
+        bool isColliding = false;
+        for (const auto& collisionList : collisionsToResolve)
+        {
+            if (std::find(collisionList.begin(), collisionList.end(), collider) != collisionList.end())
+            {
+                isColliding = true;
+                break;
+            }
+        }
+        if (!isColliding)
+        {
+            collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
+        }
     }
 }
 
@@ -68,9 +97,9 @@ void PhysicsEngine::applyForces()
         
 }
 
-void PhysicsEngine::collisionDetection()
+void PhysicsEngine::broadCollisionGathering()
 {
-    //"Smarter" Collision gathering
+    // Implemented using a hash table with morton encoding
     for (auto& [key, val] : mortonHashTable)
     {
         bool dontAddIfAllStatic = true;
@@ -97,6 +126,46 @@ void PhysicsEngine::collisionDetection()
         }           
             
     }
+}
+
+void PhysicsEngine::narrowCollisionGathering()
+{
+    // Implement through SAT collision detection
+    std::vector<std::vector<PhysicsCollider*>> actualCollisions;
+
+    for (auto& collisionList : collisionsToResolve)
+    {
+        std::vector<PhysicsCollider*> actualCollisionList;
+        for (size_t i = 0; i < collisionList.size(); ++i)
+        {
+            for (size_t j = i + 1; j < collisionList.size(); ++j)
+            {
+                if (CollisionTester::arePhysicsCollidersColliding(collisionList[i], collisionList[j]))
+                {
+                    if (std::find(actualCollisionList.begin(), actualCollisionList.end(), collisionList[i]) == actualCollisionList.end())
+                    {
+                        actualCollisionList.push_back(collisionList[i]);
+                    }
+                    if (std::find(actualCollisionList.begin(), actualCollisionList.end(), collisionList[j]) == actualCollisionList.end())
+                    {
+                        actualCollisionList.push_back(collisionList[j]);
+                    }
+                }
+            }
+        }
+        if (!actualCollisionList.empty())
+        {
+            actualCollisions.push_back(actualCollisionList);
+        }
+    }
+
+    collisionsToResolve = actualCollisions;
+}
+
+void PhysicsEngine::collisionDetection()
+{
+    broadCollisionGathering();
+    narrowCollisionGathering();
     maxCollisionsResolvedLastTick = collisionsToResolve.size();
 }
 
@@ -111,124 +180,21 @@ void PhysicsEngine::collisionRespone()
             {
                 if(entry == collisiontoCheckFor)
                     continue;
-                if(CollisionTester::arePhysicsCollidersColliding(entry, collisiontoCheckFor))
+                restoreInitialPosAndRot(entry);
+                if((abs(entry->getVelocity().x) > 0.1f) || (abs(entry->getVelocity().y) > 0.1f))
                 {
-                    //Getting the Edge of the collision contact
-                    //Get the 'Save' point
-                    int index = 0;
-                    float shortestDistance = 100;
-                    int indexShortestDistance;
-                    auto& refCornerVec = collisiontoCheckFor->getCornerPosAsVector(); 
-                    //"Save" Corner Pos calc
-                    for(auto &cornerToCheck:refCornerVec)
-                    {
-                        float distanceToCalculate = 0;
-                        //Go Through all Corners of Entity
-                        for(auto &cornerOfEntity:entry->getCornerPosAsVector())
-                            distanceToCalculate+=glm::distance(cornerToCheck, cornerOfEntity);
-                        
-                        if(distanceToCalculate<shortestDistance)
-                        {
-                            shortestDistance = distanceToCalculate;
-                            indexShortestDistance = index;
-                        }   
-                        index++;
-                    }
-                    //Possible Edge Index Calc (Maybe smarter/Better way)
-                    int possibleEdgeIndexes1[2];possibleEdgeIndexes1[0] = indexShortestDistance;
-                    int possibleEdgeIndexes2[2];possibleEdgeIndexes2[0] = indexShortestDistance;
-                    if((indexShortestDistance+1)>3)
-                        possibleEdgeIndexes1[1] = 0;
-                    else
-                        possibleEdgeIndexes1[1] = indexShortestDistance+1;
-                    if((indexShortestDistance-1)<0)
-                        possibleEdgeIndexes2[1] = 3;
-                    else
-                        possibleEdgeIndexes2[1] = indexShortestDistance-1;
-                    //Which Edge is the correct one?
-                    //Which possible edge is the shorter one?
-                    int theShorterOne = 0;
-                    
-                    float dEdge1 = glm::distance(refCornerVec[possibleEdgeIndexes1[0]], refCornerVec[possibleEdgeIndexes1[1]]);
-                    float dEdge2 = glm::distance(refCornerVec[possibleEdgeIndexes2[0]], refCornerVec[possibleEdgeIndexes2[1]]);
-                    if(dEdge1>dEdge2)
-                        theShorterOne = 2;
-                    else
-                        theShorterOne = 1;
-                    
-                    //Vector Calc
-                    glm::vec3 edge1 = refCornerVec[possibleEdgeIndexes1[1]]-refCornerVec[possibleEdgeIndexes1[0]];
-                    glm::vec3 edge2 = refCornerVec[possibleEdgeIndexes2[1]]-refCornerVec[possibleEdgeIndexes2[0]]; 
-                    float scalingFactor = 0;
-                    glm::vec3 pointThatDeterminesTheShorterEdge;
-                    if(theShorterOne == 2)
-                    {
-                        scalingFactor = dEdge2/dEdge1;
-                        pointThatDeterminesTheShorterEdge = refCornerVec[possibleEdgeIndexes1[0]] + scalingFactor * edge1;
-                    }   
-                    else
-                    {
-                        scalingFactor = dEdge1/dEdge2; 
-                        pointThatDeterminesTheShorterEdge = refCornerVec[possibleEdgeIndexes2[0]] + scalingFactor * edge2;
-                    }
-                    float distanceToTheLongEdgePoint = 0;
-                    float distanceToTheShortSidePoint = 0;
-                    for(auto &cornerOfEntity:entry->getCornerPosAsVector())
-                    {
-                        distanceToTheLongEdgePoint+=glm::distance(pointThatDeterminesTheShorterEdge, cornerOfEntity);
-                        if(theShorterOne == 2)
-                            distanceToTheShortSidePoint+=glm::distance(refCornerVec[possibleEdgeIndexes2[1]], cornerOfEntity);
-                        else
-                            distanceToTheShortSidePoint+=glm::distance(refCornerVec[possibleEdgeIndexes1[1]], cornerOfEntity);
-                    }
-                    //Now we finally can determine which edge is the right one      
-                    int longerEdge = 0;
-                    if(glm::length(edge1)> glm::length(edge2))
-                        longerEdge = 1;
-                    else
-                        longerEdge = 2;
-                    glm::vec3 edgeToUseCalculationsWith;
-                    if(distanceToTheLongEdgePoint < distanceToTheShortSidePoint)
-                        if(longerEdge == 1)
-                            edgeToUseCalculationsWith = edge1;
-                        else
-                            edgeToUseCalculationsWith = edge2;
-                    else
-                        if(longerEdge == 1)
-                            edgeToUseCalculationsWith = edge2;
-                        else
-                            edgeToUseCalculationsWith = edge1;
-                        
-                    glm::vec2 normVector1(-edgeToUseCalculationsWith.y, edgeToUseCalculationsWith.x);
-                    glm::vec2 normVector2(edgeToUseCalculationsWith.y, -edgeToUseCalculationsWith.x);
-
-                    
-                                                
-                    
-                    restoreInitialPosAndRot(entry);
-                    //WH 18.10.2024 Buggy regarding CornerPos Rots Leads to strange calculations
-                    if(entry->getNameOfEntityThisIsAttachedTo() == "Player")
-                    {
-                        //std::cout << glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y)) << "\n";
-                        //std::cout << glm::degrees(glm::atan((normVector2/glm::length(normVector2)).x,(normVector2/glm::length(normVector2)).y)) << "\n";
-                        //std::cout << "\n";
-                        //std::cout << glm::abs(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y))) << "\n";
-                        entry->setRot(glm::abs(glm::degrees(glm::atan((normVector1/glm::length(normVector1)).x,(normVector1/glm::length(normVector1)).y))));
-                    }
-                    if((abs(entry->getVelocity().x) > 0.1f) || (abs(entry->getVelocity().y) > 0.1f))
-                    {
-                        //Poor mans attempt to trade forces
-                        glm::vec3 velocityToTrade(-entry->getVelocity()*collisiontoCheckFor->getElascicity());
-                        entry->setVelocity(velocityToTrade);
-                        if(!collisiontoCheckFor->getIsStatic())
-                            collisiontoCheckFor->setVelocity(-velocityToTrade);
-                    }
-                    else
-                    {
-                        entry->setVelocity(glm::vec3(0));
-                        entry->setIsGrounded(true);
-                    } 
-                }            
+                    //Poor mans attempt to trade forces
+                    glm::vec3 velocityToTrade(-entry->getVelocity()*collisiontoCheckFor->getElascicity());
+                    entry->setVelocity(velocityToTrade);
+                    if(!collisiontoCheckFor->getIsStatic())
+                        collisiontoCheckFor->setVelocity(-velocityToTrade);
+                }
+                else
+                {
+                    entry->setVelocity(glm::vec3(0));
+                    entry->setIsGrounded(true);
+                } 
+                           
             }
         }
     }
@@ -295,8 +261,8 @@ void PhysicsEngine::updatePhysics()
     while (tickTime >= getTimeStep())
     {
         applyForces();
-        testing();
         collisionDetection();
+        testing();
         /* for(auto &entry:collisionsToResolve)
         {
             std::cout << "COLLISION: \n";

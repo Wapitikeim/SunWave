@@ -13,7 +13,9 @@ struct PhysicColliderInitialTransform
 {
     PhysicsCollider* ref;
     glm::vec3 colliderInitialPos;
+    //glm::vec3 colliderInitialVelocity;
     float colliderInitialRot;
+    
 };
 
 class PhysicsEngine 
@@ -47,6 +49,8 @@ class PhysicsEngine
         //PhysicsUpdateLoop
         void prepLoop();
         void applyForces();
+        void broadCollisionGathering();
+        void narrowCollisionGathering();
         void collisionDetection();
         void collisionRespone();
 
