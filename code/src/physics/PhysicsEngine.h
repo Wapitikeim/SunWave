@@ -53,6 +53,7 @@ class PhysicsEngine
         void narrowCollisionGathering();
         void collisionDetection();
         void collisionRespone();
+        void resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity);
 
         
         //Debug/Info Helpers
@@ -100,11 +101,12 @@ class PhysicsEngine
 
         void clearPhysicsObjects()
         {
-            physicsObjects.clear(); 
             mortonHashTable.clear();
+            collisionsToResolve.clear();
             initTransformOfColliders.clear();
             colliderInitialPos.clear();
             colliderInitialRot.clear();
+            physicsObjects.clear(); 
             initDone = false;  
         };
 

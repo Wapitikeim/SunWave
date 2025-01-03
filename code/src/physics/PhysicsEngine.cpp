@@ -30,10 +30,10 @@ void PhysicsEngine::testing()
         {
             //std::cout << "  Collider: " << collider->getNameOfEntityThisIsAttachedTo() << std::endl;
             // Change color to red if colliding
-            collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
+            if(collider!=nullptr)
+                collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
         }
     }
-    //std::cout << "\n";
 
     // Set color to black for colliders not in collisionsToResolve
     for (const auto& collider : physicsObjects)
@@ -49,7 +49,8 @@ void PhysicsEngine::testing()
         }
         if (!isColliding)
         {
-            collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
+            if(collider!=nullptr)
+                collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
         }
     }
 }
@@ -171,34 +172,76 @@ void PhysicsEngine::collisionDetection()
 
 void PhysicsEngine::collisionRespone()
 {
-    //Collision Response
-    for(auto &listOfCollisionEntry:collisionsToResolve)
+    // Collision Response
+    for (auto& listOfCollisionEntry : collisionsToResolve)
     {
-        for(auto &entry:listOfCollisionEntry)
+        for (size_t i = 0; i < listOfCollisionEntry.size(); ++i)
         {
-            for(auto &collisiontoCheckFor:listOfCollisionEntry)
+            for (size_t j = i + 1; j < listOfCollisionEntry.size(); ++j)
             {
-                if(entry == collisiontoCheckFor)
-                    continue;
-                restoreInitialPosAndRot(entry);
-                if((abs(entry->getVelocity().x) > 0.1f) || (abs(entry->getVelocity().y) > 0.1f))
+                PhysicsCollider* cA = listOfCollisionEntry[i];
+                PhysicsCollider* cB = listOfCollisionEntry[j];
+
+                // Calculate relative velocity
+                glm::vec3 relativeVelocity = cB->getVelocity() - cA->getVelocity();
+                cA->setVelocity(glm::vec3(0));
+                cA->setIsGrounded(true);
+                cB->setVelocity(glm::vec3(0));
+                cB->setIsGrounded(true);
+
+                
+                glm::vec3 contactNormal;
+                float penetrationDepth;
+                /* if (CollisionTester::arePhysicsCollidersCollidingWithDetails(colliderA, colliderB, contactNormal, penetrationDepth))
                 {
-                    //Poor mans attempt to trade forces
-                    glm::vec3 velocityToTrade(-entry->getVelocity()*collisiontoCheckFor->getElascicity());
-                    entry->setVelocity(velocityToTrade);
-                    if(!collisiontoCheckFor->getIsStatic())
-                        collisiontoCheckFor->setVelocity(-velocityToTrade);
-                }
-                else
-                {
-                    entry->setVelocity(glm::vec3(0));
-                    entry->setIsGrounded(true);
-                } 
-                           
+                    // Apply impulse-based collision response
+                    resolveCollision(colliderA, colliderB, contactNormal, penetrationDepth, relativeVelocity);  
+                } */
             }
         }
     }
     collisionsToResolve.clear();
+}
+
+void PhysicsEngine::resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity)
+{
+    // Skip response if both colliders are static
+    if (colliderA->getIsStatic() && colliderB->getIsStatic())
+        return;
+
+    // Calculate relative velocity along the contact normal
+    float velocityAlongNormal = glm::dot(relativeVelocity, contactNormal);
+
+    // Skip if colliders are moving apart
+    if (velocityAlongNormal > 0)
+        return;
+
+    // Calculate restitution (elasticity)
+    float restitution = std::min(colliderA->getElascicity(), colliderB->getElascicity());
+
+    // Calculate impulse scalar
+    float impulseScalar = -(1 + restitution) * velocityAlongNormal;
+    impulseScalar /= (1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass());
+
+    // Apply impulse to colliders
+    glm::vec3 impulse = impulseScalar * contactNormal;
+    if (!colliderA->getIsStatic())
+    {
+        colliderA->applyForce(-impulse * (1.0f / colliderA->getMass()));
+    }
+    if (!colliderB->getIsStatic())
+    {
+        colliderB->applyForce(impulse * (1.0f / colliderB->getMass()));
+    }
+
+    // Positional correction to avoid sinking
+    float percent = 0.2f; // Penetration correction percentage
+    glm::vec3 correction = penetrationDepth / ((1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass())) * percent * contactNormal;
+    if (!colliderA->getIsStatic())
+        colliderA->applyForce(-correction * (1.0f / colliderA->getMass()));
+    if (!colliderB->getIsStatic())
+        colliderB->applyForce(correction * (1.0f / colliderB->getMass()));
+
 }
 
 void PhysicsEngine::addColliderIntoHashTable(PhysicsCollider* colliderRef)
@@ -216,6 +259,8 @@ void PhysicsEngine::removeColliderFromHashTable(PhysicsCollider *colliderRef)
 int PhysicsEngine::getHashTableIndicesSize()
 {
     int i = 0;
+    if(mortonHashTable.size() == 0)
+        return 0;
     for (auto& [key, val] : mortonHashTable)
     {
         if(val.size() != 0)
@@ -250,11 +295,8 @@ void PhysicsEngine::updatePhysics()
     //Nessecary for Right HashTable Insertion because Corner Positions are getting calculated to late
     if(!initDone)
     {
-        for(auto& entry:physicsObjects)
-        {    
+        for(auto& entry:physicsObjects)  
             addColliderIntoHashTable(entry);
-            tableLogic.addColliderIntoHashTable(entry, mortonHashTable);
-        }
         initDone = true;
     } 
     
@@ -272,6 +314,7 @@ void PhysicsEngine::updatePhysics()
         collisionRespone();
         tickTime -= (1/tickrateOfSimulation);
         ticksLastFrame++;
+        
     }
     //TicksPerSecondCalc
     if(deltatime < 1.0f)

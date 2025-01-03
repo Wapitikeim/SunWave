@@ -22,11 +22,13 @@ class CollisionTester
         static bool simpleCheckForCollision(PhysicsCollider* e1, PhysicsCollider* e2);
         static bool simpleCollisionCheckBasedOnDistanceAndScale(PhysicsCollider* e1, PhysicsCollider* e2);
         static bool aAABCollisionCheck(PhysicsCollider* e1, PhysicsCollider* e2);
+        static float CollisionTester::calcPenetrationDepth(glm::vec2 projectionField, std::vector<glm::vec2> pointsE1, std::vector<glm::vec2> pointsE2);
     public:
         //static float signedDistance2DBox(glm::vec3 posToCheckTo, glm::vec3 posScale, glm::vec3 objectScale, glm::vec3 objectPos, float rotation);
         static float signedDistancePointAnd2DBox(glm::vec3 pointPos, PhysicsCollider* colliderToCheck);
         static float signedDistance2DBoxAnd2DBox(PhysicsCollider* colliderToCheckOne, PhysicsCollider* colliderToCheckTwo);                
 
         static bool arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsCollider* e2);
+        static bool arePhysicsCollidersCollidingWithDetails(PhysicsCollider* e1, PhysicsCollider* e2, glm::vec3& contactNormal, float& penetrationDepth);
         static bool isColliderCollidingWithShell(PhysicsCollider* e1, glm::vec3 &posE2, glm::vec3 &scaleE2, float &rotzE2);
 };

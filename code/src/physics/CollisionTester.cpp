@@ -159,6 +159,79 @@ bool CollisionTester::arePhysicsCollidersColliding(PhysicsCollider* e1, PhysicsC
     return true;
 }
 
+bool CollisionTester::arePhysicsCollidersCollidingWithDetails(PhysicsCollider *e1, PhysicsCollider *e2, glm::vec3 &contactNormal, float &penetrationDepth)
+{
+    std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);
+    std::vector<glm::vec2> e2EdgePoints = calcPointsWithRespectToRotation(e2);
+
+    std::vector<glm::vec2> projFieldForEntity1 = calcProjectionFieldOutOfPoints(e1EdgePoints);
+    std::vector<glm::vec2> projFieldForEntity2 = calcProjectionFieldOutOfPoints(e2EdgePoints);
+
+    float minPenetrationDepth = std::numeric_limits<float>::max();
+    glm::vec2 minPenetrationNormal;
+
+    for (glm::vec2 projField : projFieldForEntity1)
+    {
+        if (!calcIfProjectionFieldIsOverlapping(projField, e1EdgePoints, e2EdgePoints))
+            return false;
+
+        float penetration = calcPenetrationDepth(projField, e1EdgePoints, e2EdgePoints);
+        if (penetration < minPenetrationDepth)
+        {
+            minPenetrationDepth = penetration;
+            minPenetrationNormal = projField;
+        }
+    }
+
+    for (glm::vec2 projField : projFieldForEntity2)
+    {
+        if (!calcIfProjectionFieldIsOverlapping(projField, e1EdgePoints, e2EdgePoints))
+            return false;
+
+        float penetration = calcPenetrationDepth(projField, e1EdgePoints, e2EdgePoints);
+        if (penetration < minPenetrationDepth)
+        {
+            minPenetrationDepth = penetration;
+            minPenetrationNormal = projField;
+        }
+    }
+    
+    // Ensure the contact normal points from e1 to e2
+    glm::vec3 direction = e2->getPos() - e1->getPos();
+    if (glm::dot(glm::vec3(minPenetrationNormal, 0.0f), direction) < 0)
+    {
+        minPenetrationNormal = -minPenetrationNormal;
+    }
+
+    contactNormal = glm::vec3(minPenetrationNormal, 0.0f);
+    penetrationDepth = minPenetrationDepth;
+    return true;
+}
+
+float CollisionTester::calcPenetrationDepth(glm::vec2 projectionField, std::vector<glm::vec2> pointsE1, std::vector<glm::vec2> pointsE2)
+{
+    float minE1 = std::numeric_limits<float>::max();
+    float maxE1 = std::numeric_limits<float>::lowest();
+    float minE2 = std::numeric_limits<float>::max();
+    float maxE2 = std::numeric_limits<float>::lowest();
+
+    for (const auto& point : pointsE1)
+    {
+        float projection = glm::dot(point, projectionField);
+        minE1 = std::min(minE1, projection);
+        maxE1 = std::max(maxE1, projection);
+    }
+
+    for (const auto& point : pointsE2)
+    {
+        float projection = glm::dot(point, projectionField);
+        minE2 = std::min(minE2, projection);
+        maxE2 = std::max(maxE2, projection);
+    }
+
+    return std::min(maxE1 - minE2, maxE2 - minE1);
+}
+
 bool CollisionTester::isColliderCollidingWithShell(PhysicsCollider *e1, glm::vec3 &posE2, glm::vec3 &scaleE2, float &rotzE2)
 {
     std::vector<glm::vec2> e1EdgePoints = calcPointsWithRespectToRotation(e1);

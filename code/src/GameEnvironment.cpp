@@ -296,22 +296,22 @@ void GameEnvironment::loadWallLevel()
     //Entities Prep
     addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
     auto WallBottom = getEntityFromName<Entity>("WallBottom");
-    WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,0));
+    WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,1));
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
 
     addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
     auto WallTop = getEntityFromName<Entity>("WallTop");
-    WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,0));
+    WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,1));
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
 
     addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
     auto wallLeft = getEntityFromName<Entity>("wallLeft");
-    wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,0));
+    wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,1));
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
 
     addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
     auto wallRight = getEntityFromName<Entity>("wallRight");
-    wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,0));
+    wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,1));
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
 }
 
