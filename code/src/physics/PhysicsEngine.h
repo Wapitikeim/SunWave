@@ -23,7 +23,6 @@ class PhysicsEngine
     private:
         float deltatime = 0;
         float tickTime = 0;
-        
         std::vector<glm::vec3> colliderInitialPos;
         std::vector<float> colliderInitialRot;
 
@@ -47,11 +46,15 @@ class PhysicsEngine
         std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
         
         //PhysicsUpdateLoop
-        void prepLoop();
-        void applyForces();
+        void updatePhysicsState();
+        void applyGravity(PhysicsCollider* collider);
+        float GRAVITY = -9.81f;
+        void integrateForces(PhysicsCollider* collider);
         void broadCollisionGathering();
         void narrowCollisionGathering();
         void collisionDetection();
+        float RESTING_THRESHOLD = 0.5f;
+        float BOUNCE_MULTIPLIER = 2.5f;
         void collisionRespone();
         void resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity);
 
@@ -112,7 +115,7 @@ class PhysicsEngine
 
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;
-        float getTimeStep(){return (1/tickrateOfSimulation/(1/speedOfSimulation));};
+        float getTimeStep(){return (1.0f / tickrateOfSimulation) * speedOfSimulation;};
 
         void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
         void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
@@ -122,7 +125,8 @@ class PhysicsEngine
         const int& getCurrentCollisions(){return maxCollisionsResolvedLastTick;};
         const int& getTicksLastFrame(){return ticksLastFrame;};
         const int& getTicksLastSecond(){return ticksCalculatedInOneSecond;};
-
+        const float& getBounceMultiplier(){return BOUNCE_MULTIPLIER;};
+        void setBounceMultiplier(const float &newBounce){BOUNCE_MULTIPLIER = newBounce;};
         bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
         PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
 

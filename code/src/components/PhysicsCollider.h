@@ -17,6 +17,7 @@ struct PhysicsBody
     //Physics
     glm::vec3 colliderVelocity;
     glm::vec3 colliderAcceleration;
+    glm::vec3 accumulatedForce;
     float mass;
 };
 
@@ -38,7 +39,7 @@ class PhysicsCollider : public Component
         bool isTrigger = false;
         bool isResting = false;
         float elasticity = 0.2; // 0 = perfectly inalastic 1 = perfectly elastic
-        
+
         PhysicsBody colliderBody;
         std::vector<PhysicsCollider*> isInContactWith;
         Entity* entityThisIsAttachedTo;
@@ -59,6 +60,7 @@ class PhysicsCollider : public Component
             colliderBody.mass = 1.f;
             colliderBody.colliderVelocity = glm::vec3(0);
             colliderBody.colliderAcceleration = glm::vec3(0);
+            colliderBody.accumulatedForce = glm::vec3(0);
             if(isStatic)
                 elasticity = 0.5f;
             update();
@@ -91,7 +93,10 @@ class PhysicsCollider : public Component
         void setIsStatic(const bool &newStatic){isStatic = newStatic;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};
-        void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};
+        //void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};
+        void applyForce(const glm::vec3& force){colliderBody.accumulatedForce += force; colliderBody.colliderAcceleration = colliderBody.accumulatedForce*(1.f/colliderBody.mass);};
+        void clearForces(){colliderBody.accumulatedForce = glm::vec3(0);}
+        const glm::vec3& getAccumulatedForce() const {return colliderBody.accumulatedForce;}
         void setIndiciesForHashTable(const std::vector<uint32_t> &newIndicies){indiciesInHashTable = newIndicies;};
         void addOneIndexIntoIndiciesForHashTable(const uint32_t &index)
         {

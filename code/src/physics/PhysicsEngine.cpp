@@ -1,5 +1,17 @@
 #include "PhysicsEngine.h"
 #include <bitset>
+#include <unordered_set>
+#include <utility>
+#include <functional>
+
+struct pair_hash {
+    template <class T1, class T2>
+    std::size_t operator() (const std::pair<T1, T2>& pair) const {
+        auto hash1 = std::hash<T1>{}(pair.first);
+        auto hash2 = std::hash<T2>{}(pair.second);
+        return hash1 ^ hash2;
+    }
+};
 
 void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
 {
@@ -55,47 +67,52 @@ void PhysicsEngine::testing()
     }
 }
 
-void PhysicsEngine::applyForces()
+void PhysicsEngine::updatePhysicsState()
 {
-    //Force Apply + Update
     for(auto& collider:physicsObjects)
     {
         if(collider->getIsTrigger() || collider->getIsStatic()&&(collider->getVelocity()==glm::vec3(0)))
             continue;  
 
-        //ForcesApply
-        if(glm::abs(collider->getVelocity().y) >0)
-            collider->setIsGrounded(false);
-        if(!collider->getIsGrounded())
-            collider->applyForce(glm::vec3(0,-9.81,0));
+        applyGravity(collider);
 
-        //Angular Momentum? TODO
-        //Pivot at Center
-        /*  float inertia = (1/12) * collider->getMass() * (glm::pow(collider->getBody().colliderScale.x*2,2)+glm::pow(collider->getBody().colliderScale.y*2,2) );
-        //Torgue
-        float torgueWidth = collider->getBody().colliderScale.x*glm::cos(glm::degrees(collider->getBody().colliderZRotation));
-        float torgueHeight = collider->getBody().colliderScale.y*glm::cos(glm::degrees(collider->getBody().colliderZRotation));
-        float torgue = (torgueWidth+torgueHeight);//*-9.81f*collider->getMass();
-
-        float angularMomentum = 0;
-        if(inertia!=0)
-            angularMomentum = (torgue/inertia)*getTimeStep();
-        if(collider->getNameOfEntityThisIsAttachedTo() == "Player")
-            std::cout << angularMomentum <<"Torgue: " << torgue << " Inertia " << inertia << "\n";
-        collider->setRot(collider->getRot()+angularMomentum); */
-        
-        
-        //Friction ? NormalForce
-        //Integrate
-        collider->setVelocity(collider->getVelocity()+(collider->getAcceleration()*getTimeStep()));
-        collider->setPos(collider->getPos()+(collider->getVelocity()*getTimeStep()));
-        collider->setAcceleration(glm::vec3(0));
-        collider->update(); //Nessecarry for corner pos updates?
+        integrateForces(collider);
 
         if(glm::abs(collider->getVelocity()) != glm::vec3(0))
             addColliderIntoHashTable(collider); 
-    }
+    }       
+}
+
+void PhysicsEngine::applyGravity(PhysicsCollider *collider)
+{
+    //If the collider has some velocity > Threshhold and wasnt part of a collision he cant be grounded
+    if(glm::abs(collider->getVelocity().y) > RESTING_THRESHOLD&&collider->getIsGrounded())
+        collider->setIsGrounded(false);
+    
+    if(!collider->getIsGrounded())
+    {
+        glm::vec3 gravityForce = glm::vec3(0, GRAVITY, 0) * collider->getMass();
+        collider->applyForce(gravityForce);
+    }   
+}
+
+void PhysicsEngine::integrateForces(PhysicsCollider *collider)
+{
+    // Integrate acceleration to update velocity
+    collider->setVelocity(collider->getVelocity() + collider->getAcceleration() * getTimeStep());
+
+    // Integrate velocity to update position
+    collider->setPos(collider->getPos() + collider->getVelocity() * getTimeStep());
+
+    // Clear accumulated forces after integration
+    collider->clearForces();
+
+    if(collider->getIsResting())
+        collider->setAcceleration(glm::vec3(0));
+    
+
         
+    collider->update();
 }
 
 void PhysicsEngine::broadCollisionGathering()
@@ -173,6 +190,7 @@ void PhysicsEngine::collisionDetection()
 void PhysicsEngine::collisionRespone()
 {
     // Collision Response
+    std::unordered_set<std::pair<PhysicsCollider*, PhysicsCollider*>, pair_hash> processedCollisions;    
     for (auto& listOfCollisionEntry : collisionsToResolve)
     {
         for (size_t i = 0; i < listOfCollisionEntry.size(); ++i)
@@ -181,22 +199,64 @@ void PhysicsEngine::collisionRespone()
             {
                 PhysicsCollider* cA = listOfCollisionEntry[i];
                 PhysicsCollider* cB = listOfCollisionEntry[j];
+                // Skip response if both colliders are static
+                if (cA->getIsStatic() && cB->getIsStatic() || cA->getIsResting() && cB->getIsResting())
+                    continue;
+                
+                // Check if this collision has already been processed
+                if (processedCollisions.find(std::make_pair(cA, cB)) != processedCollisions.end() ||
+                    processedCollisions.find(std::make_pair(cB, cA)) != processedCollisions.end())
+                    continue;
 
                 // Calculate relative velocity
                 glm::vec3 relativeVelocity = cB->getVelocity() - cA->getVelocity();
-                cA->setVelocity(glm::vec3(0));
-                cA->setIsGrounded(true);
-                cB->setVelocity(glm::vec3(0));
-                cB->setIsGrounded(true);
-
-                
                 glm::vec3 contactNormal;
                 float penetrationDepth;
-                /* if (CollisionTester::arePhysicsCollidersCollidingWithDetails(colliderA, colliderB, contactNormal, penetrationDepth))
+                if (CollisionTester::arePhysicsCollidersCollidingWithDetails(cA, cB, contactNormal, penetrationDepth))
                 {
-                    // Apply impulse-based collision response
-                    resolveCollision(colliderA, colliderB, contactNormal, penetrationDepth, relativeVelocity);  
-                } */
+                    if(glm::abs(relativeVelocity.x) > RESTING_THRESHOLD, glm::abs(relativeVelocity.y) > RESTING_THRESHOLD)
+                        resolveCollision(cA, cB, contactNormal, penetrationDepth, relativeVelocity);
+                    else
+                    {
+                        cA->setVelocity(glm::vec3(0));
+                        cB->setVelocity(glm::vec3(0));
+                    }
+                    processedCollisions.insert(std::make_pair(cA, cB));
+                }
+                else
+                {
+                    processedCollisions.insert(std::make_pair(cA, cB));
+                    continue;
+                }
+
+                if(contactNormal.y > 0.1f)
+                {
+                    cB->setIsGrounded(true);
+                }
+                else
+                    cB->setIsGrounded(false);
+
+                if (contactNormal.y < -0.1f) 
+                {
+                    cA->setIsGrounded(true);
+                }
+                else
+                    cA->setIsGrounded(false);
+
+                if(glm::dot(relativeVelocity, contactNormal) > 0)
+                {
+                    cA->setIsGrounded(false);
+                    cB->setIsGrounded(false);
+                }
+                if(glm::abs(cA->getVelocity().y) > RESTING_THRESHOLD)
+                {
+                    cA->setIsGrounded(false);
+                }
+                if(glm::abs(cB->getVelocity().y) > RESTING_THRESHOLD)
+                {
+                    cB->setIsGrounded(false);
+                }
+                
             }
         }
     }
@@ -205,42 +265,45 @@ void PhysicsEngine::collisionRespone()
 
 void PhysicsEngine::resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity)
 {
-    // Skip response if both colliders are static
-    if (colliderA->getIsStatic() && colliderB->getIsStatic())
-        return;
-
     // Calculate relative velocity along the contact normal
     float velocityAlongNormal = glm::dot(relativeVelocity, contactNormal);
-
     // Skip if colliders are moving apart
     if (velocityAlongNormal > 0)
         return;
-
+    
     // Calculate restitution (elasticity)
     float restitution = std::min(colliderA->getElascicity(), colliderB->getElascicity());
-
     // Calculate impulse scalar
     float impulseScalar = -(1 + restitution) * velocityAlongNormal;
     impulseScalar /= (1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass());
-
+    if(impulseScalar < 0.1f)
+        return;
     // Apply impulse to colliders
-    glm::vec3 impulse = impulseScalar * contactNormal;
+    glm::vec3 impulse = (impulseScalar*BOUNCE_MULTIPLIER) * contactNormal;
+    //std::cout << "Impulse: " << impulse.x << " " << impulse.y << " " << impulse.z << "\n";
     if (!colliderA->getIsStatic())
-    {
-        colliderA->applyForce(-impulse * (1.0f / colliderA->getMass()));
-    }
-    if (!colliderB->getIsStatic())
-    {
-        colliderB->applyForce(impulse * (1.0f / colliderB->getMass()));
-    }
+        colliderA->setVelocity(colliderA->getVelocity() - impulse * (1.0f / colliderA->getMass()));
 
-    // Positional correction to avoid sinking
-    float percent = 0.2f; // Penetration correction percentage
-    glm::vec3 correction = penetrationDepth / ((1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass())) * percent * contactNormal;
-    if (!colliderA->getIsStatic())
-        colliderA->applyForce(-correction * (1.0f / colliderA->getMass()));
+        
     if (!colliderB->getIsStatic())
-        colliderB->applyForce(correction * (1.0f / colliderB->getMass()));
+        colliderB->setVelocity(colliderB->getVelocity() + impulse * (1.0f / colliderB->getMass()));
+    
+    // Debug prints for rotated colliders
+    /* std::cout << "Contact Normal: " << contactNormal.x << ", " << contactNormal.y << ", " << contactNormal.z << "\n";
+    std::cout << "Velocity Along Normal: " << velocityAlongNormal << "\n";
+    std::cout << "Relative Velocity: " << relativeVelocity.x << ", " << relativeVelocity.y << ", " << relativeVelocity.z << "\n";
+    std::cout << "Impulse: " << impulse.x << ", " << impulse.y << ", " << impulse.z << "\n";
+    std::cout << "Penetration: " << penetrationDepth << "\n";
+    std::cout << "\n"; */
+    // Positional correction to avoid sinking
+    /* float percent = 0.8f; // Slightly increased penetration correction percentage
+    float slop = 0.01f; // Small bias to prevent sinking
+    glm::vec3 correction = std::max(penetrationDepth - slop, 0.0f) / ((1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass())) * percent * contactNormal;
+
+    if (!colliderA->getIsStatic())
+        colliderA->setPos(colliderA->getPos() - correction);
+    if (!colliderB->getIsStatic())
+        colliderB->setPos(colliderB->getPos() + correction); */
 
 }
 
@@ -288,46 +351,41 @@ void PhysicsEngine::getInitialTransform(float _deltatime)
 void PhysicsEngine::updatePhysics()
 {
     ticksLastFrame = 0;
-    
-    if(isHalting) //Kinda just works if physicsObjects are not moving
+
+    if (isHalting) //Kinda just works if physicsObjects are not moving
         return;
-    
-    //Nessecary for Right HashTable Insertion because Corner Positions are getting calculated to late
-    if(!initDone)
+
+    // Necessary for Right HashTable Insertion because Corner Positions are getting calculated too late
+    if (!initDone)
     {
-        for(auto& entry:physicsObjects)  
+        for (auto& entry : physicsObjects)
             addColliderIntoHashTable(entry);
         initDone = true;
-    } 
-    
+    }
+
     while (tickTime >= getTimeStep())
     {
-        applyForces();
+        updatePhysicsState();
         collisionDetection();
         testing();
-        /* for(auto &entry:collisionsToResolve)
-        {
-            std::cout << "COLLISION: \n";
-            for(auto& val:entry)
-                std::cout << val->getNameOfEntityThisIsAttachedTo() << "\n";
-        } */
         collisionRespone();
-        tickTime -= (1/tickrateOfSimulation);
+        tickTime -= getTimeStep();
         ticksLastFrame++;
-        
     }
-    //TicksPerSecondCalc
-    if(deltatime < 1.0f)
-        ticksBuffer+=ticksLastFrame;
+
+    // TicksPerSecondCalc
+    if (deltatime < 1.0f)
+        ticksBuffer += ticksLastFrame;
     else
     {
         deltatime = 0;
         ticksCalculatedInOneSecond = ticksBuffer;
         ticksBuffer = 0;
     }
-    //AfterTickTime For CollisionGathering
-    for(auto entry:physicsObjects)
-        if(entry->getVelocity() == glm::vec3(0))
+
+    // AfterTickTime For CollisionGathering
+    for (auto entry : physicsObjects)
+        if (entry->getVelocity() == glm::vec3(0))
             entry->setIsResting(true);
         else
             entry->setIsResting(false);

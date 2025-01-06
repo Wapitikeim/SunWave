@@ -203,7 +203,7 @@ bool CollisionTester::arePhysicsCollidersCollidingWithDetails(PhysicsCollider *e
         minPenetrationNormal = -minPenetrationNormal;
     }
 
-    contactNormal = glm::vec3(minPenetrationNormal, 0.0f);
+    contactNormal = glm::normalize(glm::vec3(minPenetrationNormal, 0.0f)); // Normalize the contact normal
     penetrationDepth = minPenetrationDepth;
     return true;
 }
