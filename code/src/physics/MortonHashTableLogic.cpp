@@ -65,15 +65,17 @@ void MortonHashTableLogic::addMortonCodesForXScale(glm::vec3& leftBot, glm::vec3
 
     glm::vec2 currentBot = glm::vec2(leftBot) + directionBot * BUCKETSIZE;
     glm::vec2 currentTop = glm::vec2(ref->getCornerPos().leftTop) + directionTop * BUCKETSIZE;
-    distanceBot -= BUCKETSIZE;
+    
+    float adjustedBucketSize = BUCKETSIZE/CORRECTION_DIVIDER;
+    distanceBot -= adjustedBucketSize;
 
     while (distanceBot > BUCKETSIZE)
     {
         ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((currentBot.x/BUCKETSIZE), (currentBot.y/BUCKETSIZE)));
         ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((currentTop.x/BUCKETSIZE), (currentTop.y/BUCKETSIZE)));
-        currentBot += directionBot * BUCKETSIZE;
-        currentTop += directionTop * BUCKETSIZE;
-        distanceBot -= BUCKETSIZE;
+        currentBot += directionBot * adjustedBucketSize;
+        currentTop += directionTop * adjustedBucketSize;
+        distanceBot -= adjustedBucketSize;
     }
 }
 
@@ -85,15 +87,17 @@ void MortonHashTableLogic::addMortonCodesForYScale(glm::vec3& leftBot, glm::vec3
 
     glm::vec2 currentLeft = glm::vec2(leftBot) + directionLeft * BUCKETSIZE;
     glm::vec2 currentRight = glm::vec2(ref->getCornerPos().rightBottom) + directionRight * BUCKETSIZE;
-    distanceLeft -= BUCKETSIZE;
+    
+    float adjustedBucketSize = BUCKETSIZE/CORRECTION_DIVIDER;
+    distanceLeft -= adjustedBucketSize;
 
     while (distanceLeft > BUCKETSIZE)
     {
         ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((currentLeft.x/BUCKETSIZE), (currentLeft.y/BUCKETSIZE)));
         ref->addOneIndexIntoIndiciesForHashTable(mortonEncode2D((currentRight.x/BUCKETSIZE), (currentRight.y/BUCKETSIZE)));
-        currentLeft += directionLeft * BUCKETSIZE;
-        currentRight += directionRight * BUCKETSIZE;
-        distanceLeft -= BUCKETSIZE;
+        currentLeft += directionLeft * adjustedBucketSize;
+        currentRight += directionRight * adjustedBucketSize;
+        distanceLeft -= adjustedBucketSize;
     }
 }
 

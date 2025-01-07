@@ -15,7 +15,8 @@ class MortonHashTableLogic
         MortonHashTableLogic() = default;
         ~MortonHashTableLogic() = default;
         const int32_t OFFSET = 50;
-        const float BUCKETSIZE = 2.f; //2.f Bucketsize = 1.f Scale
+        const float CORRECTION_DIVIDER = 2.0f; //Makes sure that for edge cases all relevant buckets are hit
+        const float BUCKETSIZE = 2.0f; //2.f Bucketsize = 1.f Scale
 
         void removeColliderFromHashTable(PhysicsCollider* ref, std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> &table);
         void addColliderIntoHashTable(PhysicsCollider* ref, std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> &table);

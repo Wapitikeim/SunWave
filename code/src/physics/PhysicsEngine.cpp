@@ -33,19 +33,19 @@ void PhysicsEngine::testing()
 {
     if (collisionsToResolve.size() == 0)
         return;
-
+    
     //std::cout << "Collisions to Resolve:" << std::endl;
     for (const auto& collisionList : collisionsToResolve)
     {
         //std::cout << "Collision Group:" << std::endl;
         for (const auto& collider : collisionList)
         {
-            //std::cout << "  Collider: " << collider->getNameOfEntityThisIsAttachedTo() << std::endl;
+            //std::cout << "  Collider: " << collider->getNameOfEntityThisIsAttachedTo() << " ";
             // Change color to red if colliding
             if(collider!=nullptr)
                 collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
         }
-    }
+    }   
 
     // Set color to black for colliders not in collisionsToResolve
     for (const auto& collider : physicsObjects)
@@ -75,9 +75,7 @@ void PhysicsEngine::updatePhysicsState()
             continue;  
 
         applyGravity(collider);
-
         integrateForces(collider);
-
         if(glm::abs(collider->getVelocity()) != glm::vec3(0))
             addColliderIntoHashTable(collider); 
     }       
@@ -109,8 +107,6 @@ void PhysicsEngine::integrateForces(PhysicsCollider *collider)
 
     if(collider->getIsResting())
         collider->setAcceleration(glm::vec3(0));
-    
-
         
     collider->update();
 }
@@ -225,6 +221,7 @@ void PhysicsEngine::collisionRespone()
                 }
                 else
                 {
+                    //Important for small Entities -> e.g. just 1 hash entry for all points
                     processedCollisions.insert(std::make_pair(cA, cB));
                     continue;
                 }
@@ -258,6 +255,7 @@ void PhysicsEngine::collisionRespone()
                 }
                 
             }
+              
         }
     }
     collisionsToResolve.clear();
@@ -284,7 +282,6 @@ void PhysicsEngine::resolveCollision(PhysicsCollider* colliderA, PhysicsCollider
     if (!colliderA->getIsStatic())
         colliderA->setVelocity(colliderA->getVelocity() - impulse * (1.0f / colliderA->getMass()));
 
-        
     if (!colliderB->getIsStatic())
         colliderB->setVelocity(colliderB->getVelocity() + impulse * (1.0f / colliderB->getMass()));
     
@@ -299,12 +296,19 @@ void PhysicsEngine::resolveCollision(PhysicsCollider* colliderA, PhysicsCollider
     /* float percent = 0.8f; // Slightly increased penetration correction percentage
     float slop = 0.01f; // Small bias to prevent sinking
     glm::vec3 correction = std::max(penetrationDepth - slop, 0.0f) / ((1.0f / colliderA->getMass()) + (1.0f / colliderB->getMass())) * percent * contactNormal;
-
+    */
     if (!colliderA->getIsStatic())
-        colliderA->setPos(colliderA->getPos() - correction);
+    {
+        restoreInitialPosAndRot(colliderA);
+        //addColliderIntoHashTable(colliderA);
+    }
+        
     if (!colliderB->getIsStatic())
-        colliderB->setPos(colliderB->getPos() + correction); */
-
+    {
+        restoreInitialPosAndRot(colliderB);
+        //addColliderIntoHashTable(colliderB);
+    }
+    
 }
 
 void PhysicsEngine::addColliderIntoHashTable(PhysicsCollider* colliderRef)
@@ -371,6 +375,18 @@ void PhysicsEngine::updatePhysics()
         collisionRespone();
         tickTime -= getTimeStep();
         ticksLastFrame++;
+        for(auto& entry:physicsObjects)
+        {
+            if(entry->getNameOfEntityThisIsAttachedTo() == "wallMiddle")
+            {
+                for(auto& index:entry->getTableIndicies())
+                {
+                    std::cout << index << " ";
+                }
+                std::cout << "\n";
+            }
+
+        }
     }
 
     // TicksPerSecondCalc
