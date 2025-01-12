@@ -31,7 +31,7 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
 
 void PhysicsEngine::testing()
 {
-    if (collisionsToResolve.size() == 0)
+/*     if (collisionsToResolve.size() == 0)
         return;
     
     //std::cout << "Collisions to Resolve:" << std::endl;
@@ -65,6 +65,12 @@ void PhysicsEngine::testing()
                 collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
         }
     }
+ */
+    if(physicsObjects[0]->getNameOfEntityThisIsAttachedTo() == "Player")
+        if(physicsObjects[0]->getIsInContact())
+            physicsObjects[0]->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
+        else
+            physicsObjects[0]->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
 }
 
 void PhysicsEngine::updatePhysicsState()
@@ -83,21 +89,32 @@ void PhysicsEngine::updatePhysicsState()
 
 void PhysicsEngine::applyGravity(PhysicsCollider *collider)
 {
-    //If the collider has some velocity > Threshhold and wasnt part of a collision he cant be grounded
-    if(glm::abs(collider->getVelocity().y) > RESTING_THRESHOLD&&collider->getIsGrounded())
+    //If the collider has some y velocity > Threshhold and wasnt part of a collision he cant be grounded
+    if(glm::abs(collider->getVelocity().y) < RESTING_THRESHOLD)
+        collider->setIsGrounded(true);
+    else
         collider->setIsGrounded(false);
     
+    if(collider->getIsGrounded() && !collider->getIsInContact())
+        collider->setIsGrounded(false);
+
     if(!collider->getIsGrounded())
     {
         glm::vec3 gravityForce = glm::vec3(0, GRAVITY, 0) * collider->getMass();
         collider->applyForce(gravityForce);
-    }   
+    }
+    
 }
 
 void PhysicsEngine::integrateForces(PhysicsCollider *collider)
 {
     // Integrate acceleration to update velocity
     collider->setVelocity(collider->getVelocity() + collider->getAcceleration() * getTimeStep());
+
+    // Apply air resistance (reduce velocity by 0.5%)
+    collider->setVelocity(collider->getVelocity() * AIR_RESISTANCE);
+    if(glm::abs(collider->getVelocity().x) < RESTING_THRESHOLD)
+        collider->setVelocity(glm::vec3(0, collider->getVelocity().y, collider->getVelocity().z));
 
     // Integrate velocity to update position
     collider->setPos(collider->getPos() + collider->getVelocity() * getTimeStep());
@@ -142,6 +159,30 @@ void PhysicsEngine::broadCollisionGathering()
     }
 }
 
+void PhysicsEngine::updateNonCollidingColliders()
+{
+    //Potentially expensive and not needed?
+    for (auto& collider : physicsObjects)
+    {
+        if(collider->getIsTrigger() || collider->getIsStatic() || collider->getIsResting() ||collider->getIsTrigger())
+            continue;
+        bool isColliding = false;
+        for (const auto& collisionList : collisionsToResolve)
+        {
+            if (std::find(collisionList.begin(), collisionList.end(), collider) != collisionList.end())
+            {
+                isColliding = true;
+                break;
+            }
+        }
+        if (!isColliding&&collider->getIsGrounded())
+            collider->setIsInContact(false);
+        if(!isColliding&&collider->getVelocity()!=glm::vec3(0))
+            collider->setIsInContact(false);
+            
+    }
+}
+
 void PhysicsEngine::narrowCollisionGathering()
 {
     // Implement through SAT collision detection
@@ -180,6 +221,7 @@ void PhysicsEngine::collisionDetection()
 {
     broadCollisionGathering();
     narrowCollisionGathering();
+    updateNonCollidingColliders();
     maxCollisionsResolvedLastTick = collisionsToResolve.size();
 }
 
@@ -212,48 +254,36 @@ void PhysicsEngine::collisionRespone()
                 {
                     if(glm::abs(relativeVelocity.x) > RESTING_THRESHOLD, glm::abs(relativeVelocity.y) > RESTING_THRESHOLD)
                         resolveCollision(cA, cB, contactNormal, penetrationDepth, relativeVelocity);
-                    else
+                    else if(contactNormal.y > 0.99) //Small arc of 5.7 degrees still counts as ground
                     {
-                        cA->setVelocity(glm::vec3(0));
-                        cB->setVelocity(glm::vec3(0));
+                        //Collision potentially very weak 
+                        cA->setVelocity(glm::vec3(cA->getVelocity().x, 0, cA->getVelocity().z));
+                        cA->setAcceleration(glm::vec3(cA->getAcceleration().x, 0, cA->getAcceleration().z));
+                        cA->setIsInContact(true);
+                        cB->setVelocity(glm::vec3(cB->getVelocity().x, 0, cB->getVelocity().z));
+                        cB->setAcceleration(glm::vec3(cB->getAcceleration().x, 0, cB->getAcceleration().z));
+                        cB->setIsInContact(true);
+                    }
+                    else if(glm::abs(contactNormal.x) == 1) //Colllision weak and onto wall
+                    {
+                        cA->setVelocity(glm::vec3(0, cA->getVelocity().y, cA->getVelocity().z));
+                        cA->setAcceleration(glm::vec3(0, cA->getAcceleration().y, cA->getAcceleration().z));
+                        cB->setVelocity(glm::vec3(0, cB->getVelocity().y, cB->getVelocity().z));
+                        cB->setAcceleration(glm::vec3(0, cB->getAcceleration().y, cB->getAcceleration().z));
                     }
                     processedCollisions.insert(std::make_pair(cA, cB));
                 }
                 else
                 {
+                    //Actually only happens if listOfCollisionEntry.size() > 2
+                    // -> makes sense because narrowCollisionGathering only counts collisions
+                    
+                    
+                    //Not colliding but potentially touching
                     //Important for small Entities -> e.g. just 1 hash entry for all points
                     processedCollisions.insert(std::make_pair(cA, cB));
                     continue;
                 }
-
-                if(contactNormal.y > 0.1f)
-                {
-                    cB->setIsGrounded(true);
-                }
-                else
-                    cB->setIsGrounded(false);
-
-                if (contactNormal.y < -0.1f) 
-                {
-                    cA->setIsGrounded(true);
-                }
-                else
-                    cA->setIsGrounded(false);
-
-                if(glm::dot(relativeVelocity, contactNormal) > 0)
-                {
-                    cA->setIsGrounded(false);
-                    cB->setIsGrounded(false);
-                }
-                if(glm::abs(cA->getVelocity().y) > RESTING_THRESHOLD)
-                {
-                    cA->setIsGrounded(false);
-                }
-                if(glm::abs(cB->getVelocity().y) > RESTING_THRESHOLD)
-                {
-                    cB->setIsGrounded(false);
-                }
-                
             }
               
         }
@@ -363,7 +393,12 @@ void PhysicsEngine::updatePhysics()
     if (!initDone)
     {
         for (auto& entry : physicsObjects)
+        {
             addColliderIntoHashTable(entry);
+            if(!entry->getIsStatic())
+                entry->setVelocity(glm::vec3(0, RESTING_THRESHOLD, 0));
+        }
+            
         initDone = true;
     }
 
@@ -375,18 +410,6 @@ void PhysicsEngine::updatePhysics()
         collisionRespone();
         tickTime -= getTimeStep();
         ticksLastFrame++;
-        for(auto& entry:physicsObjects)
-        {
-            if(entry->getNameOfEntityThisIsAttachedTo() == "wallMiddle")
-            {
-                for(auto& index:entry->getTableIndicies())
-                {
-                    std::cout << index << " ";
-                }
-                std::cout << "\n";
-            }
-
-        }
     }
 
     // TicksPerSecondCalc

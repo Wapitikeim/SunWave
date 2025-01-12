@@ -38,6 +38,7 @@ class PhysicsCollider : public Component
         bool isStatic = true;
         bool isTrigger = false;
         bool isResting = false;
+        bool isInContact = false;
         float elasticity = 0.2; // 0 = perfectly inalastic 1 = perfectly elastic
 
         PhysicsBody colliderBody;
@@ -78,6 +79,7 @@ class PhysicsCollider : public Component
         [[nodiscard]] const bool &getIsTrigger()const{return isTrigger;};
         [[nodiscard]] const bool &getIsResting()const{return isResting;};
         [[nodiscard]] const bool &getIsGrounded()const{return isGrounded;};
+        [[nodiscard]] const bool &getIsInContact()const{return isInContact;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
         [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
         [[nodiscard]] const std::vector<uint32_t> &getTableIndicies()const{return indiciesInHashTable;};
@@ -90,6 +92,7 @@ class PhysicsCollider : public Component
         void setIsGrounded(const bool &newGround){isGrounded = newGround;};
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
         void setIsResting(const bool &newResting){isResting = newResting;};
+        void setIsInContact(const bool &newContact){isInContact = newContact;};
         void setIsStatic(const bool &newStatic){isStatic = newStatic;};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};

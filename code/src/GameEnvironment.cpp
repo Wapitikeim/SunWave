@@ -123,10 +123,9 @@ void GameEnvironment::mouseClickLogic()
         if(refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound)
         {
             shapeFound = true;
-            physicsEngine->tickrateOfSimulation = 30;
             physicsEngine->setIsHalting(false);
             deleteEntityFromName("WallBottom");
-            registerFunctionToExecuteWhen(3.f,[this]() {this->startMiniGameLogic();});
+            registerFunctionToExecuteWhen(5.f,[this]() {this->startMiniGameLogic();});
         }    
         
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
@@ -320,7 +319,6 @@ void GameEnvironment::fillSceneWithEntitys()
     prepareForLevelChange();
 
     physicsEngine->setIsHalting(true);
-    physicsEngine->tickrateOfSimulation  = 60;
 
     //Walls
     {
@@ -357,8 +355,8 @@ void GameEnvironment::fillSceneWithEntitys()
         for(int i = 0; i< entitiesToFill ; i++)
         {
             glm::vec3 pos(getRandomNumber(glm::floor(cameraPos.x-xHalf), glm::floor(cameraPos.x+xHalf)), getRandomNumber(glm::floor(cameraPos.y-yHalf), glm::floor(cameraPos.y+yHalf)),0);
-            glm::vec3 scale(getRandomNumber(1,10)*0.1f);
-            float rotZ(getRandomNumber(0,180));
+            glm::vec3 scale(getRandomNumber(2,10)*0.1f);
+            float rotZ(getRandomNumber(0,360));
             if(!physicsEngine->checkIfShellWouldCollide(pos,scale,rotZ))
             {
                 if(shapeToFindPlaced == false)
@@ -529,7 +527,7 @@ void GameEnvironment::drawImGuiWindows()
             ImGui::Text("Corner left top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.y);
             ImGui::Text("Corner right top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.y);
             //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
-            ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,10, 25,"%.3f",0);
+            ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,1, 20,"%.3f",0);
             float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
             float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
             ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);

@@ -49,12 +49,14 @@ class PhysicsEngine
         void updatePhysicsState();
         void applyGravity(PhysicsCollider* collider);
         float GRAVITY = -9.81f;
+        float AIR_RESISTANCE = 0.995f;
         void integrateForces(PhysicsCollider* collider);
         void broadCollisionGathering();
+        void updateNonCollidingColliders();
         void narrowCollisionGathering();
         void collisionDetection();
-        float RESTING_THRESHOLD = 0.5f;
-        float BOUNCE_MULTIPLIER = 2.5f;
+        float RESTING_THRESHOLD = 0.05f;
+        float BOUNCE_MULTIPLIER = 2.25f;
         void collisionRespone();
         void resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity);
 
