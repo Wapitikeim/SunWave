@@ -49,6 +49,7 @@ class PhysicsCollider : public Component
 
         CornerPositions cornerPos;
         
+        void resetColliderMovementValues(){colliderBody.colliderVelocity = glm::vec3(0); colliderBody.colliderAcceleration = glm::vec3(0); clearForces();};
 
         std::vector<uint32_t> indiciesInHashTable;
         
@@ -93,7 +94,7 @@ class PhysicsCollider : public Component
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
         void setIsResting(const bool &newResting){isResting = newResting;};
         void setIsInContact(const bool &newContact){isInContact = newContact;};
-        void setIsStatic(const bool &newStatic){isStatic = newStatic;};
+        void setIsStatic(const bool &newStatic){isStatic = newStatic; if(newStatic)resetColliderMovementValues();};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};
         void setMass(const float &newMass){colliderBody.mass = newMass;};
         //void applyForce(const glm::vec3 direction){colliderBody.colliderAcceleration+=direction*(1/colliderBody.mass);};

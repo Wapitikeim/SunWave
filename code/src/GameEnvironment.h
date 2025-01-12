@@ -98,7 +98,7 @@ class GameEnvironment
         int currentMouseLeftButtonState;
         int lastMouseLeftButtonState = 0;
         bool pressedAndHoldingSomething = false;
-        bool staticPrevRef;
+        bool staticPrevRef = false;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
         PhysicsCollider* refColliderForMouseOld = nullptr;
         void mousePositionUpdate();

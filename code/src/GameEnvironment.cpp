@@ -62,7 +62,7 @@ void GameEnvironment::mouse_callback(GLFWwindow* window, double xpos, double ypo
 
 void GameEnvironment::mousePositionUpdate()
 {
-    //MouseCursorTesting
+    //MouseCursor Update
     float yPos = glm::abs(ImGui::GetMousePos().y-glfwPrep::getCurrentWindowHeight());
     float xPos = ImGui::GetMousePos().x;
     //float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/glfwPrep::getCurrentWindowWidth();
@@ -70,13 +70,12 @@ void GameEnvironment::mousePositionUpdate()
     mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
     float rot = 0;
     //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
-    //if(getEntityFromName<Entity>("aRandomTriggerBox"))
-    //    getEntityFromName<Entity>("aRandomTriggerBox")->setPosition(glm::vec3(mouseX,mouseY,0));
     auto refCollider = physicsEngine->getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
-    refColliderForMouseCurrent = refCollider;
+    if(!pressedAndHoldingSomething)
+        refColliderForMouseCurrent = refCollider;
     
     //ChangeShaderByOverOverEffect---
-    if(refCollider != nullptr)
+    if(refCollider != nullptr && !pressedAndHoldingSomething)
         refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
     //CheckIn/OutBound 
     if(refColliderForMouseCurrent != refColliderForMouseOld)
@@ -88,7 +87,27 @@ void GameEnvironment::mousePositionUpdate()
     }
     //---ChangeShaderByOverOverEffect
     mouseClickLogic();
-    //std::cout << mouseX << " " << mouseY << "\n";
+
+    //Rotation Logic
+    if(pressedAndHoldingSomething)
+    {
+        if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            float rot = refEntity->getRotation();
+            refEntity->setZRotation(rot += 40.0f*deltaTime);
+            if(refEntity->getRotation() > 360)
+                refEntity->setZRotation(0);
+        }
+        if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            float rot = refEntity->getRotation();
+            refEntity->setZRotation(rot -= 40.0f*deltaTime);
+            if(refEntity->getRotation() < 0)
+                refEntity->setZRotation(360);
+        }
+    }
 }
 
 void GameEnvironment::mouseClickLogic()
@@ -96,25 +115,24 @@ void GameEnvironment::mouseClickLogic()
     //0 = Release
     //1 = Press 
     currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    if(refColliderForMouseCurrent == nullptr)
+        return;
+    refColliderForMouseCurrent->updateCornerPositions();
+    physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     if (currentMouseLeftButtonState!= lastMouseLeftButtonState)
     {
-        //From Press to Release ("It was Pressed now released")
-        if(lastMouseLeftButtonState)
-        {
-            pressedAndHoldingSomething = false;
-            if(refColliderForMouseCurrent != nullptr)
-                refColliderForMouseCurrent->setIsStatic(staticPrevRef);
-        }
-        //From Release to Press ("It was Resting now Pressed")
         if(!lastMouseLeftButtonState)
         {
-            if(refColliderForMouseCurrent != nullptr)
-            {
-                pressedAndHoldingSomething = true;
-                staticPrevRef = refColliderForMouseCurrent->getIsStatic();
-                refColliderForMouseCurrent->setIsStatic(false);
-            }
-                    
+            //From Release to Press ("It was Resting now Pressed")
+            pressedAndHoldingSomething = true;
+            staticPrevRef = refColliderForMouseCurrent->getIsStatic(); 
+            refColliderForMouseCurrent->setIsStatic(staticPrevRef);        
+        }
+        else
+        {
+            //From Press to Release ("It was Pressed now released")
+            pressedAndHoldingSomething = false;
+            refColliderForMouseCurrent->setIsStatic(staticPrevRef); 
         }
         lastMouseLeftButtonState = currentMouseLeftButtonState;
     }
@@ -129,6 +147,7 @@ void GameEnvironment::mouseClickLogic()
         }    
         
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
+        refColliderForMouseCurrent->update();
         physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     }
 }
