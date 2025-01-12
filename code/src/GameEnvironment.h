@@ -218,7 +218,7 @@ class GameEnvironment
 
         void run();
 
-        void testing(const glm::vec3& ePos); //Random testing function
+        void testing(); //Random testing function
         int entitiesToFill = 50;
 
 };

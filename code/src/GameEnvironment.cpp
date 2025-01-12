@@ -1,6 +1,9 @@
 #include "GameEnvironment.h"
 #include <bitset>
 
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include "util/fileReader.h"
 //Just a random string generator (https://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c)
 std::string random_string( size_t length )
 {
@@ -630,7 +633,7 @@ void GameEnvironment::run()
  
     glfwMaximizeWindow(window);
 
-
+    testing();
     //Loop
     while (!glfwWindowShouldClose(window))
     {   
@@ -690,36 +693,12 @@ void GameEnvironment::run()
     
 }
 
-void GameEnvironment::testing(const glm::vec3& ePos)
+void GameEnvironment::testing()
 {
-    // Define an offset to handle negative coordinates (assuming a range large enough for your application)
-    constexpr int32_t OFFSET = 32768;
-    constexpr float BUCKETSIZE = 1.f;
-    //constexpr int32_t OFFSET = 100; -6653/2 + 6653 In der X achse
-
-    // Helper function to interleave bits of a 16-bit integer
-    auto interleaveBits = [](uint16_t n)
-    {
-        uint32_t x = n;
-        x = (x | (x << 8)) & 0x00FF00FF;
-        x = (x | (x << 4)) & 0x0F0F0F0F;
-        x = (x | (x << 2)) & 0x33333333;
-        x = (x | (x << 1)) & 0x55555555;
-        return x;
-    };
-    // Morton encoding function for integer bucket coordinates
-    auto mortonEncode2D = [OFFSET, interleaveBits](int bucketX, int bucketY) 
-    {
-        // Shift negative coordinates to non-negative space
-        uint16_t xBits = static_cast<uint16_t>(bucketX + OFFSET);
-        uint16_t yBits = static_cast<uint16_t>(bucketY + OFFSET);
-
-        // Interleave bits to create Morton code
-        return interleaveBits(xBits) | (interleaveBits(yBits) << 1);
-    };
-    
-    int bucketX = glm::floor(ePos.x/BUCKETSIZE);
-    int bucketY = glm::floor(ePos.y/BUCKETSIZE);
-    std::cout <<"Current Bucket: " << std::bitset<32>(mortonEncode2D(bucketX,bucketY)) << "\n";
-    
+    nlohmann::json j = nlohmann::json{{"name"}};
+    std::filesystem::path srcPath = std::filesystem::current_path() / "src";
+    fileReader::trimDownPathToWorkingDirectory(srcPath);
+    srcPath.append("src/Test.json");
+    std::ofstream file(srcPath);
+    file << j.dump(4);
 }
