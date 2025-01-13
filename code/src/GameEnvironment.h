@@ -29,6 +29,8 @@
 #include "entities/Entity.h"
 #include "entities/Shape.h"
 #include "entities/PlayerShape.h"
+#include "Scenes/SceneManager.h"
+
 
 //Imgui
 #include "imgui.h"
@@ -105,6 +107,7 @@ class GameEnvironment
         void mouseClickLogic();
 
         //Level Logic / Functions
+        SceneManager sceneManager;
         /* struct level
         {
 
@@ -216,6 +219,7 @@ class GameEnvironment
             ImGui::DestroyContext();
         };
 
+        const std::vector<std::unique_ptr<Entity>>& getEntities() const{return entities;}
         void run();
 
         void testing(); //Random testing function

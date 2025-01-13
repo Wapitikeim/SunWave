@@ -1,9 +1,8 @@
 #include "GameEnvironment.h"
 #include <bitset>
 
-#include <fstream>
-#include <nlohmann/json.hpp>
-#include "util/fileReader.h"
+
+
 //Just a random string generator (https://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c)
 std::string random_string( size_t length )
 {
@@ -222,7 +221,7 @@ void GameEnvironment::initEntities()
     auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallTop));
     entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
+    //physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
 
     auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallLeft));
@@ -695,10 +694,6 @@ void GameEnvironment::run()
 
 void GameEnvironment::testing()
 {
-    nlohmann::json j = nlohmann::json{{"name"}};
-    std::filesystem::path srcPath = std::filesystem::current_path() / "src";
-    fileReader::trimDownPathToWorkingDirectory(srcPath);
-    srcPath.append("src/Test.json");
-    std::ofstream file(srcPath);
-    file << j.dump(4);
+    sceneManager.saveLevel("TestLevel",entities);
+    
 }

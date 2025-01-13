@@ -5,6 +5,8 @@
 PlayerShape::PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, std::string texturePath) 
 : Entity(std::move(shapeName), ShaderContainer("defaultVertexShader.glsl", "defaultFragmentShader.glsl"), MeshContainer(nullptr, nullptr, texturePath), shapePosition, shapeScale, shapeRotation)
 {
+    type = "PlayerShape";
+    shaderName = texturePath;
     //Default Mesh Coord
     quadrat = std::make_shared<std::vector<float>>();
     quadrat->assign(
@@ -29,6 +31,8 @@ PlayerShape::PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::ve
 PlayerShape::PlayerShape(std::string shapeName, glm::vec3 shapePosition, glm::vec3 shapeScale, float shapeRotation, bool letFragmentShaderDraw, std::string fragmentShapeName)
 : Entity(std::move(shapeName), ShaderContainer("defaultVertexShader.glsl", "shapeFragmentShader/"+fragmentShapeName+".glsl"), MeshContainer(nullptr, nullptr, "DefaultTexture.png"), shapePosition, shapeScale, shapeRotation)
 {
+    type = "PlayerShape";
+    shaderName = fragmentShapeName;
     //Default Mesh Coord
     quadrat = std::make_shared<std::vector<float>>();
     quadrat->assign(

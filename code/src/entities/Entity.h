@@ -17,7 +17,10 @@ class Entity
         //Misc for now
         std::string entityName;
         
+        
     protected:
+        std::string type = "Entity";
+        std::string shaderName;
         std::vector<std::unique_ptr<Component>> componentsOfThisEntity;
         //World Data 
         glm::vec3 entityScale;
@@ -33,7 +36,7 @@ class Entity
         Entity(std::string Name, ShaderContainer shader, MeshContainer mesh, glm::vec3 position, glm::vec3 scale, float rotation )
         :entityName(std::move(Name)), entityShader(std::move(shader)), entityMesh(std::move(mesh)), entityPosition(position), entityScale(scale), entityRotation(rotation)
         {};
-
+        
         virtual ~Entity() = default;
 
         virtual void update(GLFWwindow* window, float deltaTime);
@@ -44,7 +47,13 @@ class Entity
         [[nodiscard]] float getRotation() const { return entityRotation; }
         [[nodiscard]] const glm::vec3 &getPosition() const {return entityPosition; }
         [[nodiscard]] const ShaderContainer &getShaderContainer() const {return entityShader;}
+        [[nodiscard]] const MeshContainer &getMeshContainer() const {return entityMesh;};
         [[nodiscard]] const bool &getDontDraw() const {return dontDraw;}
+        
+        [[nodiscard]] const std::string &getEntityName() const {return entityName;};
+        [[nodiscard]] const std::string &getEntityType() const {return type;};
+        [[nodiscard]] const std::string &getShaderName() const {return shaderName;};
+        
         
         void setScale(const glm::vec3 &scale) { Entity::entityScale = scale; }
         void setZRotation(float zRotation) { Entity::entityRotation = zRotation; }
@@ -71,7 +80,5 @@ class Entity
         void removeComponent(std::string componentName);
 
         int getComponentArraySize(){return componentsOfThisEntity.size();};
-
-        std::string getEntityName(){return entityName;};
 
 };
