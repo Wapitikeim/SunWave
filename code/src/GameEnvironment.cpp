@@ -519,7 +519,7 @@ void GameEnvironment::drawImGuiWindows()
     std::vector<std::string> levelNames = fileReader::getAllLevelFileNames();
     static int selectedLevelIndex = 0;
     
-    static char levelToLoad[128] = "";
+    static char levelToLoad[128] = "TestLevel";
     // Create a combo box for selecting the level name
     if (ImGui::Combo("Select Level", &selectedLevelIndex, [](void* data, int idx, const char** out_text) {
         const std::vector<std::string>* items = static_cast<std::vector<std::string>*>(data);
@@ -546,7 +546,21 @@ void GameEnvironment::drawImGuiWindows()
     ImGui::InputText("Level Name", levelToSaveName, IM_ARRAYSIZE(levelToSaveName));
     ImGui::SameLine();
     if(ImGui::Button("Save"))
-        sceneManager.saveLevel(levelToSaveName, entities);
+    {
+        // Convert to std::string for easier manipulation
+        std::string levelNameStr(levelToSaveName);
+
+        // Trim whitespace from both ends
+        levelNameStr.erase(levelNameStr.find_last_not_of(" \t\n\r\f\v") + 1);
+        levelNameStr.erase(0, levelNameStr.find_first_not_of(" \t\n\r\f\v"));
+
+        // Check if the string is empty after trimming
+        if (!levelNameStr.empty())
+            sceneManager.saveLevel(levelNameStr, entities, physicsEngine.get(), cameraPos, fov);
+        else
+            std::cerr << "Error: Level name cannot be empty or whitespace only.\n";
+        
+    }
 
 
     ImGui::End();

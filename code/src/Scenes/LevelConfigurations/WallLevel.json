@@ -16,8 +16,8 @@
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
-                    -35.0866584777832,
-                    -0.32222461700439453,
+                    -0.5772842764854431,
+                    0.00027157366275787354,
                     0.0
                 ]
             },
@@ -25,8 +25,8 @@
             "Type": "PlayerShape",
             "name": "Player",
             "position": [
-                11.278080940246582,
-                6.16065788269043,
+                20.36013412475586,
+                2.3588736057281494,
                 0.0
             ],
             "rotation": 0.0,
@@ -179,151 +179,22 @@
                 12.426407814025879,
                 1.0
             ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.5,
-                "IsGrounded": false,
-                "IsInContact": true,
-                "IsResting": true,
-                "IsStatic": true,
-                "IsTrigger": false,
-                "Mass": 1.0,
-                "Rot": 47.3297119140625,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "box",
-            "Type": "Shape",
-            "name": "wallMiddle",
-            "position": [
-                19.993417739868164,
-                13.801668167114258,
-                0.0
-            ],
-            "rotation": 47.3297119140625,
-            "scale": [
-                3.0,
-                1.0,
-                1.0
-            ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.5,
-                "IsGrounded": false,
-                "IsInContact": false,
-                "IsResting": true,
-                "IsStatic": true,
-                "IsTrigger": false,
-                "Mass": 1.0,
-                "Rot": 132.3150634765625,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "box",
-            "Type": "Shape",
-            "name": "wallMiddleLeft",
-            "position": [
-                14.425630569458008,
-                13.848692893981934,
-                0.0
-            ],
-            "rotation": 132.3150634765625,
-            "scale": [
-                3.0,
-                1.0,
-                1.0
-            ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.20000000298023224,
-                "IsGrounded": true,
-                "IsInContact": true,
-                "IsResting": true,
-                "IsStatic": false,
-                "IsTrigger": false,
-                "Mass": 1.0,
-                "Rot": 0.0,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "box",
-            "Type": "Shape",
-            "name": "aDynamicBox",
-            "position": [
-                17.22684669494629,
-                2.4990978240966797,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.20000000298023224,
-                "IsGrounded": true,
-                "IsInContact": true,
-                "IsResting": true,
-                "IsStatic": false,
-                "IsTrigger": false,
-                "Mass": 1.0,
-                "Rot": 0.0,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "circle",
-            "Type": "Shape",
-            "name": "aRandomTriggerBox",
-            "position": [
-                21.0057430267334,
-                16.98361587524414,
-                0.0
-            ],
-            "rotation": 0.0,
-            "scale": [
-                0.30000001192092896,
-                0.30000001192092896,
-                0.30000001192092896
-            ]
         }
     ],
-    "levelName": "TestLevel"
+    "levelName": "WallLevel",
+    "physicsEngine": [
+        {
+            "BounceM": 1.6690000295639038
+        }
+    ],
+    "worldData": [
+        {
+            "CameraPos": [
+                22.100000381469727,
+                12.425999641418457,
+                30.0
+            ],
+            "Fov": 45.0
+        }
+    ]
 }

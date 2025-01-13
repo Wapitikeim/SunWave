@@ -20,6 +20,6 @@ class SceneManager
         void setApplyPhysicsWhenLoading(const bool& newApply){applyPhysicsWhenLoading = newApply;};
         
         void loadLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine);
-        void saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities);
+        void saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine , const glm::vec3& cameraPos, const float& fov);
 
 };

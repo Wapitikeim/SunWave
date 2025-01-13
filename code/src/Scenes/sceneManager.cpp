@@ -46,6 +46,11 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
     std::cout << "Loading " << levelToLoad["levelName"] << "\n";
     entities.clear();
     physicsEngine->clearPhysicsObjects();
+    if (levelToLoad.contains("physicsEngine"))
+        for(const auto& physicsEntry_json : levelToLoad["physicsEngine"])
+            physicsEngine->setBounceMultiplier(physicsEntry_json["BounceM"]);
+    else
+        std::cerr << "Error: BounceM key not found in physicsEngine section of the JSON.\n";
 
     int i = 0;
     for(const auto& entity_json : levelToLoad["entities"])
@@ -88,12 +93,14 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
     }
 }
 
-void SceneManager::saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities)
+void SceneManager::saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine, const glm::vec3& cameraPos, const float& fov)
 {
     if((entities.size() == 0)|| (levelName.size() == 0))
         return;
     nlohmann::json level = nlohmann::json{{"levelName", levelName},
-                                          {"entities", nlohmann::json::array()}};
+                                          {"entities", nlohmann::json::array()},
+                                          {"worldData", nlohmann::json::array()},
+                                          {"physicsEngine", nlohmann::json::array()}};
     for(auto& entry: entities)
     {
         nlohmann::json entity_json;
@@ -126,6 +133,18 @@ void SceneManager::saveLevel(const std::string& levelName, std::vector<std::uniq
         }   
         level["entities"].push_back(entity_json);
     }
+    
+    //World Data just Camera Info for Now
+    nlohmann::json worlddata_json;
+    worlddata_json["CameraPos"] = {cameraPos.x,cameraPos.y,cameraPos.z};
+    worlddata_json["Fov"] =  fov;
+    level["worldData"].push_back(worlddata_json);
+
+    //PhysicsEngine extra info - just bounce Multipliert for now
+    nlohmann::json physicsEngine_json;
+    physicsEngine_json["BounceM"] = physicsEngine->getBounceMultiplier();
+    level["physicsEngine"].push_back(physicsEngine_json);
+    
     std::filesystem::path srcPath = std::filesystem::current_path();
     fileReader::trimDownPathToWorkingDirectory(srcPath);
     srcPath.append("src/Scenes/LevelConfigurations/"+levelName+".json");
