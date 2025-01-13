@@ -514,6 +514,43 @@ void GameEnvironment::drawImGuiWindows()
     //ImGui::Text("Ticks calculated last Second: %i", physicsEngine->getTicksLastSecond());
     ImGui::End();
 
+    ImGui::Begin("Level Loading");
+    // Vector of level names (for demonstration purposes)
+    std::vector<std::string> levelNames = fileReader::getAllLevelFileNames();
+    static int selectedLevelIndex = 0;
+    
+    static char levelToLoad[128] = "";
+    // Create a combo box for selecting the level name
+    if (ImGui::Combo("Select Level", &selectedLevelIndex, [](void* data, int idx, const char** out_text) {
+        const std::vector<std::string>* items = static_cast<std::vector<std::string>*>(data);
+        if (idx < 0 || idx >= items->size()) return false;
+        *out_text = items->at(idx).c_str();
+        return true;
+    }, static_cast<void*>(&levelNames), levelNames.size()))
+    {
+        // Update the levelName with the selected level
+        strncpy(levelToLoad, levelNames[selectedLevelIndex].c_str(), sizeof(levelToLoad));
+        levelToLoad[sizeof(levelToLoad) - 1] = '\0'; // Ensure null-termination
+    }
+    ImGui::SameLine();
+    if(ImGui::Button("Load"))
+        sceneManager.loadLevel(levelToLoad, entities, physicsEngine.get());
+
+    bool applyPhysics = sceneManager.getApplyPhysicsWhenLoading();
+    ImGui::Checkbox("Apply physics when loading", &applyPhysics);
+    ImGui::SameLine();
+    if(ImGui::Button("Change"))
+        sceneManager.setApplyPhysicsWhenLoading(!applyPhysics);
+
+    static char levelToSaveName[128] = "";
+    ImGui::InputText("Level Name", levelToSaveName, IM_ARRAYSIZE(levelToSaveName));
+    ImGui::SameLine();
+    if(ImGui::Button("Save"))
+        sceneManager.saveLevel(levelToSaveName, entities);
+
+
+    ImGui::End();
+
     ImGui::Begin("Physics Engine Control");
     ImGui::SliderFloat("Tickrate:", &physicsEngine->tickrateOfSimulation, 60, 300, "%.3f",0);
     ImGui::SliderFloat("Speed:", &physicsEngine->speedOfSimulation, 0, 3, "%.3f",0);
@@ -530,15 +567,9 @@ void GameEnvironment::drawImGuiWindows()
     {
         fillSceneWithEntitys();
     }
-    static char levelName[128] = "TestLevel";
-    ImGui::InputText("Level Name", levelName, IM_ARRAYSIZE(levelName));
-    
-    if(ImGui::Button("Save"))
-        sceneManager.saveLevel(levelName, entities);
-    ImGui::SameLine();
-    if(ImGui::Button("Load"))
-        sceneManager.loadLevel(levelName, entities, physicsEngine.get());
 
+    
+    
     float newBounce = physicsEngine->getBounceMultiplier();
     ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);
     physicsEngine->setBounceMultiplier(newBounce);  
@@ -703,6 +734,5 @@ void GameEnvironment::run()
 
 void GameEnvironment::testing()
 {
-    //sceneManager.loadLevel("TestLevels", entities, physicsEngine.get());
     
 }

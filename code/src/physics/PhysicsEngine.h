@@ -128,6 +128,8 @@ class PhysicsEngine
         const int& getTicksLastFrame(){return ticksLastFrame;};
         const int& getTicksLastSecond(){return ticksCalculatedInOneSecond;};
         const float& getBounceMultiplier(){return BOUNCE_MULTIPLIER;};
+        const std::vector<PhysicsCollider*>& getActiveColliders(){return physicsObjects;};
+        void setInitDone(const bool& newInit){initDone = newInit;};
         void setBounceMultiplier(const float &newBounce){BOUNCE_MULTIPLIER = newBounce;};
         bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
         PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);

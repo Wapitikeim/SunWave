@@ -68,7 +68,22 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
         {
             entities[i]->addComponent(std::make_unique<PhysicsCollider>(entities[i].get(),entity_json["Physics"]["IsStatic"]));
             physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[i]->getComponent("Physics")));
+            if(applyPhysicsWhenLoading)
+            {
+                auto& ref = physicsEngine->getActiveColliders()[i];
+                ref->setVelocity(glm::vec3(entity_json["Physics"]["Velocity"][0], entity_json["Physics"]["Velocity"][1], entity_json["Physics"]["Velocity"][2]));
+                ref->setAcceleration(glm::vec3(entity_json["Physics"]["Acceleration"][0], entity_json["Physics"]["Acceleration"][1], entity_json["Physics"]["Acceleration"][2]));
+                ref->setMass(entity_json["Physics"]["Mass"]);
+                ref->setIsTrigger(entity_json["Physics"]["IsTrigger"]);
+                ref->setIsResting(entity_json["Physics"]["IsResting"]);
+                ref->setIsGrounded(entity_json["Physics"]["IsGrounded"]);
+                ref->setIsInContact(entity_json["Physics"]["IsInContact"]);
+                ref->setElascity(entity_json["Physics"]["Elasticity"]);
+                ref->setRot(entity_json["Physics"]["Rot"]);
+            }
         }
+        if (applyPhysicsWhenLoading)
+            physicsEngine->setInitDone(true);
         i++;
     }
 }

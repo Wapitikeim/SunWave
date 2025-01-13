@@ -64,3 +64,26 @@ std::filesystem::path fileReader::getPathToFileInFolder(std::string fileName, co
     }
     return path;
 }
+
+std::vector<std::string> fileReader::getAllLevelFileNames()
+{
+    std::vector<std::string> fileNames;
+    std::filesystem::path path(std::filesystem::current_path());
+    trimDownPathToWorkingDirectory(path);
+    path.append("src");
+    path.append("Scenes");
+    path.append("LevelConfigurations");
+
+    // Iterate through the files in the directory
+    for (const auto& entry : std::filesystem::directory_iterator(path))
+    {
+        if (entry.is_regular_file() && entry.path().extension() == ".json")
+        {
+            // Get the file name without the extension
+            std::string fileName = entry.path().stem().string();
+            fileNames.push_back(fileName);
+        }
+    }
+
+    return fileNames;
+}

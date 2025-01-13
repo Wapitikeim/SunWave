@@ -4,20 +4,20 @@
             "Physics": {
                 "Acceleration": [
                     0.0,
-                    0.0,
+                    -9.8100004196167,
                     0.0
                 ],
                 "Elasticity": 0.20000000298023224,
-                "IsGrounded": true,
-                "IsInContact": true,
-                "IsResting": true,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": false,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
-                    0.0,
-                    0.0,
+                    -35.0866584777832,
+                    -0.32222461700439453,
                     0.0
                 ]
             },
@@ -25,8 +25,8 @@
             "Type": "PlayerShape",
             "name": "Player",
             "position": [
-                21.459304809570313,
-                2.4994304180145264,
+                11.278080940246582,
+                6.16065788269043,
                 0.0
             ],
             "rotation": 0.0,
@@ -277,8 +277,8 @@
             "Type": "Shape",
             "name": "aDynamicBox",
             "position": [
-                16.404264450073242,
-                16.411523818969727,
+                17.22684669494629,
+                2.4990978240966797,
                 0.0
             ],
             "rotation": 0.0,
@@ -314,7 +314,7 @@
             "name": "aRandomTriggerBox",
             "position": [
                 21.0057430267334,
-                17.16391372680664,
+                16.98361587524414,
                 0.0
             ],
             "rotation": 0.0,

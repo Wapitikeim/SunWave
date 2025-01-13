@@ -12,21 +12,12 @@
 class SceneManager
 {
     private:
-        struct EntityData 
-        {
-            std::string name;
-            glm::vec3 position;
-            glm::vec3 scale;
-            float rotation;
-        };
-
-        struct LevelData 
-        {
-            std::vector<EntityData> entities;
-        };
+        bool applyPhysicsWhenLoading = true;
 
     public:
         SceneManager() = default;
+        const bool& getApplyPhysicsWhenLoading()const{return applyPhysicsWhenLoading;};
+        void setApplyPhysicsWhenLoading(const bool& newApply){applyPhysicsWhenLoading = newApply;};
         
         void loadLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine);
         void saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities);
