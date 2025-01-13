@@ -3,6 +3,7 @@
 #include <string>
 #include <glm/vec3.hpp>
 #include "../Entities/Entity.h"
+#include "../physics/PhysicsEngine.h"
 
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -27,7 +28,7 @@ class SceneManager
     public:
         SceneManager() = default;
         
-        void loadLevel(std::string levelName, std::vector<std::unique_ptr<Entity>>& entities);
-        void saveLevel(std::string levelName, std::vector<std::unique_ptr<Entity>>& entities);
+        void loadLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine);
+        void saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities);
 
 };

@@ -221,7 +221,7 @@ void GameEnvironment::initEntities()
     auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallTop));
     entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
-    //physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
 
     auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box");
     entities.push_back(std::move(wallLeft));
@@ -530,6 +530,15 @@ void GameEnvironment::drawImGuiWindows()
     {
         fillSceneWithEntitys();
     }
+    static char levelName[128] = "TestLevel";
+    ImGui::InputText("Level Name", levelName, IM_ARRAYSIZE(levelName));
+    
+    if(ImGui::Button("Save"))
+        sceneManager.saveLevel(levelName, entities);
+    ImGui::SameLine();
+    if(ImGui::Button("Load"))
+        sceneManager.loadLevel(levelName, entities, physicsEngine.get());
+
     float newBounce = physicsEngine->getBounceMultiplier();
     ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);
     physicsEngine->setBounceMultiplier(newBounce);  
@@ -694,6 +703,6 @@ void GameEnvironment::run()
 
 void GameEnvironment::testing()
 {
-    sceneManager.saveLevel("TestLevel",entities);
+    //sceneManager.loadLevel("TestLevels", entities, physicsEngine.get());
     
 }

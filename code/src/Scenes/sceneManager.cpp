@@ -3,21 +3,77 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include "../util/fileReader.h"
+#include "../entities/Shape.h"
+#include "../entities/PlayerShape.h"
 
-/* 
-    nlohmann::json j = nlohmann::json{{"tew"}};
-    std::filesystem::path srcPath = std::filesystem::current_path();
-    fileReader::trimDownPathToWorkingDirectory(srcPath);
-    srcPath.append("src/Test.json");
-    std::ofstream file(srcPath);
-    file << j.dump(4); 
-*/
-
-void SceneManager::loadLevel(std::string levelName, std::vector<std::unique_ptr<Entity>>& entities)
+// Factory function to create entities based on type
+std::unique_ptr<Entity> createEntity(const std::string& type, const std::string& name, const glm::vec3& position, const glm::vec3& scale, float rotation, const std::string& shaderName)
 {
+    if (type == "Shape")
+    {
+        return std::make_unique<Shape>(name, position, scale, rotation, true, shaderName);
+    }
+    else if (type == "PlayerShape")
+    {
+        return std::make_unique<PlayerShape>(name, position, scale, rotation, true, shaderName);
+    }
+    // Add more entity types as needed
+    else
+    {
+        throw std::runtime_error("Unknown entity type: " + type);
+    }
 }
 
-void SceneManager::saveLevel(std::string levelName, std::vector<std::unique_ptr<Entity>>& entities)
+void SceneManager::loadLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine)
+{
+    std::filesystem::path srcPath = std::filesystem::current_path();
+    fileReader::trimDownPathToWorkingDirectory(srcPath);
+    srcPath.append("src/Scenes/LevelConfigurations/"+levelName+".json");
+    nlohmann::json levelToLoad;
+    std::ifstream file(srcPath);
+    // Check if the file was successfully opened
+    if (!file.is_open())
+    {
+        std::cerr << "Error: Could not open file " << levelName <<".json" << "\n";
+        return;
+    }
+    file >> levelToLoad;
+    if (levelToLoad["levelName"] == nullptr)
+    {
+        std::cout << "Json does not contain the levelName key \n";
+        return;
+    }
+    std::cout << "Loading " << levelToLoad["levelName"] << "\n";
+    entities.clear();
+    physicsEngine->clearPhysicsObjects();
+
+    int i = 0;
+    for(const auto& entity_json : levelToLoad["entities"])
+    {
+        //Load base Entity data
+        std::string name = entity_json["name"];
+        glm::vec3 position = glm::vec3(entity_json["position"][0], entity_json["position"][1], entity_json["position"][2]);
+        glm::vec3 scale = glm::vec3(entity_json["scale"][0], entity_json["scale"][1], entity_json["scale"][2]);
+        float rotation = entity_json["rotation"];
+        std::string type = entity_json["Type"];
+        std::string shaderName = entity_json["ShaderName"];
+
+        
+        // Create the entity
+        //auto aDynamicBox = std::make_unique<Shape>("aDynamicBox", glm::vec3(10.f,5.f,0.3f),glm::vec3(1.f), 0, true, "box");
+        auto loadedEntity = createEntity(type, name, position, scale, rotation, shaderName);
+        entities.push_back(std::move(loadedEntity));
+        
+        if (entity_json.contains("Physics"))
+        {
+            entities[i]->addComponent(std::make_unique<PhysicsCollider>(entities[i].get(),entity_json["Physics"]["IsStatic"]));
+            physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[i]->getComponent("Physics")));
+        }
+        i++;
+    }
+}
+
+void SceneManager::saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities)
 {
     if((entities.size() == 0)|| (levelName.size() == 0))
         return;
