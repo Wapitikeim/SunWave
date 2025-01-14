@@ -32,10 +32,7 @@
 #include "Scenes/SceneManager.h"
 
 
-//Imgui
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+//UI
 #include "ui/UiManager.h"
 
 //ComponentTesting
@@ -151,9 +148,8 @@ class GameEnvironment
         void update();
 
         
-        //ImGui
+        //Ui
         UiManager ui;
-        void drawImGuiWindows();
 
     public:
         GameEnvironment();

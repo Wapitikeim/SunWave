@@ -437,185 +437,6 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
     std::cout << "Function Registerd with timer: " << t.timer << "\n";
 }
 
-void GameEnvironment::drawImGuiWindows()
-{
-    /* //Needs to be on Top That it dosent crash if other levels are loaded and the Header is collpased
-    ImGui::Begin("World Control");
-    ImGui::Checkbox("Grid", &showGrid);
-    ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
-    if(ImGui::CollapsingHeader("Entitys Info"))
-    {
-        for(int i=0; i< entities.size(); i++)
-        {
-            auto* colliderRef = getComponentOfEntity<PhysicsCollider>(entities[i]->getEntityName(),"Physics");
-            ImGui::PushID(i);
-            ImGui::Text("%s", entities[i]->getEntityName().c_str());
-            if(ImGui::CollapsingHeader("Physics"))
-            {
-                ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
-                ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
-                ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
-                
-                bool iTrigger = colliderRef->getIsTrigger();
-                ImGui::Checkbox("Is Trigger", &iTrigger);
-                if(ImGui::Button("Change Trigger"))
-                    colliderRef->setIsTrigger(!iTrigger);
-                
-                bool iResting = colliderRef->getIsResting();
-                ImGui::Checkbox("Is Resting", &iResting);
-                
-            
-                bool iStatic = colliderRef->getIsStatic();
-                ImGui::Checkbox("Is Static", &iStatic);
-                if(ImGui::Button("Change Static"))
-                    colliderRef->setIsStatic(!iStatic);
-
-                bool iDontDraw = entities[i]->getDontDraw();
-                ImGui::Checkbox("Dont Draw", &iDontDraw);
-                if(ImGui::Button("Hide"))
-                    entities[i]->setDontDraw(!iDontDraw);
-
-                if(ImGui::Button("ChangeColor"))
-                    entities[i]->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1,0,0,1));
-            
-                float massRef = colliderRef->getBody().mass;
-                ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
-                colliderRef->setMass(massRef);
-
-                if(physicsEngine->getHashTableIndicesSize() != 0)
-                    ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
-                
-            }
-
-            ImGui::PopID();    
-            ImGui::Text("");
-        }
-    }    
-    ImGui::End();
-    
-    ImGui::Begin("Info Panel");
-    ImGui::Text("FPS: %i", imGuiFPS);
-    ImGui::Text("Entities in Scene: %i", entities.size());
-    ImGui::Text("Collisions resolved LastTick: %i", physicsEngine->getCurrentCollisions());
-    //ImGui::Text("Ticks calculated last Second: %i", physicsEngine->getTicksLastSecond());
-    ImGui::End();
-
-    ImGui::Begin("Level Loading");
-    // Vector of level names (for demonstration purposes)
-    std::vector<std::string> levelNames = fileReader::getAllLevelFileNames();
-    static int selectedLevelIndex = 0;
-    
-    static char levelToLoad[128] = "TestLevel";
-    // Create a combo box for selecting the level name
-    if (ImGui::Combo("Select Level", &selectedLevelIndex, [](void* data, int idx, const char** out_text) {
-        const std::vector<std::string>* items = static_cast<std::vector<std::string>*>(data);
-        if (idx < 0 || idx >= items->size()) return false;
-        *out_text = items->at(idx).c_str();
-        return true;
-    }, static_cast<void*>(&levelNames), levelNames.size()))
-    {
-        // Update the levelName with the selected level
-        strncpy(levelToLoad, levelNames[selectedLevelIndex].c_str(), sizeof(levelToLoad));
-        levelToLoad[sizeof(levelToLoad) - 1] = '\0'; // Ensure null-termination
-    }
-    ImGui::SameLine();
-    if(ImGui::Button("Load"))
-        sceneManager.loadLevel(levelToLoad, entities, physicsEngine.get());
-
-    bool applyPhysics = sceneManager.getApplyPhysicsWhenLoading();
-    ImGui::Checkbox("Apply physics when loading", &applyPhysics);
-    ImGui::SameLine();
-    if(ImGui::Button("Change"))
-        sceneManager.setApplyPhysicsWhenLoading(!applyPhysics);
-
-    static char levelToSaveName[128] = "";
-    ImGui::InputText("Level Name", levelToSaveName, IM_ARRAYSIZE(levelToSaveName));
-    ImGui::SameLine();
-    if(ImGui::Button("Save"))
-    {
-        // Convert to std::string for easier manipulation
-        std::string levelNameStr(levelToSaveName);
-
-        // Trim whitespace from both ends
-        levelNameStr.erase(levelNameStr.find_last_not_of(" \t\n\r\f\v") + 1);
-        levelNameStr.erase(0, levelNameStr.find_first_not_of(" \t\n\r\f\v"));
-
-        // Check if the string is empty after trimming
-        if (!levelNameStr.empty())
-            sceneManager.saveLevel(levelNameStr, entities, physicsEngine.get(), cameraPos, fov);
-        else
-            std::cerr << "Error: Level name cannot be empty or whitespace only.\n";
-        
-    }
-
-
-    ImGui::End();
-
-    ImGui::Begin("Physics Engine Control");
-    ImGui::SliderFloat("Tickrate:", &physicsEngine->tickrateOfSimulation, 60, 300, "%.3f",0);
-    ImGui::SliderFloat("Speed:", &physicsEngine->speedOfSimulation, 0, 3, "%.3f",0);
-    bool engineHalting = physicsEngine->getIsHalting();
-    ImGui::Checkbox("Is Halting", &engineHalting);
-    if(ImGui::Button("Halt Engine"))
-        physicsEngine->setIsHalting(!engineHalting);
-    if(ImGui::Button("Reset Level"))
-        resetLevel();
-    if(ImGui::Button("Load just walls"))
-        loadWallLevel();
-    ImGui::SliderInt("Entity Count", &entitiesToFill, 20, 200);
-    if(ImGui::Button("Test Stuff"))
-    {
-        fillSceneWithEntitys();
-    }
-
-    
-    
-    float newBounce = physicsEngine->getBounceMultiplier();
-    ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);
-    physicsEngine->setBounceMultiplier(newBounce);  
-    ImGui::Text("Hash Table Size: %i ", physicsEngine->getHashTableIndicesSize());
-    ImGui::End();
-     
-    ImGui::Begin("Player Extra Info");
-        if(getEntityFromName<Entity>("Player") != nullptr)
-        {
-            ImGui::Text("Player Pos: X: %f Y: %f", getEntityFromName<PlayerShape>("Player")->getPosition().x, getEntityFromName<PlayerShape>("Player")->getPosition().y);
-            ImGui::Text("Player is grounded: %s", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getIsGrounded() ? "true" : "false");
-            ImGui::Text("Player Velocity X:%f Y: %f", getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getVelocity().y);
-            ImGui::Text("Player Acceleration X: %f Y:%f",  getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().x, getComponentOfEntity<PhysicsCollider>("Player", "Physics")->getAcceleration().y);
-            ImGui::Text("Corner left bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftBottom.y);
-            ImGui::Text("Corner right bottom: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightBottom.y);
-            ImGui::Text("Corner left top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().leftTop.y);
-            ImGui::Text("Corner right top: X:%f Y:%f", getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.x, getComponentOfEntity<PhysicsCollider>("Player","Physics")->getCornerPos().rightTop.y);
-            //ImGui::Text("TestSDF d=%f",CollisionTester::signedDistance2DBoxAnd2DBox(getComponentOfEntity<PhysicsCollider>("aRandomTriggerBox","Physics"),getComponentOfEntity<PhysicsCollider>("Player","Physics")));
-            ImGui::SliderFloat("Speed", &getEntityFromName<PlayerShape>("Player")->velocity,1, 20,"%.3f",0);
-            float scaleX = getEntityFromName<Entity>("Player")->getScale().x;
-            float scaleY = getEntityFromName<Entity>("Player")->getScale().y;
-            ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
-            ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
-            glm::vec3 newScale(scaleX,scaleY, getEntityFromName<Entity>("Player")->getScale().z);
-            getEntityFromName<Entity>("Player")->setScale(newScale);
-            ImGui::Text("Player rot %f", getEntityFromName<Entity>("Player")->getRotation());
-            
-        }
-        else
-            ImGui::Text("Player not found");
-    ImGui::End();
-    
-    ImGui::Begin("Mouse Information");
-    ImGui::Text("Mouse X: %f", mouseX);
-    ImGui::Text("Mouse Y: %f", mouseY);
-    if(refColliderForMouseCurrent == nullptr)
-        ImGui::Text("Mouse in contact with: none");
-    else
-        ImGui::Text("Mouse in contact with: %s", refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName().c_str());
-    ImGui::End();
-
-    //Nessecary
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
-}
-
 GameEnvironment::GameEnvironment()
     :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct")),
     ui(window,this) 
@@ -635,7 +456,6 @@ void GameEnvironment::createFrameBufferAndAttachTexture()
 
 }
 
-//Maybe handeld through IMGUI -> Discard?
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
     //mousePosX = xpos;
@@ -671,7 +491,6 @@ void GameEnvironment::run()
  
     glfwMaximizeWindow(window);
 
-    testing();
     //Loop
     while (!glfwWindowShouldClose(window))
     {   

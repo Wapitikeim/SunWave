@@ -23,6 +23,22 @@ class UiManager
 
 
         void setupImGui();
+
+        void drawImGuiControlPanel();
+
+        void drawImGuiWorldControl();
+        bool worldControl = true;
+        void drawImGuiInfoPanel();
+        bool infoPanel = true;
+        void drawImGuiLevelManager();
+        bool levelManager = true;
+        void drawImGuiPhysicsEngineControl();
+        bool physicsEngineControl = true;
+        void drawImGuiPlayerExtraInfo();
+        bool playerExtraInfo = false; 
+        void drawImGuiMouseInformation();
+        bool mouseInformation = false;
+
         
     public:
         UiManager(GLFWwindow* w, GameEnvironment* gE)
