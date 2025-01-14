@@ -1,0 +1,1028 @@
+{
+    "entities": [
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "WallBottom",
+            "position": [
+                22.091392517089844,
+                0.5,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                22.091392517089844,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "WallTop",
+            "position": [
+                22.091392517089844,
+                24.352815628051758,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                22.091392517089844,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "wallLeft",
+            "position": [
+                0.5,
+                12.426407814025879,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                12.426407814025879,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "wallRight",
+            "position": [
+                43.68278503417969,
+                12.426407814025879,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                12.426407814025879,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 329.7475891113281,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 1",
+            "position": [
+                3.842233180999756,
+                20.596696853637695,
+                0.0
+            ],
+            "rotation": 329.7475891113281,
+            "scale": [
+                2.633126735687256,
+                0.5466500520706177,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 323.53515625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 2",
+            "position": [
+                4.463432788848877,
+                11.89717960357666,
+                0.0
+            ],
+            "rotation": 323.53515625,
+            "scale": [
+                3.37786865234375,
+                0.5309563875198364,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 39.981689453125,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 3",
+            "position": [
+                7.201311111450195,
+                16.764205932617188,
+                0.0
+            ],
+            "rotation": 39.981689453125,
+            "scale": [
+                3.5398969650268555,
+                0.5516774654388428,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 1",
+            "position": [
+                10.077235221862793,
+                19.75025749206543,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.32179057598114014,
+                0.34900933504104614,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 331.015625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 4",
+            "position": [
+                11.227603912353516,
+                7.641468524932861,
+                0.0
+            ],
+            "rotation": 331.015625,
+            "scale": [
+                5.119647979736328,
+                0.45130935311317444,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 313.3837890625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 5",
+            "position": [
+                11.296626091003418,
+                20.408599853515625,
+                0.0
+            ],
+            "rotation": 313.3837890625,
+            "scale": [
+                3.2569706439971924,
+                0.5063445568084717,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 50.80322265625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 6",
+            "position": [
+                15.230889320373535,
+                16.9052791595459,
+                0.0
+            ],
+            "rotation": 50.80322265625,
+            "scale": [
+                3.4588699340820313,
+                0.4804203510284424,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 315.71533203125,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 7",
+            "position": [
+                11.503692626953125,
+                12.931715965270996,
+                0.0
+            ],
+            "rotation": 315.71533203125,
+            "scale": [
+                4.0,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 2",
+            "position": [
+                3.198026418685913,
+                22.52469825744629,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 3",
+            "position": [
+                10.7674560546875,
+                22.853870391845703,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 310.98388671875,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 8",
+            "position": [
+                19.53326988220215,
+                18.29250144958496,
+                0.0
+            ],
+            "rotation": 310.98388671875,
+            "scale": [
+                3.4923508167266846,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 45.7421875,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 9",
+            "position": [
+                25.88330841064453,
+                17.540109634399414,
+                0.0
+            ],
+            "rotation": 45.7421875,
+            "scale": [
+                3.431748390197754,
+                0.4172841012477875,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 34.931640625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 10",
+            "position": [
+                20.637624740600586,
+                12.13230037689209,
+                0.0
+            ],
+            "rotation": 34.931640625,
+            "scale": [
+                4.074054718017578,
+                0.5148427486419678,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 158.48388671875,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 11",
+            "position": [
+                18.313879013061523,
+                4.138149261474609,
+                0.0
+            ],
+            "rotation": 158.48388671875,
+            "scale": [
+                3.7748589515686035,
+                0.46865227818489075,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 317.65869140625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 12",
+            "position": [
+                30.852903366088867,
+                20.643722534179688,
+                0.0
+            ],
+            "rotation": 317.65869140625,
+            "scale": [
+                3.5,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 137.42431640625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 13",
+            "position": [
+                35.224308013916016,
+                20.596696853637695,
+                0.0
+            ],
+            "rotation": 137.42431640625,
+            "scale": [
+                3.5,
+                0.5532717108726501,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 319.23583984375,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 14",
+            "position": [
+                38.974510192871094,
+                21.537185668945313,
+                0.0
+            ],
+            "rotation": 319.23583984375,
+            "scale": [
+                2.253765106201172,
+                0.3811520040035248,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 33.7353515625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 15",
+            "position": [
+                38.468345642089844,
+                15.635621070861816,
+                0.0
+            ],
+            "rotation": 33.7353515625,
+            "scale": [
+                5.9418511390686035,
+                0.549414336681366,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 12.548828125,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Rampe 16",
+            "position": [
+                29.012311935424805,
+                11.215325355529785,
+                0.0
+            ],
+            "rotation": 12.548828125,
+            "scale": [
+                4.658207416534424,
+                0.6266602277755737,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 4",
+            "position": [
+                18.935077667236328,
+                21.019916534423828,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 5",
+            "position": [
+                26.38947105407715,
+                20.690746307373047,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 6",
+            "position": [
+                30.02463722229004,
+                22.75982093811035,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 7",
+            "position": [
+                34.64912033081055,
+                22.924406051635742,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "circle",
+            "Type": "Shape",
+            "name": "Ball 8",
+            "position": [
+                39.434654235839844,
+                22.83035659790039,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4000000059604645,
+                0.4000000059604645,
+                1.0
+            ]
+        }
+    ],
+    "levelName": "RampenSpaß",
+    "physicsEngine": [
+        {
+            "BounceM": 2.2219998836517334
+        }
+    ],
+    "worldData": [
+        {
+            "CameraPos": [
+                22.100000381469727,
+                12.425999641418457,
+                30.0
+            ],
+            "Fov": 45.0
+        }
+    ]
+}

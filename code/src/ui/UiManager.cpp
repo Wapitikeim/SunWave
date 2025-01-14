@@ -1,6 +1,6 @@
 #include "UiManager.h"
 #include "../GameEnvironment.h"
-
+#include "../factorys/EntityFactory.h"
 
 void UiManager::setupImGui()
 {
@@ -25,6 +25,10 @@ void UiManager::drawImGuiControlPanel()
     ImGui::Checkbox("Physics engine Control", &physicsEngineControl);
     ImGui::Checkbox("Player info", &playerExtraInfo);
     ImGui::Checkbox("Mouse info", &mouseInformation);
+    ImGui::Checkbox("Entity adder", &entityAdder);
+    
+    ImGui::Text("");
+    ImGui::Checkbox("Enable ImGui", &imGuiControlPanel);
     
     ImGui::End();
 }
@@ -68,41 +72,47 @@ void UiManager::drawImGuiWorldControl()
     {
         auto entityRef = gameEnv->getEntityFromName<Entity>(entityToLoad);
         auto* colliderRef = gameEnv->getComponentOfEntity<PhysicsCollider>(entityRef->getEntityName(),"Physics");
+        if(colliderRef == nullptr)
+            ImGui::Text("Entity %s has no active Physics Collider", entityRef->getEntityName().c_str());
+        else
+        {
+            ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
+            ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
+            ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
+            bool iTrigger = colliderRef->getIsTrigger();
+            ImGui::Checkbox("Is Trigger", &iTrigger);
+            ImGui::SameLine();
+            if(ImGui::Button("Change Trigger"))
+                colliderRef->setIsTrigger(!iTrigger);
+            
+            bool iResting = colliderRef->getIsResting();
+            ImGui::Checkbox("Is Resting", &iResting);
+            
         
-        ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
-        ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
-        ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
-        bool iTrigger = colliderRef->getIsTrigger();
-        ImGui::Checkbox("Is Trigger", &iTrigger);
-        ImGui::SameLine();
-        if(ImGui::Button("Change Trigger"))
-            colliderRef->setIsTrigger(!iTrigger);
+            bool iStatic = colliderRef->getIsStatic();
+            ImGui::Checkbox("Is Static", &iStatic);
+            ImGui::SameLine();
+            if(ImGui::Button("Change Static"))
+                colliderRef->setIsStatic(!iStatic);
+
+            bool iDontDraw = entityRef->getDontDraw();
+            ImGui::Checkbox("Dont Draw", &iDontDraw);
+            ImGui::SameLine();
+            if(ImGui::Button("Hide"))
+                entityRef->setDontDraw(!iDontDraw);
+
+            if(ImGui::Button("ChangeColor"))
+                entityRef->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1,0,0,1));
         
-        bool iResting = colliderRef->getIsResting();
-        ImGui::Checkbox("Is Resting", &iResting);
-        
-    
-        bool iStatic = colliderRef->getIsStatic();
-        ImGui::Checkbox("Is Static", &iStatic);
-        ImGui::SameLine();
-        if(ImGui::Button("Change Static"))
-            colliderRef->setIsStatic(!iStatic);
+            float massRef = colliderRef->getBody().mass;
+            ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
+            colliderRef->setMass(massRef);
 
-        bool iDontDraw = entityRef->getDontDraw();
-        ImGui::Checkbox("Dont Draw", &iDontDraw);
-        ImGui::SameLine();
-        if(ImGui::Button("Hide"))
-            entityRef->setDontDraw(!iDontDraw);
-
-        if(ImGui::Button("ChangeColor"))
-            entityRef->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1,0,0,1));
-    
-        float massRef = colliderRef->getBody().mass;
-        ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
-        colliderRef->setMass(massRef);
-
-        if(physicsEngine->getHashTableIndicesSize() != 0)
-            ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
+            if(physicsEngine->getHashTableIndicesSize() != 0)
+                ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
+        }
+        if(ImGui::Button("Delete Entity"))
+            gameEnv->deleteEntityFromName(entityRef->getEntityName());
     }
     
     ImGui::End();
@@ -262,6 +272,61 @@ void UiManager::drawImGuiMouseInformation()
     ImGui::End();
 }
 
+void UiManager::drawImGuiEnitityAdder()
+{
+    //What Do I need for the entity?
+    auto& entities = gameEnv->getEntities();
+    auto* physicsEngine = gameEnv->getPhysicsEngine();
+
+    static char entityType[128] = "Shape";
+    static char entityName[128] = "NewEntity";
+    static float position[2] = {10.0f, 10.0f};
+    static float scale[2] = {1.0f, 1.0f};
+    static float rotation = 0.0f;
+    static char shaderName[128] = "box";
+    static bool isStatic = "true";
+
+    static int selectedShaderIndex = 0; // Index for the selected shader
+
+    // List of shader names
+    const char* shaderNames[] = { "box", "circle", "cross", "sTriangle" };
+
+    ImGui::Begin("Entity Adder");
+
+    ImGui::InputText("Type", entityType, IM_ARRAYSIZE(entityType));
+    ImGui::InputText("Name", entityName, IM_ARRAYSIZE(entityName));
+    ImGui::InputFloat2("Position", position);
+    ImGui::InputFloat2("Scale", scale);
+    ImGui::InputFloat("Rotation", &rotation);
+    ImGui::Checkbox("Is static", &isStatic);
+    // Dropdown for shader names
+    if (ImGui::Combo("Shader Name", &selectedShaderIndex, shaderNames, IM_ARRAYSIZE(shaderNames)))
+    {
+        // Update shaderName based on the selected index
+        strncpy(shaderName, shaderNames[selectedShaderIndex], sizeof(shaderName));
+        shaderName[sizeof(shaderName) - 1] = '\0'; // Ensure null-termination
+    }
+
+    if (ImGui::Button("Add"))
+    {
+        try
+        {
+            auto newEntity = createEntity(entityType, entityName, glm::vec3(position[0], position[1], 0.f), glm::vec3(scale[0], scale[1], 1.0f), rotation, shaderName);
+            gameEnv->addEntity(std::move(newEntity));
+            std::cout << "Trying to add entity: " << entityName << "\n";
+            auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
+            addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
+            physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "Error: " << e.what() << "\n";
+        }
+    }
+
+    ImGui::End();
+}
+
 void UiManager::prepFrames()
 {
     //Imgui Setup
@@ -272,25 +337,29 @@ void UiManager::prepFrames()
 
 void UiManager::draw()
 {   
-    drawImGuiControlPanel();
+    if(imGuiControlPanel)
+        drawImGuiControlPanel();
 
-    if(worldControl)
+    if(worldControl&&imGuiControlPanel)
         drawImGuiWorldControl();
 
-    if(infoPanel)
+    if(infoPanel&&imGuiControlPanel)
         drawImGuiInfoPanel();
 
-    if(levelManager)
+    if(levelManager&&imGuiControlPanel)
         drawImGuiLevelManager();
 
-    if(physicsEngineControl)
+    if(physicsEngineControl&&imGuiControlPanel)
         drawImGuiPhysicsEngineControl();
     
-    if(playerExtraInfo)
+    if(playerExtraInfo&&imGuiControlPanel)
         drawImGuiPlayerExtraInfo();
 
-    if(mouseInformation)
+    if(mouseInformation&&imGuiControlPanel)
         drawImGuiMouseInformation();
+    
+    if(entityAdder&&imGuiControlPanel)
+        drawImGuiEnitityAdder();
 
     //Nessecary
     ImGui::Render();

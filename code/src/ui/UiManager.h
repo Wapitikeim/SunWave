@@ -24,8 +24,9 @@ class UiManager
 
         void setupImGui();
 
-        void drawImGuiControlPanel();
 
+        void drawImGuiControlPanel();
+        bool imGuiControlPanel = true;
         void drawImGuiWorldControl();
         bool worldControl = true;
         void drawImGuiInfoPanel();
@@ -38,6 +39,8 @@ class UiManager
         bool playerExtraInfo = false; 
         void drawImGuiMouseInformation();
         bool mouseInformation = false;
+        void drawImGuiEnitityAdder();
+        bool entityAdder = true;
 
         
     public:

@@ -109,6 +109,36 @@ void GameEnvironment::mousePositionUpdate()
             if(refEntity->getRotation() < 0)
                 refEntity->setZRotation(360);
         }
+        float SCALEFACTOR = 0.8f;
+        if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            glm::vec3 scale = refEntity->getScale();
+            scale.y +=SCALEFACTOR*deltaTime;
+            refEntity->setScale(scale);
+        }
+        if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            glm::vec3 scale = refEntity->getScale();
+            scale.y -=SCALEFACTOR*deltaTime;
+            refEntity->setScale(scale);
+        }
+        if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            glm::vec3 scale = refEntity->getScale();
+            scale.x +=SCALEFACTOR*deltaTime;
+            refEntity->setScale(scale);
+        }
+        if (glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+        {
+            auto refEntity = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+            glm::vec3 scale = refEntity->getScale();
+            scale.x -=SCALEFACTOR*deltaTime;
+            refEntity->setScale(scale);
+        }
+
     }
 }
 
