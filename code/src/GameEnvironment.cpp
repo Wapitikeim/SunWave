@@ -437,23 +437,9 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
     std::cout << "Function Registerd with timer: " << t.timer << "\n";
 }
 
-void GameEnvironment::setupImGui()
-{
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
-    ImGui_ImplOpenGL3_Init();
-}
-
 void GameEnvironment::drawImGuiWindows()
 {
-    //Needs to be on Top That it dosent crash if other levels are loaded and the Header is collpased
+    /* //Needs to be on Top That it dosent crash if other levels are loaded and the Header is collpased
     ImGui::Begin("World Control");
     ImGui::Checkbox("Grid", &showGrid);
     ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
@@ -627,12 +613,13 @@ void GameEnvironment::drawImGuiWindows()
 
     //Nessecary
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); */
 }
 
 GameEnvironment::GameEnvironment()
-{
-    window = glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct");
+    :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct")),
+    ui(window,this) 
+{   
 }
 
 //Framebuffer Testing
@@ -681,8 +668,6 @@ void GameEnvironment::run()
 
     //Load Level
     initEntities();
-    //ImGui
-    setupImGui();
  
     glfwMaximizeWindow(window);
 
@@ -701,10 +686,7 @@ void GameEnvironment::run()
         //"z" Buffer - depth testing
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //Imgui Setup
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        ui.prepFrames();
         
 
         //Physics pre Update
@@ -715,7 +697,7 @@ void GameEnvironment::run()
         fps++;
         if (currentTime - prevTime >= 1.)
         {
-            imGuiFPS = fps;
+            ui.setImGuiFps(fps);
             fps = 0;
             prevTime = currentTime;
         }
@@ -730,13 +712,13 @@ void GameEnvironment::run()
 
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
-        if(showGrid)
-            grid.drawGrid(gridSize);
+        if(ui.getShowGrid())
+            grid.drawGrid(ui.getGridSize());
         //"Physics" Reset AFTER Update
         physicsEngine->updatePhysics(); 
           
         drawEntities();
-        drawImGuiWindows();
+        ui.draw();
         glfwSwapBuffers(window);
         updateDeltaTime(); 
         //BuffersAndEventHandeling

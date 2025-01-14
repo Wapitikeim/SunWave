@@ -36,6 +36,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "ui/UiManager.h"
 
 //ComponentTesting
 #include "physics/CollisionTester.h"
@@ -85,7 +86,6 @@ class GameEnvironment
         float lastFrame = 0.0f; // Time of last frame
         double prevTime = glfwGetTime();
         int fps = 0;
-        int imGuiFPS = 0;
 
         //Mouse Movement
         bool firstMouse = true;
@@ -121,7 +121,6 @@ class GameEnvironment
         void initEntities();
         void resetLevel();
         void loadWallLevel();
-        void fillSceneWithEntitys();
         
         void updateFunctionEvents();
         struct funcExecute
@@ -151,10 +150,19 @@ class GameEnvironment
         //Update
         void update();
 
-        //Grid
-        bool showGrid=true;
-        float gridSize = 1.f;
+        
+        //ImGui
+        UiManager ui;
+        void drawImGuiWindows();
 
+    public:
+        GameEnvironment();
+        ~GameEnvironment()
+        {
+            glfwTerminate();
+        };
+
+        
         //Entitys
         template<typename entityTypeToGet>
         entityTypeToGet* getEntityFromName(std::string entityName)
@@ -205,24 +213,20 @@ class GameEnvironment
             entities.push_back(std::move(entityToAdd));
         }
 
-        //ImGui 
-        void setupImGui();
-        void drawImGuiWindows();
 
-    public:
-        GameEnvironment();
-        ~GameEnvironment()
-        {
-            glfwTerminate();
-            ImGui_ImplOpenGL3_Shutdown();
-            ImGui_ImplGlfw_Shutdown();
-            ImGui::DestroyContext();
-        };
+        std::vector<std::unique_ptr<Entity>>& getEntities() {return entities;}
+        PhysicsEngine* getPhysicsEngine()const{return physicsEngine.get();};
+        SceneManager& getSceneManager() { return sceneManager; }
+        const float& getFov()const{return fov;};
+        const float& getMouseX()const{return mouseX;};
+        const float& getMouseY()const{return mouseY;};
+        const glm::vec3 getCameraPos()const{return cameraPos;};
+        PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
 
-        const std::vector<std::unique_ptr<Entity>>& getEntities() const{return entities;}
         void run();
 
         void testing(); //Random testing function
+        void fillSceneWithEntitys(); //MiniGame 1
         int entitiesToFill = 50;
 
 };
