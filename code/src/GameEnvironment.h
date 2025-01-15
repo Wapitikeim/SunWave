@@ -150,7 +150,7 @@ class GameEnvironment
         
         //Ui
         UiManager ui;
-        std::unique_ptr<FontLoader> fontLoader;
+        FontLoader fontLoader;
 
     public:
         GameEnvironment();
@@ -215,6 +215,7 @@ class GameEnvironment
         PhysicsEngine* getPhysicsEngine()const{return physicsEngine.get();};
         SceneManager& getSceneManager() { return sceneManager; }
         const float& getFov()const{return fov;};
+        void setFOV(const float& newFOV){fov = newFOV;};
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};
         const glm::vec3 getCameraPos()const{return cameraPos;};
@@ -222,7 +223,7 @@ class GameEnvironment
 
         void run();
 
-        void testing(); //Random testing function
+        void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
         void fillSceneWithEntitys(); //MiniGame 1
         int entitiesToFill = 50;
 

@@ -42,6 +42,9 @@ void UiManager::drawImGuiWorldControl()
     ImGui::Begin("World Control");
     ImGui::Checkbox("Grid", &showGrid);
     ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
+    float fov = gameEnv->getFov();
+    ImGui::SliderFloat("Fov:", &fov, 30, 120, "%.3f",0);
+    gameEnv->setFOV(fov);
 
     // Vector of entity names
     std::vector<std::string> entityNames;

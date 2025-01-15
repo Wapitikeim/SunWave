@@ -14,7 +14,7 @@ struct Character {
 
 class FontLoader {
 public:
-    FontLoader(const std::string& fontPath, unsigned int fontSize);
+    FontLoader(const std::string& fontName, unsigned int fontSize);
     ~FontLoader();
     const std::map<char, Character>& getCharacters() const { return Characters; }
 

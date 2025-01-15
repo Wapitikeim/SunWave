@@ -1,7 +1,10 @@
 #include "GameEnvironment.h"
 #include <bitset>
 
-
+#include <glm/glm.hpp>
+#include <glm/matrix.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/vec4.hpp>
 
 //Just a random string generator (https://stackoverflow.com/questions/440133/how-do-i-create-a-random-alpha-numeric-string-in-c)
 std::string random_string( size_t length )
@@ -470,7 +473,7 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
 GameEnvironment::GameEnvironment()
     :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct")),
     ui(window,this),
-    fontLoader(std::make_unique<FontLoader>("../../../ui/Fonts/Open_Sans/OpenSans-Italic-VariableFont_wdth,wght.ttf", 48)) // Adjust the path and size as needed
+    fontLoader("Open_Sans\\OpenSans.ttf", 48) // Initialize fontLoader here
 {   
 }
 
@@ -566,8 +569,10 @@ void GameEnvironment::run()
             grid.drawGrid(ui.getGridSize());
         //"Physics" Reset AFTER Update
         physicsEngine->updatePhysics(); 
-          
+        
+        //testing(std::to_string(deltaTime), 0, 0, 1, glm::vec3(1,1,1));
         drawEntities();
+        
         ui.draw();
         glfwSwapBuffers(window);
         updateDeltaTime(); 
@@ -578,7 +583,73 @@ void GameEnvironment::run()
     
 }
 
-void GameEnvironment::testing()
+void GameEnvironment::testing(const std::string& text, float x, float y, float scale, glm::vec3 color)
 {
+    // Activate corresponding render state
+    ShaderContainer textShader("textVertexShader.glsl", "textFragmentShader.glsl");
+    textShader.useShader();
+    textShader.setUniformVec4("textColor", glm::vec4(color, 1.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0,0,0));
+    //model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(0.05f));
     
+    textShader.setUniformMat4("model", model);
+    textShader.setUniformMat4("view", Camera::getCurrentCameraView());
+    textShader.setUniformMat4("projection", Camera::getCurrentCameraProjection());
+    
+    // Initialize VAO and VBO for text rendering
+    unsigned int VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(VAO);
+
+    // Iterate through all characters
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++) 
+    {
+        Character ch = fontLoader.getCharacters().at(*c);
+
+        float xpos = x + ch.Bearing.x * scale;
+        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+        // Update VBO for each character
+        float vertices[6][4] = {
+            { xpos,     ypos + h,   0.0f, 0.0f },            
+            { xpos,     ypos,       0.0f, 1.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+
+            { xpos,     ypos + h,   0.0f, 0.0f },
+            { xpos + w, ypos,       1.0f, 1.0f },
+            { xpos + w, ypos + h,   1.0f, 0.0f }           
+        };
+
+        // Render glyph texture over quad
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+        // Update content of VBO memory
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); 
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        // Render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // Now advance cursors for next glyph (advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64)
+    }
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Clean up
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
 }

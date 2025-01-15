@@ -1,14 +1,20 @@
 #include "FontLoader.h"
 #include <iostream>
 #include <glad/glad.h>
+#include "../util/fileReader.h"
 
-FontLoader::FontLoader(const std::string& fontPath, unsigned int fontSize) {
+FontLoader::FontLoader(const std::string& fontName, unsigned int fontSize) 
+{
+    std::filesystem::path path(std::filesystem::current_path());
+    fileReader::trimDownPathToWorkingDirectory(path);
+    path.append("src\\ui\\Fonts\\" +fontName);
+    
     if (FT_Init_FreeType(&ft)) {
         std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
         return;
     }
 
-    if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
+    if (FT_New_Face(ft, path.string().c_str(), 0, &face)) {
         std::cerr << "ERROR::FREETYPE: Failed to load font" << std::endl;
         return;
     }
@@ -17,7 +23,8 @@ FontLoader::FontLoader(const std::string& fontPath, unsigned int fontSize) {
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable byte-alignment restriction
 
-    for (unsigned char c = 0; c < 128; c++) {
+    for (unsigned char c = 0; c < 128; c++) 
+    {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             std::cerr << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
             continue;
@@ -43,7 +50,8 @@ FontLoader::FontLoader(const std::string& fontPath, unsigned int fontSize) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Character character = {
+        Character character = 
+        {
             texture,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
             glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
@@ -57,8 +65,10 @@ FontLoader::FontLoader(const std::string& fontPath, unsigned int fontSize) {
     FT_Done_FreeType(ft);
 }
 
-FontLoader::~FontLoader() {
-    for (auto& pair : Characters) {
+FontLoader::~FontLoader() 
+{
+    for (auto& pair : Characters) 
+    {
         glDeleteTextures(1, &pair.second.TextureID);
     }
 }
