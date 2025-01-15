@@ -469,7 +469,8 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
 
 GameEnvironment::GameEnvironment()
     :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct")),
-    ui(window,this) 
+    ui(window,this),
+    fontLoader(std::make_unique<FontLoader>("../../../ui/Fonts/Open_Sans/OpenSans-Italic-VariableFont_wdth,wght.ttf", 48)) // Adjust the path and size as needed
 {   
 }
 

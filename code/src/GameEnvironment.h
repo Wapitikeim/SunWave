@@ -34,7 +34,7 @@
 
 //UI
 #include "ui/UiManager.h"
-
+#include "ui/FontLoader.h"
 //ComponentTesting
 #include "physics/CollisionTester.h"
 #include "physics/PhysicsEngine.h"
@@ -150,6 +150,7 @@ class GameEnvironment
         
         //Ui
         UiManager ui;
+        std::unique_ptr<FontLoader> fontLoader;
 
     public:
         GameEnvironment();

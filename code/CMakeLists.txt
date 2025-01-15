@@ -46,6 +46,13 @@ add_subdirectory(extern/glm)
 add_subdirectory(extern/stbimage)
 add_subdirectory(extern/imgui)
 add_subdirectory(extern/nhlohmann_json)
+# FreeType configuration
+set(FT_DISABLE_ZLIB TRUE CACHE BOOL "Disable ZLIB")
+set(FT_DISABLE_BZIP2 TRUE CACHE BOOL "Disable BZIP2")
+set(FT_DISABLE_PNG TRUE CACHE BOOL "Disable PNG")
+set(FT_DISABLE_HARFBUZZ TRUE CACHE BOOL "Disable HarfBuzz")
+set(FT_DISABLE_BROTLI TRUE CACHE BOOL "Disable Brotli")
+add_subdirectory(extern/freetype)
 
 # Cmake glfw stuff
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -56,7 +63,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_executable (HiddenInstinct ${SOURCEFILES} ${HEADERFILES})
 
 # opengl32.lib -> included in glad
-target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage imgui nlohmann_json)
+target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage imgui nlohmann_json freetype)
 
 # require C++ 17 compiler
 target_compile_features(HiddenInstinct PRIVATE cxx_std_17)
