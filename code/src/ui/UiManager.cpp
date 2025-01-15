@@ -37,6 +37,7 @@ void UiManager::drawImGuiWorldControl()
 {
     auto& entities = gameEnv->getEntities();
     auto* physicsEngine = gameEnv->getPhysicsEngine();
+    auto* mouseCollider = gameEnv->getCurrentMouseCollider();
     //Needs to be on Top That it dosent crash if other levels are loaded and the Header is collpased
     ImGui::Begin("World Control");
     ImGui::Checkbox("Grid", &showGrid);
@@ -50,9 +51,11 @@ void UiManager::drawImGuiWorldControl()
 
     static int selectedEntityIndex = 0;
     static char entityToLoad[128] = "";
-    if (entityToLoad[0] == '\0' && !entityNames.empty())
+
+    // Set entityToLoad to the mouseCollider name if available
+    if (mouseCollider != nullptr)
     {
-        strncpy(entityToLoad, entityNames[0].c_str(), sizeof(entityToLoad));
+        strncpy(entityToLoad, mouseCollider->getEntityThisIsAttachedTo()->getEntityName().c_str(), sizeof(entityToLoad));
         entityToLoad[sizeof(entityToLoad) - 1] = '\0'; // Ensure null-termination
     }
 
@@ -72,6 +75,7 @@ void UiManager::drawImGuiWorldControl()
     {
         auto entityRef = gameEnv->getEntityFromName<Entity>(entityToLoad);
         auto* colliderRef = gameEnv->getComponentOfEntity<PhysicsCollider>(entityRef->getEntityName(),"Physics");
+        ImGui::Text("Current selected entity: %s ", entityRef->getEntityName().c_str());
         if(colliderRef == nullptr)
             ImGui::Text("Entity %s has no active Physics Collider", entityRef->getEntityName().c_str());
         else
@@ -111,6 +115,14 @@ void UiManager::drawImGuiWorldControl()
             if(physicsEngine->getHashTableIndicesSize() != 0)
                 ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
         }
+        
+        float scaleX = entityRef->getScale().x;
+        float scaleY = entityRef->getScale().y;
+        ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
+        ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
+        glm::vec3 newScale(scaleX,scaleY, entityRef->getScale().z);
+        entityRef->setScale(newScale);
+        
         if(ImGui::Button("Delete Entity"))
             gameEnv->deleteEntityFromName(entityRef->getEntityName());
     }
@@ -224,6 +236,11 @@ void UiManager::drawImGuiPhysicsEngineControl()
     ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);
     physicsEngine->setBounceMultiplier(newBounce);  
     ImGui::Text("Hash Table Size: %i ", physicsEngine->getHashTableIndicesSize());
+    bool initDone = physicsEngine->getInitDone();
+    ImGui::Checkbox("Init done", &initDone);
+    ImGui::SameLine();
+    if(ImGui::Button("Re init"))
+        physicsEngine->setInitDone(!initDone);
     ImGui::End();
 }
 
@@ -287,13 +304,23 @@ void UiManager::drawImGuiEnitityAdder()
     static bool isStatic = "true";
 
     static int selectedShaderIndex = 0; // Index for the selected shader
+    static int selectedShapeIndex = 0; // Index for the selected shape
 
     // List of shader names
     const char* shaderNames[] = { "box", "circle", "cross", "sTriangle" };
+    // List of shape names
+    const char* shapeNames[] = { "Shape", "PlayerShape"};
+
 
     ImGui::Begin("Entity Adder");
 
-    ImGui::InputText("Type", entityType, IM_ARRAYSIZE(entityType));
+    // Dropdown for shape names
+    if (ImGui::Combo("Shape Name", &selectedShapeIndex, shapeNames, IM_ARRAYSIZE(shapeNames)))
+    {
+        // Update entityType based on the selected index
+        strncpy(entityType, shapeNames[selectedShapeIndex], sizeof(entityType));
+        entityType[sizeof(entityType) - 1] = '\0'; // Ensure null-termination
+    }
     ImGui::InputText("Name", entityName, IM_ARRAYSIZE(entityName));
     ImGui::InputFloat2("Position", position);
     ImGui::InputFloat2("Scale", scale);

@@ -3,21 +3,21 @@
         {
             "Physics": {
                 "Acceleration": [
+                    20.0,
                     0.0,
-                    -9.8100004196167,
                     0.0
                 ],
                 "Elasticity": 0.20000000298023224,
-                "IsGrounded": false,
-                "IsInContact": false,
+                "IsGrounded": true,
+                "IsInContact": true,
                 "IsResting": false,
                 "IsStatic": false,
                 "IsTrigger": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
-                    -0.5772842764854431,
-                    0.00027157366275787354,
+                    16.38457489013672,
+                    0.0,
                     0.0
                 ]
             },
@@ -25,8 +25,8 @@
             "Type": "PlayerShape",
             "name": "Player",
             "position": [
-                20.36013412475586,
-                2.3588736057281494,
+                20.39988136291504,
+                2.4990603923797607,
                 0.0
             ],
             "rotation": 0.0,
@@ -184,7 +184,7 @@
     "levelName": "WallLevel",
     "physicsEngine": [
         {
-            "BounceM": 1.6690000295639038
+            "BounceM": 2.247999906539917
         }
     ],
     "worldData": [
