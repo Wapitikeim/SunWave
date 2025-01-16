@@ -333,6 +333,7 @@ void UiManager::drawImGuiEnitityAdder()
     static int fontSize = 48;
     static char textBuffer[256];
     static float textColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+    static bool addPhysics = "false";
 
     static int selectedShaderIndex = 0; // Index for the selected shader
     static int selectedShapeIndex = 0; // Index for the selected shape
@@ -365,6 +366,7 @@ void UiManager::drawImGuiEnitityAdder()
         ImGui::InputInt("FontSize", &fontSize);
         ImGui::InputText("Rendered Text", textBuffer, sizeof(textBuffer));
         ImGui::ColorEdit4("Text Color", textColor);
+        ImGui::Checkbox("Add Physics", &addPhysics);
     }
     else
     {
@@ -385,9 +387,13 @@ void UiManager::drawImGuiEnitityAdder()
                 auto newEntity = createUiEntity(entityType, entityName, glm::vec3(position[0], position[1], 0.f), glm::vec3(scale[0], scale[1], 1.0f), rotation, textBuffer, fontNames[selectedFontIndex], static_cast<unsigned int>(fontSize), glm::vec4(textColor[0], textColor[1], textColor[2], textColor[3]));
                 gameEnv->addEntity(std::move(newEntity));
                 std::cout << "Trying to add entity: " << entityName << "\n";
-                auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
-                addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
-                physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+                if(addPhysics)
+                {
+                    auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
+                    addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
+                    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+                }
+                
             }
             catch (const std::exception& e)
             {
