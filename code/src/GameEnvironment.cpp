@@ -286,7 +286,7 @@ void GameEnvironment::initEntities()
     entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
     physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
     
-    auto testElement = std::make_unique<UiElement>("TestUI",glm::vec3(30,20,0), glm::vec3(1.f), 0, "Ja leck mich fett", "Open_Sans\\OpenSans.ttf", 48);
+    auto testElement = std::make_unique<UiElement>("TestUI",glm::vec3(0,1040,0), glm::vec3(1.f), 0, "Ja leck mich fett", "Open_Sans\\static\\OpenSans-Regular.ttf", 48);
     entities.push_back(std::move(testElement));
 
     /* auto physicsTesting_1 = std::make_unique<Shape>("physicsTesting_1", glm::vec3(cameraPos.x+5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.5f), 0, true, "circle");
@@ -556,7 +556,6 @@ void GameEnvironment::run()
             fps = 0;
             prevTime = currentTime;
         }
-        
         //Camera Update (Theoriactically)
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));

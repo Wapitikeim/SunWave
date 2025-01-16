@@ -118,16 +118,36 @@ void UiManager::drawImGuiWorldControl()
             if(physicsEngine->getHashTableIndicesSize() != 0)
                 ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
         }
-        //Currently buggy, lets the entitys jump around 
-        /* static float position[2] = {entityRef->getPosition().x, entityRef->getPosition().y};
-        ImGui::InputFloat2("Position", position);
-        entityRef->setPosition(glm::vec3(position[0], position[1], entityRef->getPosition().z)); */
+        float position[2] = { entityRef->getPosition().x, entityRef->getPosition().y };
+        if (ImGui::InputFloat2("Position", position)) 
+            entityRef->setPosition(glm::vec3(position[0], position[1], entityRef->getPosition().z));
         float scaleX = entityRef->getScale().x;
         float scaleY = entityRef->getScale().y;
         ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
         ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
         glm::vec3 newScale(scaleX,scaleY, entityRef->getScale().z);
         entityRef->setScale(newScale);
+
+        if(entityRef->getEntityType() == "UiElement")
+        {
+            UiElement* uiElement = dynamic_cast<UiElement*>(entityRef);
+            if (uiElement) 
+            {
+            // Successfully cast to UiElement, now you can access UiElement-specific members
+            static char textBuffer[256];
+            strncpy(textBuffer, uiElement->getText().c_str(), sizeof(textBuffer));
+            if (ImGui::InputText("Rendered Text", textBuffer, sizeof(textBuffer))) 
+                uiElement->setTextToBeRenderd(std::string(textBuffer));
+            }
+
+            // Input for text color
+            float textColor[4] = { uiElement->getTextColor().r, uiElement->getTextColor().g, uiElement->getTextColor().b, uiElement->getTextColor().a };
+            if (ImGui::InputFloat4("Text Color", textColor)) 
+                uiElement->setTextColor(glm::vec4(textColor[0], textColor[1], textColor[2], textColor[3]));
+            
+            
+        }
+            
         
         if(ImGui::Button("Delete Entity"))
             gameEnv->deleteEntityFromName(entityRef->getEntityName());
