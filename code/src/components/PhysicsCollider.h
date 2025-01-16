@@ -87,6 +87,7 @@ class PhysicsCollider : public Component
 
         void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
         void setPos(const glm::vec3 &newPos){colliderBody.colliderPosition = newPos; updateEntityPosAndRot();};
+        void setScale(const glm::vec3 &newScale){colliderBody.colliderScale = newScale; updateEntityPosAndRot();};
         void setVelocity(const glm::vec3 &newVelocity){colliderBody.colliderVelocity = newVelocity;};
         void setAcceleration(const glm::vec3 &newAcceleration){colliderBody.colliderAcceleration = newAcceleration;};
         void setRot(const float &newRot){colliderBody.colliderZRotation = newRot; updateEntityPosAndRot();};
@@ -126,7 +127,7 @@ class PhysicsCollider : public Component
         };
         bool isGivenColliderInContactWithThisCollider(PhysicsCollider* collider){return std::count(isInContactWith.begin(),isInContactWith.end(),collider);};
         int getSizeOfContacts(){return isInContactWith.size();};
-
+        glm::vec3& getColliderScale(){return colliderBody.colliderScale;};
         void update() override;
         void updateCornerPositions();
 

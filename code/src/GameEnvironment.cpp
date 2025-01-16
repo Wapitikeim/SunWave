@@ -289,7 +289,7 @@ void GameEnvironment::initEntities()
     auto testElement = std::make_unique<UiElement>("TestUI",glm::vec3(15,10,0), glm::vec3(1.f), 0, "Ja leck mich fett", "Open_Sans\\static\\OpenSans-Regular.ttf", 48);
     entities.push_back(std::move(testElement));
     entities[9]->addComponent(std::make_unique<PhysicsCollider>(entities[9].get(),0));
-    dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))->setIsTrigger(true);
+    //dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))->setIsTrigger(true);
     physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics")));
 
     /* auto physicsTesting_1 = std::make_unique<Shape>("physicsTesting_1", glm::vec3(cameraPos.x+5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.5f), 0, true, "circle");

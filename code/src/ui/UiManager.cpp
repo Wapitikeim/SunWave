@@ -328,6 +328,11 @@ void UiManager::drawImGuiEnitityAdder()
     static float rotation = 0.0f;
     static char shaderName[128] = "box";
     static bool isStatic = "true";
+    const char* fontNames[] = { "Open_Sans\\static\\OpenSans-Regular.ttf", "Open_Sans\\static\\OpenSans-Bold.ttf", "Open_Sans\\static\\OpenSans-Italic.ttf" };
+    static int selectedFontIndex = 0;
+    static int fontSize = 48;
+    static char textBuffer[256];
+    static float textColor[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 
     static int selectedShaderIndex = 0; // Index for the selected shader
     static int selectedShapeIndex = 0; // Index for the selected shape
@@ -335,16 +340,16 @@ void UiManager::drawImGuiEnitityAdder()
     // List of shader names
     const char* shaderNames[] = { "box", "circle", "cross", "sTriangle" };
     // List of shape names
-    const char* shapeNames[] = { "Shape", "PlayerShape"};
+    const char* entityTypes[] = { "Shape", "PlayerShape", "UiElement"};
 
 
     ImGui::Begin("Entity Adder");
 
     // Dropdown for shape names
-    if (ImGui::Combo("Shape Name", &selectedShapeIndex, shapeNames, IM_ARRAYSIZE(shapeNames)))
+    if (ImGui::Combo("Entity type", &selectedShapeIndex, entityTypes, IM_ARRAYSIZE(entityTypes)))
     {
         // Update entityType based on the selected index
-        strncpy(entityType, shapeNames[selectedShapeIndex], sizeof(entityType));
+        strncpy(entityType, entityTypes[selectedShapeIndex], sizeof(entityType));
         entityType[sizeof(entityType) - 1] = '\0'; // Ensure null-termination
     }
     ImGui::InputText("Name", entityName, IM_ARRAYSIZE(entityName));
@@ -353,27 +358,57 @@ void UiManager::drawImGuiEnitityAdder()
     ImGui::InputFloat("Rotation", &rotation);
     ImGui::Checkbox("Is static", &isStatic);
     // Dropdown for shader names
-    if (ImGui::Combo("Shader Name", &selectedShaderIndex, shaderNames, IM_ARRAYSIZE(shaderNames)))
+    if(strcmp(entityType, "UiElement") == 0)
     {
-        // Update shaderName based on the selected index
-        strncpy(shaderName, shaderNames[selectedShaderIndex], sizeof(shaderName));
-        shaderName[sizeof(shaderName) - 1] = '\0'; // Ensure null-termination
+        // Add UI element specific inputs here
+        ImGui::Combo("Font Name", &selectedFontIndex, fontNames, IM_ARRAYSIZE(fontNames));
+        ImGui::InputInt("FontSize", &fontSize);
+        ImGui::InputText("Rendered Text", textBuffer, sizeof(textBuffer));
+        ImGui::ColorEdit4("Text Color", textColor);
+    }
+    else
+    {
+    if (ImGui::Combo("Shader Name", &selectedShaderIndex, shaderNames, IM_ARRAYSIZE(shaderNames)))
+        {
+            // Update shaderName based on the selected index
+            strncpy(shaderName, shaderNames[selectedShaderIndex], sizeof(shaderName));
+            shaderName[sizeof(shaderName) - 1] = '\0'; // Ensure null-termination
+        }
     }
 
     if (ImGui::Button("Add"))
     {
-        try
+        if(strcmp(entityType, "UiElement") == 0)
         {
-            auto newEntity = createEntity(entityType, entityName, glm::vec3(position[0], position[1], 0.f), glm::vec3(scale[0], scale[1], 1.0f), rotation, shaderName);
-            gameEnv->addEntity(std::move(newEntity));
-            std::cout << "Trying to add entity: " << entityName << "\n";
-            auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
-            addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
-            physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+            try
+            {
+                auto newEntity = createUiEntity(entityType, entityName, glm::vec3(position[0], position[1], 0.f), glm::vec3(scale[0], scale[1], 1.0f), rotation, textBuffer, fontNames[selectedFontIndex], static_cast<unsigned int>(fontSize), glm::vec4(textColor[0], textColor[1], textColor[2], textColor[3]));
+                gameEnv->addEntity(std::move(newEntity));
+                std::cout << "Trying to add entity: " << entityName << "\n";
+                auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
+                addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
+                physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Error: " << e.what() << "\n";
+            }
         }
-        catch (const std::exception& e)
+        else
         {
-            std::cerr << "Error: " << e.what() << "\n";
+            try
+            {
+                auto newEntity = createEntity(entityType, entityName, glm::vec3(position[0], position[1], 0.f), glm::vec3(scale[0], scale[1], 1.0f), rotation, shaderName);
+                gameEnv->addEntity(std::move(newEntity));
+                std::cout << "Trying to add entity: " << entityName << "\n";
+                auto* addedEntity = gameEnv->getEntityFromName<Entity>(entityName);
+                addedEntity->addComponent(std::make_unique<PhysicsCollider>(addedEntity,isStatic));
+                physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(gameEnv->getEntityFromName<Entity>(entityName)->getComponent("Physics")));
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "Error: " << e.what() << "\n";
+            }
         }
     }
 
