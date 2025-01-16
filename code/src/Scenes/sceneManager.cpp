@@ -5,6 +5,7 @@
 #include "../util/fileReader.h"
 #include "../entities/Shape.h"
 #include "../entities/PlayerShape.h"
+#include "../entities/UiElement.h"
 #include "../factorys/EntityFactory.h"
 
 void SceneManager::loadLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine)
@@ -45,11 +46,21 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
         float rotation = entity_json["rotation"];
         std::string type = entity_json["Type"];
         std::string shaderName = entity_json["ShaderName"];
-
         
-        // Create the entity
-        //auto aDynamicBox = std::make_unique<Shape>("aDynamicBox", glm::vec3(10.f,5.f,0.3f),glm::vec3(1.f), 0, true, "box");
-        auto loadedEntity = createEntity(type, name, position, scale, rotation, shaderName);
+        std::unique_ptr<Entity> loadedEntity;
+
+        if(entity_json.contains("UiElement"))
+        {
+            std::string renderedText = entity_json["UiElement"]["RenderedText"];
+            std::string fontName = entity_json["UiElement"]["Font"]; 
+            unsigned int fontSize = entity_json["UiElement"]["FontSize"]; 
+            glm::vec4 textColor = glm::vec4(entity_json["UiElement"]["TextColor"][0], entity_json["UiElement"]["TextColor"][1], entity_json["UiElement"]["TextColor"][2], entity_json["UiElement"]["TextColor"][3]);
+            
+            loadedEntity = createUiEntity(type, name, position, scale, rotation, renderedText, fontName, fontSize, textColor);
+        }
+        else
+            loadedEntity = createEntity(type, name, position, scale, rotation, shaderName);
+        
         entities.push_back(std::move(loadedEntity));
         
         if (entity_json.contains("Physics"))
@@ -114,6 +125,25 @@ void SceneManager::saveLevel(const std::string& levelName, std::vector<std::uniq
             };
             entity_json["Physics"] = physics_json;
         }   
+        
+        //UIElementInfo
+        if(entry->getEntityType()=="UiElement")
+        {
+            UiElement* uiElement = dynamic_cast<UiElement*>(entry.get());
+            if (uiElement) 
+            {
+                nlohmann::json uiElement_json = nlohmann::json
+                {
+                    {"Font", uiElement->getCurrentFontName()},
+                    {"FontSize", uiElement->getCurrentFontSize()},
+                    {"RenderedText", uiElement->getText()},
+                    {"TextColor", {uiElement->getTextColor().r, uiElement->getTextColor().g, uiElement->getTextColor().b, uiElement->getTextColor().a}}
+                };
+                entity_json["UiElement"] = uiElement_json;
+            }
+            
+        }
+
         level["entities"].push_back(entity_json);
     }
     

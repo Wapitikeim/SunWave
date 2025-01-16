@@ -16,6 +16,13 @@ void UiElement::draw()
     entityShader.setUniformVec4("colorChange", textColor);
     entityShader.setUniformMat4("textProjection", Camera::getCurrentCameraOrto());
 
-    entityMesh.drawText(textToBeRenderd, font, entityPosition.x, entityPosition.y, entityScale.x*entityScale.y);
+    glm::vec4 clipSpacePos = Camera::getCurrentCameraProjection() * Camera::getCurrentCameraView() * glm::vec4(entityPosition, 1.0f);
+    glm::vec3 ndcSpacePos = glm::vec3(clipSpacePos) / clipSpacePos.w;
+
+    glm::vec2 screenSpacePos;
+    screenSpacePos.x = (ndcSpacePos.x + 1.0f) * 0.5f * 1920.0f;
+    screenSpacePos.y = (ndcSpacePos.y + 1.0f) * 0.5f * 1080.0f;
+
+    entityMesh.drawText(textToBeRenderd, font, screenSpacePos.x, screenSpacePos.y, entityScale.x*entityScale.y);
     
 }
