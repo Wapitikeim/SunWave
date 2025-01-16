@@ -29,6 +29,7 @@
 #include "entities/Entity.h"
 #include "entities/Shape.h"
 #include "entities/PlayerShape.h"
+#include "entities/UiElement.h"
 #include "Scenes/SceneManager.h"
 
 
@@ -150,7 +151,6 @@ class GameEnvironment
         
         //Ui
         UiManager ui;
-        FontLoader fontLoader;
 
     public:
         GameEnvironment();

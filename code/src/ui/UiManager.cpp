@@ -118,7 +118,10 @@ void UiManager::drawImGuiWorldControl()
             if(physicsEngine->getHashTableIndicesSize() != 0)
                 ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
         }
-        
+        //Currently buggy, lets the entitys jump around 
+        /* static float position[2] = {entityRef->getPosition().x, entityRef->getPosition().y};
+        ImGui::InputFloat2("Position", position);
+        entityRef->setPosition(glm::vec3(position[0], position[1], entityRef->getPosition().z)); */
         float scaleX = entityRef->getScale().x;
         float scaleY = entityRef->getScale().y;
         ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);

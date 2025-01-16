@@ -12,13 +12,16 @@ class Camera
     
         static glm::mat4 projection;
         static glm::mat4 view;
+        static glm::mat4 orto;
 
     
     public:
 
         static glm::mat4 getCurrentCameraView();
         static glm::mat4 getCurrentCameraProjection();
+        static glm::mat4 getCurrentCameraOrto();
 
         static void setCurrentCameraView(const glm::mat4 &viewToSet);
         static void setCurrentCameraProjection(const glm::mat4 &projectionToSet);
+        static void setCurrentCameraOrto(const glm::mat4 &ortoToSet);
 };

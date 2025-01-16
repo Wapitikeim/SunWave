@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "../util/fileReader.h"
+#include "../ui/FontLoader.h"
 
 
 class MeshContainer
@@ -31,6 +32,8 @@ class MeshContainer
         void setupEBO();
         void setupTexture();
 
+        void setupForTextRendering();
+
         void generateBuffers();
 
     public:
@@ -52,6 +55,13 @@ class MeshContainer
             //Default just position data for local Space
             //And Texture coord
             setupMesh();
+        }
+        MeshContainer(bool textRendering)
+        {
+            if(textRendering)
+                setupForTextRendering();
+            else
+                std::cout << "TextRendering was set to 0\n";
         }
 
         //Delete Copy Constructor
@@ -82,6 +92,7 @@ class MeshContainer
         
         void drawLine();
         void drawMesh();
+        void drawText(std::string& textToBeRenderd, FontLoader& font,float x, float y, const float& scale);
 
         void reinitMesh();
 
