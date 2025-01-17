@@ -133,7 +133,15 @@ void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, flo
     std::string::const_iterator c;
     for (c = textToBeRenderd.begin(); c != textToBeRenderd.end(); c++)
     {
-        Character ch = font.getCharacters().at(*c);
+        Character ch;
+        try
+        {
+            ch = font.getCharacters().at(*c);
+        }
+        catch (const std::exception& e)
+        {
+            ch = font.getCharacters().at('?');
+        }
 
         float xpos = x + ch.Bearing.x * scale;
         float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;

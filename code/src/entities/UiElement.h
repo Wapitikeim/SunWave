@@ -15,7 +15,6 @@ class UiElement : public Entity
     public:
         UiElement(std::string elementName, glm::vec3 elementPosition, glm::vec3 elementScale, float elementRotation, std::string textToBeRenderd, std::string fontName, unsigned int fontSize);
         void draw() override;
-        void update(GLFWwindow* window, float deltaTime) override;
         FontLoader& getCurrentFont(){return font;};
         std::string& getCurrentFontName(){return currentFontName;};
         unsigned int& getCurrentFontSize(){return currentFontSize;};
