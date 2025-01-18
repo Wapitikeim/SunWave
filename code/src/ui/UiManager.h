@@ -28,19 +28,19 @@ class UiManager
         void drawImGuiControlPanel();
         bool imGuiControlPanel = true;
         void drawImGuiWorldControl();
-        bool worldControl = true;
+        bool worldControl = false;
         void drawImGuiInfoPanel();
-        bool infoPanel = true;
+        bool infoPanel = false;
         void drawImGuiLevelManager();
-        bool levelManager = true;
+        bool levelManager = false;
         void drawImGuiPhysicsEngineControl();
-        bool physicsEngineControl = true;
+        bool physicsEngineControl = false;
         void drawImGuiPlayerExtraInfo();
         bool playerExtraInfo = false; 
         void drawImGuiMouseInformation();
         bool mouseInformation = false;
         void drawImGuiEnitityAdder();
-        bool entityAdder = true;
+        bool entityAdder = false;
 
         
     public:

@@ -1,6 +1,7 @@
 #pragma once 
 #include "Entity.h"
 #include "../ui/FontLoader.h"
+#include <functional>
 
 class UiElement : public Entity
 {
@@ -13,6 +14,9 @@ class UiElement : public Entity
         unsigned int currentFontSize;
         FontLoader font;
 
+        //Button
+        std::function<void()> onClickFunction;
+
     public:
         UiElement(std::string elementName, glm::vec3 elementPosition, glm::vec3 elementScale, float elementRotation, std::string textToBeRenderd, std::string fontName, unsigned int fontSize);
         void draw() override;
@@ -24,5 +28,8 @@ class UiElement : public Entity
         void const setTextColor(glm::vec4& newColor){ textColor = newColor;};
         void const setTextToBeRenderd(std::string& newTextToBeRenderd){textToBeRenderd = newTextToBeRenderd;};
         void const setNewFont(std::string& newFontName, unsigned int newFontSize){font = FontLoader(newFontName, newFontSize);};
+
+        void setOnClick(std::function<void()> callback) { onClickFunction = callback; }
+        void click() { if (onClickFunction) onClickFunction(); }
 
 };

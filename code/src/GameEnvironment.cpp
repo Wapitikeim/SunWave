@@ -74,6 +74,10 @@ void GameEnvironment::mousePositionUpdate()
     mouseX = (xPos*(glm::abs((xHalf*2))-glm::abs(whatCameraSeesBottomLeft.x)))/(float)glfwPrep::getCurrentWindowWidth();
     mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
     float rot = 0;
+
+    if(physicsEngine->getPhysicsObjectsEmpty())
+        return;
+
     //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
     auto refCollider = physicsEngine->getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
     if(!pressedAndHoldingSomething)
@@ -148,8 +152,17 @@ void GameEnvironment::mousePositionUpdate()
 void GameEnvironment::mouseClickLogic()
 {
     //0 = Release
-    //1 = Press 
+    //1 = Press
+     
     currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    //UIelement Buttons catch####
+    if(currentMouseLeftButtonState && !lastMouseLeftButtonState && refColliderForMouseCurrent)
+    {
+        UiElement* uiElement = dynamic_cast<UiElement*>(refColliderForMouseCurrent->getEntityThisIsAttachedTo());
+        if (uiElement)
+            uiElement->click();
+    }
+    //######
     if(refColliderForMouseCurrent == nullptr)
         return;
     refColliderForMouseCurrent->updateCornerPositions();
@@ -185,6 +198,8 @@ void GameEnvironment::mouseClickLogic()
         refColliderForMouseCurrent->update();
         physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     }
+    
+    
 }
 
 void GameEnvironment::drawEntities()
@@ -237,9 +252,41 @@ void GameEnvironment::update()
     }
 }
 
-void GameEnvironment::initEntities()
+void GameEnvironment::loadMenu()
 {
-    //Player? Prep
+    auto exitButton = std::make_unique<UiElement>("Exit Button",glm::vec3(41,2,0), glm::vec3(2.f), 0, "Exit", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+    exitButton->setOnClick([this]
+    {
+        glfwSetWindowShouldClose(this->getCurrentWindow(), GLFW_TRUE);
+    });
+    entities.push_back(std::move(exitButton));
+    entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),1));
+    dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->setIsTrigger(true);
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
+    
+
+    auto startButton = std::make_unique<UiElement>("Start Button",glm::vec3(21,16,0), glm::vec3(2.f), 0, "Start", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+    startButton->setOnClick([this]
+    {
+        this->fillSceneWithEntitys();
+    });
+    entities.push_back(std::move(startButton));
+    entities[1]->addComponent(std::make_unique<PhysicsCollider>(entities[1].get(),1));
+    dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics"))->setIsTrigger(true);
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
+    
+    auto devMode = std::make_unique<UiElement>("Dev Button",glm::vec3(3,2,0), glm::vec3(2.f), 0, "Dev", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+    devMode->setOnClick([this]
+    {
+        this->getSceneManager().loadLevel("Default",this->getEntities(),this->getPhysicsEngine());
+    });
+    entities.push_back(std::move(devMode));
+    entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
+    dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics"))->setIsTrigger(true);
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
+    
+    
+    /* //Player? Prep
     auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box");
     entities.push_back(std::move(playerShape));
     entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),0));
@@ -290,42 +337,8 @@ void GameEnvironment::initEntities()
     entities.push_back(std::move(testElement));
     entities[9]->addComponent(std::make_unique<PhysicsCollider>(entities[9].get(),0));
     //dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))->setIsTrigger(true);
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics")));
+    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))); */
 
-    /* auto physicsTesting_1 = std::make_unique<Shape>("physicsTesting_1", glm::vec3(cameraPos.x+5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.5f), 0, true, "circle");
-    entities.push_back(std::move(physicsTesting_1));
-    entities[9]->addComponent(std::make_unique<PhysicsCollider>(entities[9].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics")));
-
-    auto physicsTesting_2 = std::make_unique<Shape>("physicsTesting_2", glm::vec3(cameraPos.x+8.f,cameraPos.y+6.f,0.3f),glm::vec3(0.75f), 0, true, "circle");
-    entities.push_back(std::move(physicsTesting_2));
-    entities[10]->addComponent(std::make_unique<PhysicsCollider>(entities[10].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[10]->getComponent("Physics")));
-
-    auto physicsTesting_3 = std::make_unique<Shape>("physicsTesting_3", glm::vec3(cameraPos.x+10.f,cameraPos.y+8.f,0.3f),glm::vec3(1), 0, true, "circle");
-    entities.push_back(std::move(physicsTesting_3));
-    entities[11]->addComponent(std::make_unique<PhysicsCollider>(entities[11].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[11]->getComponent("Physics")));
-
-    auto physicsTesting_4 = std::make_unique<Shape>("physicsTesting_4", glm::vec3(cameraPos.x-5.f,cameraPos.y+3.f,0.3f),glm::vec3(0.7f), 0, true, "circle");
-    entities.push_back(std::move(physicsTesting_4));
-    entities[12]->addComponent(std::make_unique<PhysicsCollider>(entities[12].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[12]->getComponent("Physics")));
-
-    auto physicsTesting_5 = std::make_unique<Shape>("physicsTesting_5", glm::vec3(cameraPos.x-8.f,cameraPos.y+5.f,0.3f),glm::vec3(1.2f), 0, true, "circle");
-    entities.push_back(std::move(physicsTesting_5));
-    entities[13]->addComponent(std::make_unique<PhysicsCollider>(entities[13].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[13]->getComponent("Physics")));
-
-    auto physicsTesting_6 = std::make_unique<Shape>("physicsTesting_6", glm::vec3(cameraPos.x-12.f,cameraPos.y+8.f,0.3f),glm::vec3(2.1f), 0, true, "box");
-    entities.push_back(std::move(physicsTesting_6));
-    entities[14]->addComponent(std::make_unique<PhysicsCollider>(entities[14].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[14]->getComponent("Physics")));
-
-    auto physicsTesting_7 = std::make_unique<Shape>("physicsTesting_7", glm::vec3(cameraPos.x-16.f,cameraPos.y+6.f,0.3f),glm::vec3(1.3f), 0, true, "cross");
-    entities.push_back(std::move(physicsTesting_7));
-    entities[15]->addComponent(std::make_unique<PhysicsCollider>(entities[15].get(),0));
-    physicsEngine.registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[15]->getComponent("Physics"))); */
 }
 
 void GameEnvironment::prepareForLevelChange()
@@ -339,7 +352,7 @@ void GameEnvironment::prepareForLevelChange()
 void GameEnvironment::resetLevel()
 {
     prepareForLevelChange();
-    initEntities();
+    loadMenu();
 }
 
 void GameEnvironment::loadWallLevel()
@@ -526,7 +539,7 @@ void GameEnvironment::run()
 
 
     //Load Level
-    initEntities();
+    loadMenu();
  
     glfwMaximizeWindow(window);
 

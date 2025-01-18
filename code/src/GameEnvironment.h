@@ -116,7 +116,7 @@ class GameEnvironment
 
         }; */
         void prepareForLevelChange();
-        void initEntities();
+        void loadMenu();
         void resetLevel();
         void loadWallLevel();
         
@@ -209,7 +209,7 @@ class GameEnvironment
                 }
             entities.push_back(std::move(entityToAdd));
         }
-
+        GLFWwindow* getCurrentWindow(){return window;};
 
         std::vector<std::unique_ptr<Entity>>& getEntities() {return entities;}
         PhysicsEngine* getPhysicsEngine()const{return physicsEngine.get();};

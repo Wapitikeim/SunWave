@@ -78,7 +78,7 @@ void UiElement::draw()
 
     screenSpacePos.x -= textSize.x/2;
     screenSpacePos.y -= textSize.y/2;
-    std::cout << calculateTextSizeInWorldCoord() << "\n";
+    
 
     entityMesh.drawText(textToBeRenderd, font, screenSpacePos.x, screenSpacePos.y, entityScale.x, entityScale.y);
 

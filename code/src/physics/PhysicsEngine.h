@@ -118,7 +118,7 @@ class PhysicsEngine
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;
         float getTimeStep(){return (1.0f / tickrateOfSimulation) * speedOfSimulation;};
-
+        const bool& getPhysicsObjectsEmpty(){return physicsObjects.empty();};
         void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
         void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
 

@@ -386,7 +386,7 @@ void PhysicsEngine::updatePhysics()
 {
     ticksLastFrame = 0;
 
-    if (isHalting) //Kinda just works if physicsObjects are not moving
+    if (isHalting || physicsObjects.empty())
         return;
 
     // Necessary for Right HashTable Insertion because Corner Positions are getting calculated too late
