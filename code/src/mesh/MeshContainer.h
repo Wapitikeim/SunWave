@@ -92,7 +92,7 @@ class MeshContainer
         
         void drawLine();
         void drawMesh();
-        void drawText(std::string& textToBeRenderd, FontLoader& font,float x, float y, const float& scale);
+        void drawText(std::string& textToBeRenderd, FontLoader& font,float x, float y, const float& scaleX, const float& scaleY);
 
         void reinitMesh();
 

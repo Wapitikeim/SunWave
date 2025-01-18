@@ -562,7 +562,7 @@ void GameEnvironment::run()
         //Camera Update (Theoriactically)
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
-        Camera::setCurrentCameraOrto(glm::ortho(0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT));
+        Camera::setCurrentCameraOrto(glm::ortho(0.0f, (float)glfwPrep::getCurrentWindowWidth(), 0.0f, (float)glfwPrep::getCurrentWindowHeight()));
         mousePositionUpdate();
         //GameLogic Testing        
         updateFunctionEvents();

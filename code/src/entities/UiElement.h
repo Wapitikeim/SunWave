@@ -5,7 +5,8 @@
 class UiElement : public Entity
 {
     private:
-        glm::vec2 calculateTextSize();
+        glm::vec2 calculateTextSizeInPixels();
+        glm::vec2 calculateTextSizeInWorldCoord();
         glm::vec4 textColor;
         std::string textToBeRenderd;
         std::string currentFontName;

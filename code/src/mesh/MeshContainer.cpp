@@ -123,7 +123,7 @@ void MeshContainer::drawMesh()
     
 }
 
-void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, float x, float y, const float& scale)
+void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, float xPixelPos, float yPixelPos, const float& scaleX, const float& scaleY)
 {
 
     glActiveTexture(GL_TEXTURE0);
@@ -136,6 +136,7 @@ void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, flo
         Character ch;
         try
         {
+            //Just supports ASCII character atm
             ch = font.getCharacters().at(*c);
         }
         catch (const std::exception& e)
@@ -143,11 +144,11 @@ void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, flo
             ch = font.getCharacters().at('?');
         }
 
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+        float xpos = xPixelPos + ch.Bearing.x * scaleX;
+        float ypos = yPixelPos - (ch.Size.y - ch.Bearing.y) * scaleY;
 
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
+        float w = ch.Size.x * scaleX;
+        float h = ch.Size.y * scaleY;
         // update VBO for each character
         float vertices[6][4] = {
             { xpos,     ypos + h,   0.0f, 0.0f },            
@@ -167,7 +168,7 @@ void MeshContainer::drawText(std::string &textToBeRenderd, FontLoader& font, flo
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+        xPixelPos += (ch.Advance >> 6) * scaleX; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
