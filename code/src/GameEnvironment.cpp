@@ -272,7 +272,48 @@ void GameEnvironment::processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+        if(gamePaused)
+            return;
+        gamePaused = true;
+        if(!physicsEngine->getIsHalting())
+        {
+            physicsEngine->setIsHalting(true);
+            physicsEngineWasActive = true;
+        }
+        else
+            physicsEngineWasActive = false;
+            
+        
+        addEntity(std::make_unique<UiElement>("Pause banner",glm::vec3(21,20,0),glm::vec3(2),0,"Pause","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+        addEntity(std::make_unique<UiElement>("Back to menu",glm::vec3(21,10,0),glm::vec3(2),0,"Back to menu","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+        addEntity(std::make_unique<UiElement>("Resume banner",glm::vec3(21,15,0),glm::vec3(2),0,"Resume","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+        auto resumeBanner = getEntityFromName<UiElement>("Resume banner");
+        resumeBanner->addComponent(std::make_unique<PhysicsCollider>(resumeBanner,1));
+        dynamic_cast<PhysicsCollider*>(resumeBanner->getComponent("Physics"))->setIsTrigger(true);
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Resume banner","Physics"));
+        resumeBanner->setOnClick([this]
+        {
+            this->setGamePaused(false);
+            if(this->getIfPhysicsEngineWasActive())
+                this->getPhysicsEngine()->setIsHalting(false);
+            this->deleteEntityFromName("Pause banner");
+            this->deleteEntityFromName("Back to menu");
+            this->refColliderForMouseCurrent = nullptr;
+            this->deleteEntityFromName("Resume banner");
+        });
+
+        auto backToMenuBanner = getEntityFromName<UiElement>("Back to menu");
+        backToMenuBanner->addComponent(std::make_unique<PhysicsCollider>(backToMenuBanner,1));
+        getComponentOfEntity<PhysicsCollider>("Back to menu","Physics")->setIsTrigger(true);
+        physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Back to menu","Physics"));
+        backToMenuBanner->setOnClick([this]
+        {
+            this->setGamePaused(false);
+            this->refColliderForMouseCurrent = nullptr;
+            this->loadMenu();
+        });
+
+
     }
 }
 
@@ -294,6 +335,8 @@ void GameEnvironment::update()
 void GameEnvironment::loadMenu()
 {
     sceneManager.loadLevel("Main Menu", entities, getPhysicsEngine());
+    gamePaused = true;
+    ui.setShowImGuiUI(false);
     auto exitButton = getEntityFromName<UiElement>("Exit Button");
     exitButton->setOnClick([this]
     {
@@ -304,6 +347,7 @@ void GameEnvironment::loadMenu()
     startButton->setOnClick([this]
     {
         this->resetMouseStates();
+        this->setGamePaused(false);
         this->miniGameFindShape();
     });
 
@@ -311,6 +355,8 @@ void GameEnvironment::loadMenu()
     devMode->setOnClick([this]
     {
         this->resetMouseStates();
+        this->setGamePaused(false);
+        this->getUiManager().setShowImGuiUI(true);
         this->getSceneManager().loadLevel("Default",this->getEntities(),this->getPhysicsEngine());
     });
     

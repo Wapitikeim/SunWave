@@ -64,6 +64,9 @@ class UiManager
 
         const int& getImGuiFps() const {return imGuiFPS;};
         void setImGuiFps(const int& newFPS) {imGuiFPS=newFPS;};
+
+        const bool& getShowImGuiUI() const {return imGuiControlPanel;};
+        void setShowImGuiUI(const bool& newControl){imGuiControlPanel = newControl;};
         
         void prepFrames();
         void draw();

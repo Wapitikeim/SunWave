@@ -127,6 +127,8 @@ class GameEnvironment
         void loadMenu();
         void resetLevel();
         void loadWallLevel();
+        bool gamePaused = false;
+        bool physicsEngineWasActive = false;
         
         void updateFunctionEvents();
         struct funcExecute
@@ -224,8 +226,11 @@ class GameEnvironment
         SceneManager& getSceneManager() { return sceneManager; }
         const float& getFov()const{return fov;};
         void setFOV(const float& newFOV){fov = newFOV;};
+        void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
+        const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};
+        UiManager& getUiManager(){return ui;};
         const glm::vec3 getCameraPos()const{return cameraPos;};
         PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
         
