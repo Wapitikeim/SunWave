@@ -112,6 +112,7 @@ class PhysicsEngine
             colliderInitialPos.clear();
             colliderInitialRot.clear();
             physicsObjects.clear(); 
+            physicsObjects.shrink_to_fit();
             initDone = false;  
         };
 

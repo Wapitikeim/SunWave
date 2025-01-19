@@ -1,0 +1,309 @@
+{
+    "entities": [
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": true,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 72,
+                "RenderedText": "Back to Menu",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "BtM",
+            "position": [
+                6,
+                1.5,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 94,
+                "RenderedText": "Games:",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "GamesBanner",
+            "position": [
+                4.624484062194824,
+                19.091915130615234,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-ExtraBold.ttf",
+                "FontSize": 164,
+                "RenderedText": "Sun Wave",
+                "TextColor": [
+                    0.7254902124404907,
+                    0.1351403445005417,
+                    0.1351403445005417,
+                    1.0
+                ]
+            },
+            "name": "Banner",
+            "position": [
+                10.0,
+                23.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": false,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Find the Shape",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "SF",
+            "position": [
+                9.594079971313477,
+                15.988303184509277,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": false,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Balance the spheres",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "BtS",
+            "position": [
+                11.5,
+                12.814155578613281,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": false,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Go on Position!",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "GoP",
+            "position": [
+                9.8,
+                9.592982292175293,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": false,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "To be determined",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "TbD",
+            "position": [
+                10.7,
+                6.4188337326049805,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ],
+    "levelName": "Level selector",
+    "physicsEngine": [
+        {
+            "BounceM": 2.25
+        }
+    ],
+    "worldData": [
+        {
+            "CameraPos": [
+                22.100000381469727,
+                12.425999641418457,
+                30.0
+            ],
+            "Fov": 45.0
+        }
+    ]
+}

@@ -72,7 +72,8 @@ void GameEnvironment::mouseUpdate()
     mousePhysicsUpdate();
     mouseHoverOverEffect();
     mouseClickLogic();
-    mouseEntityManipulationLogic();
+    if(entityManipulationThroughMouse)
+        mouseEntityManipulationLogic();
     //MiniGameLogic?
     if(refColliderForMouseCurrent && refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound && pressedAndHoldingSomething)
     {
@@ -337,6 +338,7 @@ void GameEnvironment::loadMenu()
     sceneManager.loadLevel("Main Menu", entities, getPhysicsEngine());
     gamePaused = true;
     ui.setShowImGuiUI(false);
+    entityManipulationThroughMouse = false;
     auto exitButton = getEntityFromName<UiElement>("Exit Button");
     exitButton->setOnClick([this]
     {
@@ -347,8 +349,7 @@ void GameEnvironment::loadMenu()
     startButton->setOnClick([this]
     {
         this->resetMouseStates();
-        this->setGamePaused(false);
-        this->miniGameFindShape();
+        this->loadLevelSelector();
     });
 
     auto devMode = getEntityFromName<UiElement>("Dev Button");
@@ -357,9 +358,32 @@ void GameEnvironment::loadMenu()
         this->resetMouseStates();
         this->setGamePaused(false);
         this->getUiManager().setShowImGuiUI(true);
+        this->setMouseEntityManipulation(true);
         this->getSceneManager().loadLevel("Default",this->getEntities(),this->getPhysicsEngine());
     });
     
+}
+
+void GameEnvironment::loadLevelSelector()
+{
+    sceneManager.loadLevel("Level selector", entities, getPhysicsEngine());
+    
+    auto backToMenuButton = getEntityFromName<UiElement>("BtM");
+    backToMenuButton->setOnClick([this]
+    {
+        this->resetMouseStates();
+        this->loadMenu();
+    });
+
+    auto sfButton = getEntityFromName<UiElement>("SF");
+    sfButton->setOnClick([this]
+    {
+        this->resetMouseStates();
+        this->setGamePaused(false);
+        this->setMouseEntityManipulation(true);
+        this->miniGameFindShape();
+    });
+
 }
 
 void GameEnvironment::prepareForLevelChange()

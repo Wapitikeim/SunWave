@@ -101,6 +101,7 @@ class GameEnvironment
         bool lastMouseLeftButtonState = false;
         bool pressedAndHoldingSomething = false;
         bool staticPrevRef = false;
+        bool entityManipulationThroughMouse = true;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
         PhysicsCollider* refColliderForMouseOld = nullptr;
         void mouseUpdate();
@@ -125,6 +126,7 @@ class GameEnvironment
         }; */
         void prepareForLevelChange();
         void loadMenu();
+        void loadLevelSelector();
         void resetLevel();
         void loadWallLevel();
         bool gamePaused = false;
@@ -227,6 +229,7 @@ class GameEnvironment
         const float& getFov()const{return fov;};
         void setFOV(const float& newFOV){fov = newFOV;};
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
+        void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};

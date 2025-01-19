@@ -37,6 +37,7 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
         std::cerr << "Error: BounceM key not found in physicsEngine section of the JSON.\n";
 
     int i = 0;
+    int j = 0; //for Physics if objects are loaded that dont have physics
     for(const auto& entity_json : levelToLoad["entities"])
     {
         //Load base Entity data
@@ -62,14 +63,14 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
             loadedEntity = createEntity(type, name, position, scale, rotation, shaderName);
         
         entities.push_back(std::move(loadedEntity));
-        
+
         if (entity_json.contains("Physics"))
         {
             entities[i]->addComponent(std::make_unique<PhysicsCollider>(entities[i].get(),entity_json["Physics"]["IsStatic"]));
             physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[i]->getComponent("Physics")));
             if(applyPhysicsWhenLoading)
             {
-                auto& ref = physicsEngine->getActiveColliders()[i];
+                auto& ref = physicsEngine->getActiveColliders()[j];
                 ref->setVelocity(glm::vec3(entity_json["Physics"]["Velocity"][0], entity_json["Physics"]["Velocity"][1], entity_json["Physics"]["Velocity"][2]));
                 ref->setAcceleration(glm::vec3(entity_json["Physics"]["Acceleration"][0], entity_json["Physics"]["Acceleration"][1], entity_json["Physics"]["Acceleration"][2]));
                 ref->setMass(entity_json["Physics"]["Mass"]);
@@ -80,11 +81,13 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
                 ref->setElascity(entity_json["Physics"]["Elasticity"]);
                 ref->setRot(entity_json["Physics"]["Rot"]);
             }
+            j++;
         }
-        if (applyPhysicsWhenLoading)
-            physicsEngine->setInitDone(true);
+        
         i++;
     }
+    if (applyPhysicsWhenLoading)
+            physicsEngine->setInitDone(true);
 }
 
 void SceneManager::saveLevel(const std::string& levelName, std::vector<std::unique_ptr<Entity>>& entities, PhysicsEngine* physicsEngine, const glm::vec3& cameraPos, const float& fov)
