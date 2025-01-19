@@ -442,7 +442,7 @@ bool PhysicsEngine::checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, f
     return false;
 }
 
-PhysicsCollider *PhysicsEngine::getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ)
+PhysicsCollider *PhysicsEngine::getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float& rotZ)
 {
     for(auto &entry:physicsObjects)
         if(CollisionTester::isColliderCollidingWithShell(entry, pos, scale, rotZ))

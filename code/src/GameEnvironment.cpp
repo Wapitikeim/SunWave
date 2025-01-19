@@ -65,7 +65,33 @@ void GameEnvironment::mouse_callback(GLFWwindow* window, double xpos, double ypo
     cameraFront = glm::normalize(direction);
 }
 
-void GameEnvironment::mousePositionUpdate()
+void GameEnvironment::mouseUpdate()
+{
+    mouseCursorPositionUpdate();
+    mouseClickUpdate();
+    mousePhysicsUpdate();
+    mouseHoverOverEffect();
+    mouseClickLogic();
+    mouseEntityManipulationLogic();
+    //MiniGameLogic?
+    if(refColliderForMouseCurrent && refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound && pressedAndHoldingSomething)
+    {
+        shapeFound = true;
+        physicsEngine->setIsHalting(false);
+        deleteEntityFromName("WallBottom");
+        registerFunctionToExecuteWhen(5.f,[this]() {this->startMiniGameLogic();});
+    }
+
+    
+    //Physics Finish (to have a chance to diff between Cur<->Old in Mouse Update)
+    if(refColliderForMouseCurrent != refColliderForMouseOld)
+        refColliderForMouseOld = refColliderForMouseCurrent;
+    //Click Finish
+    if (currentMouseLeftButtonState!= lastMouseLeftButtonState)
+        lastMouseLeftButtonState = currentMouseLeftButtonState;
+}
+
+void GameEnvironment::mouseCursorPositionUpdate()
 {
     //MouseCursor Update
     float yPos = glm::abs(ImGui::GetMousePos().y-glfwPrep::getCurrentWindowHeight());
@@ -73,32 +99,65 @@ void GameEnvironment::mousePositionUpdate()
     //float mouseX = (ImGui::GetMousePos().x*(xHalf*2))/glfwPrep::getCurrentWindowWidth();
     mouseX = (xPos*(glm::abs((xHalf*2))-glm::abs(whatCameraSeesBottomLeft.x)))/(float)glfwPrep::getCurrentWindowWidth();
     mouseY = (yPos*(glm::abs((yHalf*2))-glm::abs(whatCameraSeesBottomLeft.y)))/(float)glfwPrep::getCurrentWindowHeight();
-    float rot = 0;
+}
 
+void GameEnvironment::mousePhysicsUpdate()
+{
+    //Update the refMouse Collider
     if(physicsEngine->getPhysicsObjectsEmpty())
+    {
+        refColliderForMouseOld = nullptr;
+        refColliderForMouseCurrent = nullptr;
         return;
-
-    //!!!Erst wenn das Window einmal verändert wird?! -> glfwMaximizeWindow
+    }
+    float rot = 0;
     auto refCollider = physicsEngine->getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
-    if(!pressedAndHoldingSomething)
+    
+    if((refCollider != refColliderForMouseCurrent) && !pressedAndHoldingSomething)
         refColliderForMouseCurrent = refCollider;
     
-    //ChangeShaderByOverOverEffect---
-    if(refCollider != nullptr && !pressedAndHoldingSomething)
-        refCollider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
-    //CheckIn/OutBound 
-    if(refColliderForMouseCurrent != refColliderForMouseOld)
-    {
-        if(refColliderForMouseOld != nullptr)
-            refColliderForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
-        
-        refColliderForMouseOld = refColliderForMouseCurrent;
-    }
-    //---ChangeShaderByOverOverEffect
-    mouseClickLogic();
+}
 
+void GameEnvironment::mouseHoverOverEffect()
+{
+    //ChangeShaderByOverOverEffect---
+    if(refColliderForMouseCurrent != nullptr && !pressedAndHoldingSomething)
+        refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
+    if((refColliderForMouseCurrent != refColliderForMouseOld) && (refColliderForMouseOld != nullptr))
+        refColliderForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+}
+
+void GameEnvironment::mouseClickUpdate()
+{
+    //0 = Release
+    //1 = Press
+    currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    if(currentMouseLeftButtonState && lastMouseLeftButtonState)
+        mouseLeftClickHoldingDown = true;
+    else
+        mouseLeftClickHoldingDown = false;
+    
+    if(mouseLeftClickHoldingDown && refColliderForMouseCurrent)
+        pressedAndHoldingSomething = true;
+    else
+        pressedAndHoldingSomething = false;
+}
+
+void GameEnvironment::mouseButtonClickInteractionLogic()
+{
+    //UIelement Buttons catch####
+    if(currentMouseLeftButtonState && mouseLeftClickHoldingDown && refColliderForMouseCurrent)
+    {
+        UiElement* uiElement = dynamic_cast<UiElement*>(refColliderForMouseCurrent->getEntityThisIsAttachedTo());
+        if (uiElement)
+            uiElement->click();
+    }
+}
+
+void GameEnvironment::mouseEntityManipulationLogic()
+{
     //Rotation Logic
-    if(pressedAndHoldingSomething)
+    if(pressedAndHoldingSomething && refColliderForMouseCurrent)
     {
         if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
         {
@@ -147,59 +206,39 @@ void GameEnvironment::mousePositionUpdate()
         }
 
     }
+    
 }
 
 void GameEnvironment::mouseClickLogic()
 {
-    //0 = Release
-    //1 = Press
-     
-    currentMouseLeftButtonState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-    //UIelement Buttons catch####
-    if(currentMouseLeftButtonState && !lastMouseLeftButtonState && refColliderForMouseCurrent)
-    {
-        UiElement* uiElement = dynamic_cast<UiElement*>(refColliderForMouseCurrent->getEntityThisIsAttachedTo());
-        if (uiElement)
-            uiElement->click();
-    }
-    //######
-    if(refColliderForMouseCurrent == nullptr)
+    if(!refColliderForMouseCurrent)
         return;
+
+    mouseButtonClickInteractionLogic();
+    //It could be that the click loads or level or stmth 
+    if(!refColliderForMouseCurrent)
+        return;
+
     refColliderForMouseCurrent->updateCornerPositions();
     physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     if (currentMouseLeftButtonState!= lastMouseLeftButtonState)
     {
         if(!lastMouseLeftButtonState)
         {
-            //From Release to Press ("It was Resting now Pressed")
-            pressedAndHoldingSomething = true;
             staticPrevRef = refColliderForMouseCurrent->getIsStatic(); 
             refColliderForMouseCurrent->setIsStatic(staticPrevRef);        
         }
         else
-        {
-            //From Press to Release ("It was Pressed now released")
-            pressedAndHoldingSomething = false;
-            refColliderForMouseCurrent->setIsStatic(staticPrevRef); 
-        }
-        lastMouseLeftButtonState = currentMouseLeftButtonState;
+            refColliderForMouseCurrent->setIsStatic(staticPrevRef);  
     }
+
     if(pressedAndHoldingSomething)
-    {
-        if(refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound)
-        {
-            shapeFound = true;
-            physicsEngine->setIsHalting(false);
-            deleteEntityFromName("WallBottom");
-            registerFunctionToExecuteWhen(5.f,[this]() {this->startMiniGameLogic();});
-        }    
-        
+    {      
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
         refColliderForMouseCurrent->update();
         physicsEngine->addColliderIntoHashTable(refColliderForMouseCurrent);
     }
-    
-    
+
 }
 
 void GameEnvironment::drawEntities()
@@ -254,91 +293,27 @@ void GameEnvironment::update()
 
 void GameEnvironment::loadMenu()
 {
-    auto exitButton = std::make_unique<UiElement>("Exit Button",glm::vec3(41,2,0), glm::vec3(2.f), 0, "Exit", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+    sceneManager.loadLevel("Main Menu", entities, getPhysicsEngine());
+    auto exitButton = getEntityFromName<UiElement>("Exit Button");
     exitButton->setOnClick([this]
     {
         glfwSetWindowShouldClose(this->getCurrentWindow(), GLFW_TRUE);
     });
-    entities.push_back(std::move(exitButton));
-    entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),1));
-    dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics"))->setIsTrigger(true);
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
     
-
-    auto startButton = std::make_unique<UiElement>("Start Button",glm::vec3(21,16,0), glm::vec3(2.f), 0, "Start", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+    auto startButton = getEntityFromName<UiElement>("Start Button");
     startButton->setOnClick([this]
     {
-        this->fillSceneWithEntitys();
+        this->resetMouseStates();
+        this->miniGameFindShape();
     });
-    entities.push_back(std::move(startButton));
-    entities[1]->addComponent(std::make_unique<PhysicsCollider>(entities[1].get(),1));
-    dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics"))->setIsTrigger(true);
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
-    
-    auto devMode = std::make_unique<UiElement>("Dev Button",glm::vec3(3,2,0), glm::vec3(2.f), 0, "Dev", "Open_Sans\\static\\OpenSans-Regular.ttf", 64);
+
+    auto devMode = getEntityFromName<UiElement>("Dev Button");
     devMode->setOnClick([this]
     {
+        this->resetMouseStates();
         this->getSceneManager().loadLevel("Default",this->getEntities(),this->getPhysicsEngine());
     });
-    entities.push_back(std::move(devMode));
-    entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
-    dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics"))->setIsTrigger(true);
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
     
-    
-    /* //Player? Prep
-    auto playerShape = std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box");
-    entities.push_back(std::move(playerShape));
-    entities[0]->addComponent(std::make_unique<PhysicsCollider>(entities[0].get(),0));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[0]->getComponent("Physics")));
-
-    //Entities Prep
-    auto wallBottom = std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
-    entities.push_back(std::move(wallBottom));
-    entities[1]->addComponent(std::make_unique<PhysicsCollider>(entities[1].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[1]->getComponent("Physics")));
-
-    auto wallTop = std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box");
-    entities.push_back(std::move(wallTop));
-    entities[2]->addComponent(std::make_unique<PhysicsCollider>(entities[2].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[2]->getComponent("Physics")));
-
-    auto wallLeft = std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box");
-    entities.push_back(std::move(wallLeft));
-    entities[3]->addComponent(std::make_unique<PhysicsCollider>(entities[3].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[3]->getComponent("Physics")));
-
-    auto wallRight = std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box");
-    entities.push_back(std::move(wallRight));
-    entities[4]->addComponent(std::make_unique<PhysicsCollider>(entities[4].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[4]->getComponent("Physics")));
-
-    auto wallMiddle = std::make_unique<Shape>("wallMiddle", glm::vec3(21.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 0.0f, true, "box");
-    entities.push_back(std::move(wallMiddle));
-    entities[5]->addComponent(std::make_unique<PhysicsCollider>(entities[5].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[5]->getComponent("Physics")));
-
-    auto wallMiddleLeft = std::make_unique<Shape>("wallMiddleLeft", glm::vec3(10.f,11.f,0.3f),glm::vec3(3.f,1.f,1.0f), 45.0f, true, "box");
-    entities.push_back(std::move(wallMiddleLeft));
-    entities[6]->addComponent(std::make_unique<PhysicsCollider>(entities[6].get(),1));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[6]->getComponent("Physics")));
-
-    auto aDynamicBox = std::make_unique<Shape>("aDynamicBox", glm::vec3(10.f,5.f,0.3f),glm::vec3(1.f), 0, true, "box");
-    entities.push_back(std::move(aDynamicBox));
-    entities[7]->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("aDynamicBox"),0));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[7]->getComponent("Physics")));
-    
-    auto aRandomTriggerBox = std::make_unique<Shape>("aRandomTriggerBox", glm::vec3(cameraPos.x,cameraPos.y,0.3f),glm::vec3(0.3f), 0, true, "circle");
-    entities.push_back(std::move(aRandomTriggerBox));
-    entities[8]->addComponent(std::make_unique<PhysicsCollider>(entities[8].get(),0));
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[8]->getComponent("Physics")));
-    
-    auto testElement = std::make_unique<UiElement>("TestUI",glm::vec3(15,10,0), glm::vec3(1.f), 0, "Ja leck mich fett", "Open_Sans\\static\\OpenSans-Regular.ttf", 48);
-    entities.push_back(std::move(testElement));
-    entities[9]->addComponent(std::make_unique<PhysicsCollider>(entities[9].get(),0));
-    //dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))->setIsTrigger(true);
-    physicsEngine->registerPhysicsCollider(dynamic_cast<PhysicsCollider*>(entities[9]->getComponent("Physics"))); */
-
 }
 
 void GameEnvironment::prepareForLevelChange()
@@ -387,7 +362,7 @@ void GameEnvironment::loadWallLevel()
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
 }
 
-void GameEnvironment::fillSceneWithEntitys()
+void GameEnvironment::miniGameFindShape()
 {
     prepareForLevelChange();
 
@@ -446,6 +421,7 @@ void GameEnvironment::fillSceneWithEntitys()
                 addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
                 auto randomEntity = getEntityFromName<Entity>(name);
                 randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+                //dynamic_cast<PhysicsCollider*>(randomEntity->getComponent("Physics"))->setMass(getRandomNumber(1,10));
                 physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
             }
         }
@@ -477,7 +453,7 @@ void GameEnvironment::updateFunctionEvents()
 void GameEnvironment::startMiniGameLogic()
 {
     shapeFound = false;
-    fillSceneWithEntitys();
+    miniGameFindShape();
 }
 
 void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute)
@@ -576,7 +552,7 @@ void GameEnvironment::run()
         Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
         Camera::setCurrentCameraOrto(glm::ortho(0.0f, (float)glfwPrep::getCurrentWindowWidth(), 0.0f, (float)glfwPrep::getCurrentWindowHeight()));
-        mousePositionUpdate();
+        mouseUpdate();
         //GameLogic Testing        
         updateFunctionEvents();
 
@@ -596,6 +572,17 @@ void GameEnvironment::run()
     }
 
     
+}
+
+void GameEnvironment::resetMouseStates()
+{
+    currentMouseLeftButtonState = false;
+    mouseLeftClickHoldingDown = false;
+    lastMouseLeftButtonState = false;
+    pressedAndHoldingSomething = false;
+    staticPrevRef = false;
+    refColliderForMouseCurrent = nullptr;
+    refColliderForMouseOld = nullptr;
 }
 
 void GameEnvironment::testing(const std::string& text, float x, float y, float scale, glm::vec3 color)

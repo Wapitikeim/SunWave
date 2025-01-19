@@ -92,16 +92,24 @@ class GameEnvironment
         float pitch = 0.0f;
         float yaw = -90.f; 
         void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-        //Mouse Seperate later
+        
+        //Mouse 
         float mouseX;
         float mouseY;
-        int currentMouseLeftButtonState;
-        int lastMouseLeftButtonState = 0;
+        bool currentMouseLeftButtonState;
+        bool mouseLeftClickHoldingDown = false;
+        bool lastMouseLeftButtonState = false;
         bool pressedAndHoldingSomething = false;
         bool staticPrevRef = false;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
         PhysicsCollider* refColliderForMouseOld = nullptr;
-        void mousePositionUpdate();
+        void mouseUpdate();
+        void mouseCursorPositionUpdate();
+        void mousePhysicsUpdate();
+        void mouseHoverOverEffect();
+        void mouseClickUpdate();
+        void mouseButtonClickInteractionLogic();
+        void mouseEntityManipulationLogic();
         void mouseClickLogic();
 
         //Level Logic / Functions
@@ -220,11 +228,13 @@ class GameEnvironment
         const float& getMouseY()const{return mouseY;};
         const glm::vec3 getCameraPos()const{return cameraPos;};
         PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
-
+        
         void run();
 
+        void resetMouseStates();
+
         void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
-        void fillSceneWithEntitys(); //MiniGame 1
+        void miniGameFindShape(); //MiniGame 1
         int entitiesToFill = 50;
 
 };

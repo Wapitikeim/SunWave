@@ -255,7 +255,7 @@ void UiManager::drawImGuiPhysicsEngineControl()
     ImGui::SliderInt("Entity Count", &gameEnv->entitiesToFill, 20, 200);
     if(ImGui::Button("Test Stuff"))
     {
-        gameEnv->fillSceneWithEntitys();
+        gameEnv->miniGameFindShape();
     }
 
     float newBounce = physicsEngine->getBounceMultiplier();
