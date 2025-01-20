@@ -339,7 +339,7 @@ void UiManager::drawImGuiEnitityAdder()
     static int selectedShapeIndex = 0; // Index for the selected shape
 
     // List of shader names
-    const char* shaderNames[] = { "box", "circle", "cross", "sTriangle" };
+    const char* shaderNames[] = { "box", "boxWithin", "circle", "cross", "sTriangle", "triangle", "triangleWithin", "star"};
     // List of shape names
     const char* entityTypes[] = { "Shape", "PlayerShape", "UiElement"};
 

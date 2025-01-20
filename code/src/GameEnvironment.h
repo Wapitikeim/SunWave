@@ -115,6 +115,7 @@ class GameEnvironment
         void resetLevel();
         void loadWallLevel();
         bool gamePaused = false;
+        bool inMenu = false;
         bool physicsEngineWasActive = false;
         
         //Entities
@@ -223,8 +224,10 @@ class GameEnvironment
         PhysicsEngine* getPhysicsEngine()const{return physicsEngine.get();};
         SceneManager& getSceneManager() { return sceneManager; }
         const float& getFov()const{return fov;};
+        const float& getDeltaTime()const{return deltaTime;};
         void setFOV(const float& newFOV){fov = newFOV;};
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
+        void setInMenu(const bool& newMenu){inMenu = newMenu;};
         void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const float& getMouseX()const{return mouseX;};
@@ -240,6 +243,7 @@ class GameEnvironment
 
         void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
         
+      
         //minigames
         const bool& getShapeFound();
         void incrementTimeToComplete();

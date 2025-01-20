@@ -273,7 +273,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        if(gamePaused)
+        if(inMenu)
             return;
         gamePaused = true;
         if(!physicsEngine->getIsHalting())
@@ -337,7 +337,7 @@ void GameEnvironment::update()
 void GameEnvironment::loadMenu()
 {
     sceneManager.loadLevel("Main Menu", entities, getPhysicsEngine());
-    gamePaused = true;
+    inMenu = true;
     ui.setShowImGuiUI(false);
     entityManipulationThroughMouse = false;
     auto exitButton = getEntityFromName<UiElement>("Exit Button");
@@ -358,11 +358,47 @@ void GameEnvironment::loadMenu()
     {
         this->resetMouseStates();
         this->setGamePaused(false);
+        this->setInMenu(false);
         this->getUiManager().setShowImGuiUI(true);
         this->setMouseEntityManipulation(true);
         this->getSceneManager().loadLevel("Default",this->getEntities(),this->getPhysicsEngine());
     });
-    
+
+    //Shenanigens
+    auto* cube = getEntityFromName<Shape>("Cube");
+    auto* cubeCollider = dynamic_cast<PhysicsCollider*>(cube->getComponent("Physics"));
+    cubeCollider->setIsStatic(false);
+    registerRepeatingFunction(
+        [this]() {
+            if(this->getEntityFromName<Shape>("Cube") == nullptr)
+                return;
+            if(this->getEntityFromName<Shape>("Cube")->getPosition().x > 47)
+            {
+                glm::vec3 newPos = this->getEntityFromName<Shape>("Cube")->getPosition();
+                newPos.x-=45;
+                this->getEntityFromName<Shape>("Cube")->setPosition(newPos);
+            }
+            if(this->getEntityFromName<Shape>("Cube")->getPosition().x < 0)
+            {
+                glm::vec3 newPos = this->getEntityFromName<Shape>("Cube")->getPosition();
+                newPos.x+=45;
+                this->getEntityFromName<Shape>("Cube")->setPosition(newPos);
+            }
+            if(this->getEntityFromName<Shape>("Cube")->getPosition().y < -2)
+            {
+                glm::vec3 newPos = this->getEntityFromName<Shape>("Cube")->getPosition();
+                newPos.y+=30;
+                this->getEntityFromName<Shape>("Cube")->setPosition(newPos);
+            }
+            this->getEntityFromName<Shape>("Cube")->setZRotation((this->getEntityFromName<Shape>("Cube")->getRotation()+10*this->getDeltaTime()));  
+        },
+        [this]() -> bool {
+            if(this->getEntityFromName<Shape>("Cube") == nullptr)
+                return true;
+            return false;
+        }
+    );
+
 }
 
 void GameEnvironment::loadLevelSelector()
@@ -382,6 +418,7 @@ void GameEnvironment::loadLevelSelector()
     {
         this->resetMouseStates();
         this->setGamePaused(false);
+        this->setInMenu(false);
         this->setMouseEntityManipulation(true);
         this->initFindTheShape();
     });
@@ -464,7 +501,7 @@ void GameEnvironment::miniGameFindShape()
     }
     //Random Entities
     {
-        std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle"};
+        std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle", "star", "triangle", "triangleWithin"};
         int shapeToFind = getRandomNumber(0,shapeNames.size()-1);
         std::string shapeToFindName = shapeNames[shapeToFind];
         shapeNames.erase(shapeNames.begin() + shapeToFind);
@@ -555,7 +592,7 @@ void GameEnvironment::updateRepeatingFunctions()
     }
 }
 
-const bool &GameEnvironment::getShapeFound()
+const bool& GameEnvironment::getShapeFound()
 {
     if(shapeFound)
     {
@@ -713,3 +750,5 @@ void GameEnvironment::testing(const std::string& text, float x, float y, float s
 {
     
 }
+
+
