@@ -80,7 +80,7 @@ void GameEnvironment::mouseUpdate()
         shapeFound = true;
         physicsEngine->setIsHalting(false);
         deleteEntityFromName("WallBottom");
-        registerFunctionToExecuteWhen(5.f,[this]() {this->startMiniGameLogic();});
+        registerFunctionToExecuteWhen(5.f,[this]() {this->initFindTheShape();});
     }
 
     
@@ -310,7 +310,8 @@ void GameEnvironment::processInput(GLFWwindow *window)
         backToMenuBanner->setOnClick([this]
         {
             this->setGamePaused(false);
-            this->refColliderForMouseCurrent = nullptr;
+            this->resetMouseStates();
+            this->resetRegisterdFunctions();
             this->loadMenu();
         });
 
@@ -372,6 +373,7 @@ void GameEnvironment::loadLevelSelector()
     backToMenuButton->setOnClick([this]
     {
         this->resetMouseStates();
+        this->resetRegisterdFunctions();
         this->loadMenu();
     });
 
@@ -381,7 +383,7 @@ void GameEnvironment::loadLevelSelector()
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setMouseEntityManipulation(true);
-        this->miniGameFindShape();
+        this->initFindTheShape();
     });
 
 }
@@ -440,22 +442,22 @@ void GameEnvironment::miniGameFindShape()
 
     //Walls
     {
-        addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+        addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,-0.7f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
         auto WallBottom = getEntityFromName<Entity>("WallBottom");
         WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,1));
         physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
 
-        addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
+        addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2+0.7,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
         auto WallTop = getEntityFromName<Entity>("WallTop");
         WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,1));
         physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
 
-        addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
+        addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(-0.7f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
         auto wallLeft = getEntityFromName<Entity>("wallLeft");
         wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,1));
         physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
 
-        addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
+        addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2+0.7f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
         auto wallRight = getEntityFromName<Entity>("wallRight");
         wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,1));
         physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
@@ -500,6 +502,8 @@ void GameEnvironment::miniGameFindShape()
 
 void GameEnvironment::updateFunctionEvents()
 {
+    if(gamePaused)
+        return;
     for(auto it = functionsToExecuteAfterTime.begin(); it != functionsToExecuteAfterTime.end();)
     {
         it->timer -= deltaTime;
@@ -520,9 +524,65 @@ void GameEnvironment::updateFunctionEvents()
     }
 }
 
-void GameEnvironment::startMiniGameLogic()
+void GameEnvironment::registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition)
+{
+    RepeatingFunction rf;
+    rf.function = functionToExecute;
+    rf.stopCondition = stopCondition;
+    repeatingFunctions.push_back(rf);
+}
+
+void GameEnvironment::updateRepeatingFunctions()
+{
+    if(gamePaused)
+        return;
+    for (auto it = repeatingFunctions.begin(); it != repeatingFunctions.end();)
+    {
+        // Execute the stored function
+        it->function();
+
+        // Check the stop condition
+        if (it->stopCondition())
+        {
+            // Erase the struct from the vector and get a valid iterator to the next element
+            it = repeatingFunctions.erase(it);
+        }
+        else
+        {
+            // Move to the next element if not erasing
+            ++it;
+        }
+    }
+}
+
+const bool &GameEnvironment::getShapeFound()
+{
+    if(shapeFound)
+    {
+        std::cout << "It took: " << timeToComplete << "\n";
+        timeToComplete = 0;
+        entitiesToFill+=20;
+    }
+    return shapeFound;  
+}
+
+void GameEnvironment::incrementTimeToComplete()
+{
+    if(!gamePaused)
+        timeToComplete+=deltaTime;
+}
+
+void GameEnvironment::initFindTheShape()
 {
     shapeFound = false;
+    registerRepeatingFunction(
+        [this]() {
+            this->incrementTimeToComplete();
+        },
+        [this]() -> bool {
+            return this->getShapeFound();
+        }
+    );
     miniGameFindShape();
 }
 
@@ -536,22 +596,9 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
 }
 
 GameEnvironment::GameEnvironment()
-    :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hidden Instinct")),
+    :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SunWave")),
     ui(window,this)
 {   
-}
-
-//Framebuffer Testing
-void GameEnvironment::createFrameBufferAndAttachTexture()
-{
-    //Create + Bind
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    glGenTextures(1,&texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1920 , 1080, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -623,8 +670,9 @@ void GameEnvironment::run()
         Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
         Camera::setCurrentCameraOrto(glm::ortho(0.0f, (float)glfwPrep::getCurrentWindowWidth(), 0.0f, (float)glfwPrep::getCurrentWindowHeight()));
         mouseUpdate();
-        //GameLogic Testing        
+        //GameLogic      
         updateFunctionEvents();
+        updateRepeatingFunctions();
 
         //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
         update();
@@ -653,6 +701,12 @@ void GameEnvironment::resetMouseStates()
     staticPrevRef = false;
     refColliderForMouseCurrent = nullptr;
     refColliderForMouseOld = nullptr;
+}
+
+void GameEnvironment::resetRegisterdFunctions()
+{
+    functionsToExecuteAfterTime.clear();
+    repeatingFunctions.clear();
 }
 
 void GameEnvironment::testing(const std::string& text, float x, float y, float scale, glm::vec3 color)

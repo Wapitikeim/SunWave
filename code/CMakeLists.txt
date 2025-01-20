@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 #set_property(TARGET tgt PROPERTY CXX_STANDARD 20)
 
-project(HiddenInstinct VERSION 0.3
+project(SunWave VERSION 0.3
                   DESCRIPTION "GameLab3 Project"
                   LANGUAGES CXX)
 
@@ -60,12 +60,12 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 # Fügen Sie der ausführbaren Datei dieses Projekts eine Quelle hinzu.
-add_executable (HiddenInstinct ${SOURCEFILES} ${HEADERFILES})
+add_executable (SunWave ${SOURCEFILES} ${HEADERFILES})
 
 # opengl32.lib -> included in glad
-target_link_libraries(HiddenInstinct PRIVATE glfw glad glm stbimage imgui nlohmann_json freetype)
+target_link_libraries(SunWave PRIVATE glfw glad glm stbimage imgui nlohmann_json freetype)
 
 # require C++ 17 compiler
-target_compile_features(HiddenInstinct PRIVATE cxx_std_17)
+target_compile_features(SunWave PRIVATE cxx_std_17)
 
 # TODO: Fügen Sie bei Bedarf Tests hinzu, und installieren Sie Ziele.

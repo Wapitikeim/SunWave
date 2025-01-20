@@ -4,8 +4,8 @@ int main()
 {   
     try 
     {
-        GameEnvironment hiddenInstinct;
-        hiddenInstinct.run();
+        GameEnvironment sunWave;
+        sunWave.run();
     }
     catch(const std::exception &e) 
     {

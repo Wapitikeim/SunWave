@@ -1,13 +1,10 @@
-`Please edit this README to fit your project and keep it up-to-date with your concept.`
-
-`All final deliverables (code, executable game, report, trailer and poster) have to be committed, tagged as final and pushed to your GitLab repository.`
 
 # GameLab Project Repository
 
 |  General Info  | |
 | ---|---|
 | Working Title | Hidden Instinct |
-| Final Title | `Edit me!` |
+| Final Title | Sun Wave |
 | Student | Wenzel Hünting, wenzel.huenting@stud-mail.uni-wuerzburg.de, s375936 |
 | Target Platform(s) | PC |
 | Start Date | 21.10.2019 |

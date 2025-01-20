@@ -46,14 +46,8 @@ class GameEnvironment
 {
     private:
 
-        //Physics testing
+        //Physics engine
         std::unique_ptr<PhysicsEngine> physicsEngine;
-
-        //Framebuffer Testing for Texture->Shader
-        GLuint fbo;
-        GLuint texture;
-
-        void createFrameBufferAndAttachTexture();
 
         //Zoom
         float fov = 45.0f;
@@ -113,17 +107,8 @@ class GameEnvironment
         void mouseEntityManipulationLogic();
         void mouseClickLogic();
 
-        //Level Logic / Functions
+        //Level loading
         SceneManager sceneManager;
-        /* struct level
-        {
-
-        };
-        
-        struct levelLoadingManager
-        {
-
-        }; */
         void prepareForLevelChange();
         void loadMenu();
         void loadLevelSelector();
@@ -132,18 +117,6 @@ class GameEnvironment
         bool gamePaused = false;
         bool physicsEngineWasActive = false;
         
-        void updateFunctionEvents();
-        struct funcExecute
-        {
-            float timer;
-            std::function<void()> function;
-        };
-        std::vector<funcExecute> functionsToExecuteAfterTime;
-        bool shapeFound = false;
-        void startMiniGameLogic();
-
-        void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
-
         //Entities
         std::vector<std::unique_ptr<Entity>> entities;
         void drawEntities();
@@ -160,9 +133,32 @@ class GameEnvironment
         //Update
         void update();
 
-        
         //Ui
         UiManager ui;
+
+        //Game logic Update
+        void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
+        void updateFunctionEvents();
+        void registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition);
+        void updateRepeatingFunctions();
+        struct funcExecute
+        {
+            float timer;
+            std::function<void()> function;
+        };
+        struct RepeatingFunction
+        {
+            std::function<void()> function;
+            std::function<bool()> stopCondition;
+        };
+        std::vector<funcExecute> functionsToExecuteAfterTime;
+        std::vector<RepeatingFunction> repeatingFunctions;
+        
+        //MiniGames
+        bool shapeFound = false;
+        float timeToComplete = 0.f;
+        
+
 
     public:
         GameEnvironment();
@@ -240,9 +236,15 @@ class GameEnvironment
         void run();
 
         void resetMouseStates();
+        void resetRegisterdFunctions();
 
         void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
-        void miniGameFindShape(); //MiniGame 1
+        
+        //minigames
+        const bool& getShapeFound();
+        void incrementTimeToComplete();
+        void initFindTheShape();
+        void miniGameFindShape();
         int entitiesToFill = 50;
 
 };
