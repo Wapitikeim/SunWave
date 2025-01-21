@@ -253,10 +253,6 @@ void UiManager::drawImGuiPhysicsEngineControl()
     if(ImGui::Button("Load just walls"))
         loadWallLevel(); */
     ImGui::SliderInt("Entity Count", &gameEnv->entitiesToFill, 20, 200);
-    if(ImGui::Button("Test Stuff"))
-    {
-        gameEnv->miniGameFindShape();
-    }
 
     float newBounce = physicsEngine->getBounceMultiplier();
     ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);
@@ -339,7 +335,7 @@ void UiManager::drawImGuiEnitityAdder()
     static int selectedShapeIndex = 0; // Index for the selected shape
 
     // List of shader names
-    const char* shaderNames[] = { "box", "boxWithin", "circle", "cross", "sTriangle", "triangle", "triangleWithin", "star"};
+    const char* shaderNames[] = { "box", "boxWithin", "circle", "cross", "crossSmooth", "triangle", "triangleWithin", "star"};
     // List of shape names
     const char* entityTypes[] = { "Shape", "PlayerShape", "UiElement"};
 

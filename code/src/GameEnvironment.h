@@ -156,8 +156,15 @@ class GameEnvironment
         std::vector<RepeatingFunction> repeatingFunctions;
         
         //MiniGames
+        enum class Difficulty 
+        {
+            Easy,
+            Middle,
+            Hard
+        };
         bool shapeFound = false;
         float timeToComplete = 0.f;
+        std::string difficultyToString(Difficulty difficulty);
         
 
 
@@ -245,10 +252,16 @@ class GameEnvironment
         
       
         //minigames
+        
+
+
         const bool& getShapeFound();
-        void incrementTimeToComplete();
+        void updateShapeFinderLogic();
+        Difficulty shapeFinderDifficulty = Difficulty::Easy;
+        int entitiesToFill = 60;
+        int shapeFinderRoundsPlayed = 0;
         void initFindTheShape();
-        void miniGameFindShape();
-        int entitiesToFill = 50;
+        void miniGameFindShape(Difficulty difficulty);
+        
 
 };

@@ -74,14 +74,7 @@ void GameEnvironment::mouseUpdate()
     mouseClickLogic();
     if(entityManipulationThroughMouse)
         mouseEntityManipulationLogic();
-    //MiniGameLogic?
-    if(refColliderForMouseCurrent && refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound && pressedAndHoldingSomething)
-    {
-        shapeFound = true;
-        physicsEngine->setIsHalting(false);
-        deleteEntityFromName("WallBottom");
-        registerFunctionToExecuteWhen(5.f,[this]() {this->initFindTheShape();});
-    }
+    
 
     
     //Physics Finish (to have a chance to diff between Cur<->Old in Mouse Update)
@@ -423,6 +416,27 @@ void GameEnvironment::loadLevelSelector()
         this->initFindTheShape();
     });
 
+    auto btsButton = getEntityFromName<UiElement>("BtS");
+    btsButton->setOnClick([this]
+    {
+        this->resetMouseStates();
+        this->setGamePaused(false);
+        this->setInMenu(false);
+        this->setMouseEntityManipulation(true);
+        sceneManager.loadLevel("BalanceLevel1", entities, getPhysicsEngine());;
+    });
+
+    auto gopButton = getEntityFromName<UiElement>("GoP");
+    gopButton->setOnClick([this]
+    {
+        this->resetMouseStates();
+        this->setGamePaused(false);
+        this->setInMenu(false);
+        this->setMouseEntityManipulation(false);
+        this->getPhysicsEngine()->setIsHalting(false);
+        sceneManager.loadLevel("PosLevel1", entities, getPhysicsEngine());;
+    });
+
 }
 
 void GameEnvironment::prepareForLevelChange()
@@ -471,7 +485,7 @@ void GameEnvironment::loadWallLevel()
     physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
 }
 
-void GameEnvironment::miniGameFindShape()
+void GameEnvironment::miniGameFindShape(Difficulty difficulty)
 {
     prepareForLevelChange();
 
@@ -501,7 +515,48 @@ void GameEnvironment::miniGameFindShape()
     }
     //Random Entities
     {
-        std::vector<std::string>shapeNames{"box", "cross", "circle", "sTriangle", "star", "triangle", "triangleWithin"};
+        //Easy pairs
+        std::vector<std::string>shapeNamesEasy1{"box", "circle", "triangle"};
+        std::vector<std::string>shapeNamesEasy2{"boxWithin", "circle", "star", "triangle"};
+        std::vector<std::string>shapeNamesEasy3{"box", "circle", "star", "triangle", "cross"};
+        //Middle pairs
+        std::vector<std::string>shapeNamesMiddle1{"box", "boxWithin", "triangle", "triangleWithin", "star"};
+        std::vector<std::string>shapeNamesMiddle2{"cross", "crossSmooth", "triangle", "triangleWithin", "star", "box"};
+        std::vector<std::string>shapeNamesMiddle3{"cross", "crossSmooth", "box", "boxWithin", "star", "triangle"};
+        //Hard
+        std::vector<std::string>shapeNamesHard1{"box", "boxWithin", "cross", "circle", "crossSmooth", "star", "triangle"};
+        std::vector<std::string>shapeNamesHard2{"box", "boxWithin", "cross", "circle", "crossSmooth", "star", "triangle", "triangleWithin"};
+        
+        std::vector<std::string>shapeNames;
+        // Select shape names based on difficulty
+        switch (difficulty)
+        {
+            case Difficulty::Easy:
+                switch (getRandomNumber(0, 2))
+                {
+                    case 0: shapeNames = shapeNamesEasy1; break;
+                    case 1: shapeNames = shapeNamesEasy2; break;
+                    case 2: shapeNames = shapeNamesEasy3; break;
+                }
+                break;
+            case Difficulty::Middle:
+                switch (getRandomNumber(0, 2))
+                {
+                    case 0: shapeNames = shapeNamesMiddle1; break;
+                    case 1: shapeNames = shapeNamesMiddle2; break;
+                    case 2: shapeNames = shapeNamesMiddle3; break;
+                }
+                break;
+            case Difficulty::Hard:
+                switch (getRandomNumber(0, 1))
+                {
+                    case 0: shapeNames = shapeNamesHard1; break;
+                    case 1: shapeNames = shapeNamesHard2; break;
+                }
+                break;
+        }
+
+
         int shapeToFind = getRandomNumber(0,shapeNames.size()-1);
         std::string shapeToFindName = shapeNames[shapeToFind];
         shapeNames.erase(shapeNames.begin() + shapeToFind);
@@ -594,19 +649,47 @@ void GameEnvironment::updateRepeatingFunctions()
 
 const bool& GameEnvironment::getShapeFound()
 {
+    
     if(shapeFound)
     {
         std::cout << "It took: " << timeToComplete << "\n";
         timeToComplete = 0;
-        entitiesToFill+=20;
+        shapeFinderRoundsPlayed++;
+        if(shapeFinderRoundsPlayed > 2)
+            shapeFinderDifficulty = Difficulty::Middle;
+        if(shapeFinderRoundsPlayed > 5)
+            shapeFinderDifficulty = Difficulty::Hard;
+        switch (shapeFinderDifficulty)
+        {
+            case Difficulty::Easy:
+                entitiesToFill = getRandomNumber(80, 120);
+                break;
+            case Difficulty::Middle:
+                entitiesToFill = getRandomNumber(120, 160);
+                break;
+            case Difficulty::Hard:
+                entitiesToFill = getRandomNumber(180, 250);
+                break;
+        };
+        
+        std::cout << "Round: " << shapeFinderRoundsPlayed << " Difficulty: " << difficultyToString(shapeFinderDifficulty) << "\n";
     }
     return shapeFound;  
 }
 
-void GameEnvironment::incrementTimeToComplete()
+void GameEnvironment::updateShapeFinderLogic()
 {
-    if(!gamePaused)
-        timeToComplete+=deltaTime;
+    if(gamePaused)
+        return;
+
+    if(refColliderForMouseCurrent && refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound && pressedAndHoldingSomething)
+    {
+        shapeFound = true;
+        physicsEngine->setIsHalting(false);
+        deleteEntityFromName("WallBottom");
+        registerFunctionToExecuteWhen(4.f,[this]() {this->initFindTheShape();});
+    }
+    timeToComplete+=deltaTime;
 }
 
 void GameEnvironment::initFindTheShape()
@@ -614,13 +697,13 @@ void GameEnvironment::initFindTheShape()
     shapeFound = false;
     registerRepeatingFunction(
         [this]() {
-            this->incrementTimeToComplete();
+            this->updateShapeFinderLogic();
         },
         [this]() -> bool {
             return this->getShapeFound();
         }
     );
-    miniGameFindShape();
+    miniGameFindShape(shapeFinderDifficulty);
 }
 
 void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute)
@@ -632,9 +715,20 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
     std::cout << "Function Registerd with timer: " << t.timer << "\n";
 }
 
+std::string GameEnvironment::difficultyToString(Difficulty difficulty)
+{
+    switch (difficulty)
+    {
+        case Difficulty::Easy: return "Easy";
+        case Difficulty::Middle: return "Middle";
+        case Difficulty::Hard: return "Hard";
+        default: return "Unknown";
+    }
+}
+
 GameEnvironment::GameEnvironment()
-    :window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SunWave")),
-    ui(window,this)
+    : window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SunWave")),
+      ui(window, this)
 {   
 }
 
