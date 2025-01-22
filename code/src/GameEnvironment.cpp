@@ -266,7 +266,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
-        if(inMenu)
+        if(inMenu || gamePaused)
             return;
         gamePaused = true;
         if(!physicsEngine->getIsHalting())
@@ -278,9 +278,9 @@ void GameEnvironment::processInput(GLFWwindow *window)
             physicsEngineWasActive = false;
             
         
-        addEntity(std::make_unique<UiElement>("Pause banner",glm::vec3(21,20,0),glm::vec3(2),0,"Pause","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
-        addEntity(std::make_unique<UiElement>("Back to menu",glm::vec3(21,10,0),glm::vec3(2),0,"Back to menu","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
-        addEntity(std::make_unique<UiElement>("Resume banner",glm::vec3(21,15,0),glm::vec3(2),0,"Resume","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+        addEntity(std::make_unique<UiElement>("Pause banner",glm::vec3(21,20,0),glm::vec3(1),0,"Pause","Open_Sans\\static\\OpenSans-Regular.ttf", 94));
+        addEntity(std::make_unique<UiElement>("Back to menu",glm::vec3(21,10,0),glm::vec3(1),0,"Back to menu","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+        addEntity(std::make_unique<UiElement>("Resume banner",glm::vec3(21,15,0),glm::vec3(1),0,"Resume","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
         auto resumeBanner = getEntityFromName<UiElement>("Resume banner");
         resumeBanner->addComponent(std::make_unique<PhysicsCollider>(resumeBanner,1));
         dynamic_cast<PhysicsCollider*>(resumeBanner->getComponent("Physics"))->setIsTrigger(true);
@@ -292,7 +292,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
                 this->getPhysicsEngine()->setIsHalting(false);
             this->deleteEntityFromName("Pause banner");
             this->deleteEntityFromName("Back to menu");
-            this->refColliderForMouseCurrent = nullptr;
+            this->resetMouseStates();
             this->deleteEntityFromName("Resume banner");
         });
 
@@ -303,6 +303,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
         backToMenuBanner->setOnClick([this]
         {
             this->setGamePaused(false);
+            this->getPhysicsEngine()->setIsHalting(false);
             this->resetMouseStates();
             this->resetRegisterdFunctions();
             this->loadMenu();
@@ -584,7 +585,7 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
                 std::string name = random_string(4);
                 addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
                 auto randomEntity = getEntityFromName<Entity>(name);
-                randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,0));
+                randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,getRandomNumber(0,1)));
                 //dynamic_cast<PhysicsCollider*>(randomEntity->getComponent("Physics"))->setMass(getRandomNumber(1,10));
                 physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(name,"Physics"));
             }

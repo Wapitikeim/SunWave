@@ -98,7 +98,7 @@ void PhysicsEngine::applyGravity(PhysicsCollider *collider)
     if(collider->getIsGrounded() && !collider->getIsInContact())
         collider->setIsGrounded(false);
 
-    if(!collider->getIsGrounded())
+    if(!collider->getIsGrounded() && !collider->getUnaffectedByGravity())
     {
         glm::vec3 gravityForce = glm::vec3(0, GRAVITY, 0) * collider->getMass();
         collider->applyForce(gravityForce);
@@ -116,6 +116,10 @@ void PhysicsEngine::integrateForces(PhysicsCollider *collider)
     if(glm::abs(collider->getVelocity().x) < RESTING_THRESHOLD)
         collider->setVelocity(glm::vec3(0, collider->getVelocity().y, collider->getVelocity().z));
 
+    if(collider->getLockX())
+        collider->setVelocity(glm::vec3(0,collider->getVelocity().y, collider->getVelocity().z));
+    if(collider->getLockY())
+        collider->setVelocity(glm::vec3(collider->getVelocity().x,0, collider->getVelocity().z));
     // Integrate velocity to update position
     collider->setPos(collider->getPos() + collider->getVelocity() * getTimeStep());
 
@@ -237,9 +241,10 @@ void PhysicsEngine::collisionRespone()
             {
                 PhysicsCollider* cA = listOfCollisionEntry[i];
                 PhysicsCollider* cB = listOfCollisionEntry[j];
-                // Skip response if both colliders are static
+                // Skip response if both colliders are static or resting
                 if (cA->getIsStatic() && cB->getIsStatic() || cA->getIsResting() && cB->getIsResting())
                     continue;
+                 
                 
                 // Check if this collision has already been processed
                 if (processedCollisions.find(std::make_pair(cA, cB)) != processedCollisions.end() ||
@@ -252,7 +257,7 @@ void PhysicsEngine::collisionRespone()
                 float penetrationDepth;
                 if (CollisionTester::arePhysicsCollidersCollidingWithDetails(cA, cB, contactNormal, penetrationDepth))
                 {
-                    if(glm::abs(relativeVelocity.x) > RESTING_THRESHOLD, glm::abs(relativeVelocity.y) > RESTING_THRESHOLD)
+                    if(glm::abs(relativeVelocity.x) > RESTING_THRESHOLD|| glm::abs(relativeVelocity.y) > RESTING_THRESHOLD)
                         resolveCollision(cA, cB, contactNormal, penetrationDepth, relativeVelocity);
                     else if(contactNormal.y > 0.99) //Small arc of 5.7 degrees still counts as ground
                     {
@@ -277,15 +282,12 @@ void PhysicsEngine::collisionRespone()
                 {
                     //Actually only happens if listOfCollisionEntry.size() > 2
                     // -> makes sense because narrowCollisionGathering only counts collisions
-                    
-                    
                     //Not colliding but potentially touching
                     //Important for small Entities -> e.g. just 1 hash entry for all points
                     processedCollisions.insert(std::make_pair(cA, cB));
                     continue;
                 }
             }
-              
         }
     }
     collisionsToResolve.clear();

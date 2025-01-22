@@ -39,6 +39,9 @@ class PhysicsCollider : public Component
         bool isTrigger = false;
         bool isResting = false;
         bool isInContact = false;
+        bool lockX = false;
+        bool lockY = false;
+        bool unaffectedByGravity = false;
         float elasticity = 0.2; // 0 = perfectly inalastic 1 = perfectly elastic
 
         PhysicsBody colliderBody;
@@ -83,6 +86,9 @@ class PhysicsCollider : public Component
         [[nodiscard]] const bool &getIsInContact()const{return isInContact;};
         [[nodiscard]] const float &getElascicity()const{return elasticity;};
         [[nodiscard]] const float &getMass()const{return colliderBody.mass;};
+        [[nodiscard]] const bool &getLockX()const{return lockX;};
+        [[nodiscard]] const bool &getLockY()const{return lockY;};
+        [[nodiscard]] const bool &getUnaffectedByGravity()const{return unaffectedByGravity;};
         [[nodiscard]] const std::vector<uint32_t> &getTableIndicies()const{return indiciesInHashTable;};
 
         void setBody(const PhysicsBody &newBody){colliderBody = newBody; updateEntityPosAndRot();};
@@ -94,6 +100,9 @@ class PhysicsCollider : public Component
         void setIsGrounded(const bool &newGround){isGrounded = newGround;};
         void setIsTrigger(const bool &newTrigger){isTrigger = newTrigger;};
         void setIsResting(const bool &newResting){isResting = newResting;};
+        void setLockX(const bool &newLock){lockX = newLock;};
+        void setLockY(const bool &newLock){lockY = newLock;};
+        void setUnaffectedByGravity(const bool &newGravity){unaffectedByGravity = newGravity;};
         void setIsInContact(const bool &newContact){isInContact = newContact;};
         void setIsStatic(const bool &newStatic){isStatic = newStatic; if(newStatic)resetColliderMovementValues();};
         void setElascity(const float &newElascicity){elasticity = newElascicity;};

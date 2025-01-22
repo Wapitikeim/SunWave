@@ -91,6 +91,9 @@ void UiManager::drawImGuiWorldControl()
             ImGui::SameLine();
             if(ImGui::Button("Change Trigger"))
                 colliderRef->setIsTrigger(!iTrigger);
+
+            bool iGrounded = colliderRef->getIsGrounded();
+            ImGui::Checkbox("Is Grounded", &iGrounded);
             
             bool iResting = colliderRef->getIsResting();
             ImGui::Checkbox("Is Resting", &iResting);
@@ -114,6 +117,24 @@ void UiManager::drawImGuiWorldControl()
             float massRef = colliderRef->getBody().mass;
             ImGui::SliderFloat("Mass:", &massRef, 0.1, 10, "%.3f",0);
             colliderRef->setMass(massRef);
+
+            bool lockX = colliderRef->getLockX();
+            ImGui::Checkbox("Lock X", &lockX);
+            ImGui::SameLine();
+            if (ImGui::Button("Change X"))
+                colliderRef->setLockX(!lockX);
+
+            bool lockY = colliderRef->getLockY();
+            ImGui::Checkbox("Lock Y", &lockY);
+            ImGui::SameLine();
+            if (ImGui::Button("Change Y"))
+                colliderRef->setLockY(!lockY);
+            
+            bool gravity = colliderRef->getUnaffectedByGravity();
+            ImGui::Checkbox("Unnaffected Gravity", &gravity);
+            ImGui::SameLine();
+            if (ImGui::Button("Change Gravity"))
+                colliderRef->setUnaffectedByGravity(!gravity);
 
             if(physicsEngine->getHashTableIndicesSize() != 0)
                 ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);

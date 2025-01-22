@@ -55,7 +55,7 @@ class PhysicsEngine
         void updateNonCollidingColliders();
         void narrowCollisionGathering();
         void collisionDetection();
-        float RESTING_THRESHOLD = 0.05f;
+        float RESTING_THRESHOLD = 0.15f;
         float BOUNCE_MULTIPLIER = 2.25f;
         void collisionRespone();
         void resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity);
