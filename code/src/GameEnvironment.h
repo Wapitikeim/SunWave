@@ -96,6 +96,8 @@ class GameEnvironment
         bool pressedAndHoldingSomething = false;
         bool staticPrevRef = false;
         bool entityManipulationThroughMouse = true;
+        glm::vec4 colorOfRefEntity;
+        Entity* entityColorSaved;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
         PhysicsCollider* refColliderForMouseOld = nullptr;
         void mouseUpdate();

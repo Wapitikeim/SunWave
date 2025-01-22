@@ -75,14 +75,10 @@ void GameEnvironment::mouseUpdate()
     if(entityManipulationThroughMouse)
         mouseEntityManipulationLogic();
     
-
-    
-    //Physics Finish (to have a chance to diff between Cur<->Old in Mouse Update)
-    if(refColliderForMouseCurrent != refColliderForMouseOld)
-        refColliderForMouseOld = refColliderForMouseCurrent;
     //Click Finish
     if (currentMouseLeftButtonState!= lastMouseLeftButtonState)
         lastMouseLeftButtonState = currentMouseLeftButtonState;
+
 }
 
 void GameEnvironment::mouseCursorPositionUpdate()
@@ -108,17 +104,48 @@ void GameEnvironment::mousePhysicsUpdate()
     auto refCollider = physicsEngine->getFirstColliderShellCollidesWith(glm::vec3(mouseX,mouseY,0),glm::vec3(0.01f),rot);
     
     if((refCollider != refColliderForMouseCurrent) && !pressedAndHoldingSomething)
+    {
+        refColliderForMouseOld = refColliderForMouseCurrent;
         refColliderForMouseCurrent = refCollider;
+    }
+        
     
 }
 
 void GameEnvironment::mouseHoverOverEffect()
 {
     //ChangeShaderByOverOverEffect---
-    if(refColliderForMouseCurrent != nullptr && !pressedAndHoldingSomething)
-        refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
-    if((refColliderForMouseCurrent != refColliderForMouseOld) && (refColliderForMouseOld != nullptr))
-        refColliderForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+    if(refColliderForMouseOld)
+    {
+        //UiElement
+        if(refColliderForMouseOld->getEntityThisIsAttachedTo() == entityColorSaved && entityColorSaved->getEntityType() == "UiElement")
+        {
+            dynamic_cast<UiElement*>(refColliderForMouseOld->getEntityThisIsAttachedTo())->setTextColor(colorOfRefEntity);
+            entityColorSaved = nullptr;
+        }
+        //Other
+        else if(refColliderForMouseOld->getEntityThisIsAttachedTo() == entityColorSaved)
+        {
+            refColliderForMouseOld->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+            entityColorSaved = nullptr;
+        }
+    } 
+    if(refColliderForMouseCurrent)
+    {
+        //UiElement
+        if(refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityType() == "UiElement" && entityColorSaved != refColliderForMouseCurrent->getEntityThisIsAttachedTo())
+        {
+            colorOfRefEntity = dynamic_cast<UiElement*>(refColliderForMouseCurrent->getEntityThisIsAttachedTo())->getTextColor();
+            dynamic_cast<UiElement*>(refColliderForMouseCurrent->getEntityThisIsAttachedTo())->setTextColor(glm::vec4(0,0,0,1));
+            entityColorSaved = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+        }
+        //Other
+        else if(entityColorSaved != refColliderForMouseCurrent->getEntityThisIsAttachedTo())
+        {
+            refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
+            entityColorSaved = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
+        }
+    }
 }
 
 void GameEnvironment::mouseClickUpdate()
@@ -277,7 +304,6 @@ void GameEnvironment::processInput(GLFWwindow *window)
         else
             physicsEngineWasActive = false;
             
-        
         addEntity(std::make_unique<UiElement>("Pause banner",glm::vec3(21,20,0),glm::vec3(1),0,"Pause","Open_Sans\\static\\OpenSans-Regular.ttf", 94));
         addEntity(std::make_unique<UiElement>("Back to menu",glm::vec3(21,10,0),glm::vec3(1),0,"Back to menu","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
         addEntity(std::make_unique<UiElement>("Resume banner",glm::vec3(21,15,0),glm::vec3(1),0,"Resume","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
@@ -294,6 +320,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
             this->deleteEntityFromName("Back to menu");
             this->resetMouseStates();
             this->deleteEntityFromName("Resume banner");
+            
         });
 
         auto backToMenuBanner = getEntityFromName<UiElement>("Back to menu");
