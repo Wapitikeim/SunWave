@@ -80,6 +80,9 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
                 ref->setIsInContact(entity_json["Physics"]["IsInContact"]);
                 ref->setElascity(entity_json["Physics"]["Elasticity"]);
                 ref->setRot(entity_json["Physics"]["Rot"]);
+                ref->setLockX(entity_json["Physics"]["LockX"]);
+                ref->setLockY(entity_json["Physics"]["LockY"]);
+                ref->setUnaffectedByGravity(entity_json["Physics"]["IgnoreGravity"]);
             }
             j++;
         }
@@ -124,7 +127,11 @@ void SceneManager::saveLevel(const std::string& levelName, std::vector<std::uniq
                                                     {"IsGrounded", physics->getIsGrounded()},
                                                     {"IsInContact", physics->getIsInContact()},
                                                     {"Elasticity", physics->getElascicity()},
-                                                    {"Rot", physics->getRot()}
+                                                    {"Rot", physics->getRot()},
+                                                    {"LockX", physics->getLockX()},
+                                                    {"LockY", physics->getLockY()},
+                                                    {"IgnoreGravity", physics->getUnaffectedByGravity()}
+
             };
             entity_json["Physics"] = physics_json;
         }   

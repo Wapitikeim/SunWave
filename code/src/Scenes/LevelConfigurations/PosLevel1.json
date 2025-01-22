@@ -8,11 +8,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -44,11 +47,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -80,11 +86,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -116,11 +125,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -152,11 +164,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -188,11 +203,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -224,11 +242,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 89.55963134765625,
                 "Velocity": [
@@ -260,11 +281,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -296,11 +320,14 @@
                     0.0
                 ],
                 "Elasticity": 0.5,
+                "IgnoreGravity": false,
                 "IsGrounded": false,
                 "IsInContact": false,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -332,11 +359,14 @@
                     0.0
                 ],
                 "Elasticity": 0.20000000298023224,
+                "IgnoreGravity": false,
                 "IsGrounded": true,
                 "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": false,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
@@ -368,11 +398,14 @@
                     0.0
                 ],
                 "Elasticity": 0.20000000298023224,
+                "IgnoreGravity": false,
                 "IsGrounded": true,
                 "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": false,
                 "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
                 "Mass": 1.0,
                 "Rot": 0.0,
                 "Velocity": [
