@@ -173,7 +173,7 @@
                 "LockX": false,
                 "LockY": false,
                 "Mass": 1.0,
-                "Rot": 0.0,
+                "Rot": 316.75537109375,
                 "Velocity": [
                     0.0,
                     0.0,
@@ -184,11 +184,11 @@
             "Type": "Shape",
             "name": "NewEntity",
             "position": [
-                21.60393524169922,
-                11.426935195922852,
+                32.992591857910156,
+                10.627519607543945,
                 0.0
             ],
-            "rotation": 0.0,
+            "rotation": 316.75537109375,
             "scale": [
                 9.384984970092773,
                 0.6805408000946045,
@@ -223,8 +223,8 @@
             "Type": "Shape",
             "name": "Wall1",
             "position": [
-                37.61707305908203,
-                3.2681972980499268,
+                31.566131591796875,
+                21.560697555541992,
                 0.0
             ],
             "rotation": 0.0,
@@ -244,14 +244,14 @@
                 "Elasticity": 0.5,
                 "IgnoreGravity": false,
                 "IsGrounded": false,
-                "IsInContact": false,
+                "IsInContact": true,
                 "IsResting": true,
                 "IsStatic": true,
                 "IsTrigger": false,
                 "LockX": false,
                 "LockY": false,
                 "Mass": 1.0,
-                "Rot": 89.55963134765625,
+                "Rot": 90.25726318359375,
                 "Velocity": [
                     0.0,
                     0.0,
@@ -262,11 +262,11 @@
             "Type": "Shape",
             "name": "Wall2",
             "position": [
-                40.907127380371094,
-                8.064688682556152,
+                3.635166883468628,
+                11.050739288330078,
                 0.0
             ],
-            "rotation": 89.55963134765625,
+            "rotation": 90.25726318359375,
             "scale": [
                 0.49255242943763733,
                 2.295966863632202,
@@ -301,13 +301,13 @@
             "Type": "Shape",
             "name": "Wall3",
             "position": [
-                3.6811816692352295,
-                19.515134811401367,
+                37.34098815917969,
+                17.563621520996094,
                 0.0
             ],
             "rotation": 0.0,
             "scale": [
-                2.3805294036865234,
+                2.6110000610351563,
                 0.5276927947998047,
                 1.0
             ]
@@ -340,8 +340,8 @@
             "Type": "Shape",
             "name": "Wall4",
             "position": [
-                9.179946899414063,
-                21.2080135345459,
+                6.419060230255127,
+                5.9956135749816895,
                 0.0
             ],
             "rotation": 0.0,
@@ -379,8 +379,8 @@
             "Type": "PlayerShape",
             "name": "Player1",
             "position": [
-                17.002458572387695,
-                13.111029624938965,
+                8.393558502197266,
+                20.714963912963867,
                 0.0
             ],
             "rotation": 0,
@@ -418,8 +418,8 @@
             "Type": "PlayerShape",
             "name": "Player2",
             "position": [
-                25.469175338745117,
-                13.11092472076416,
+                12.590120315551758,
+                20.697336196899414,
                 0.0
             ],
             "rotation": 0,
@@ -457,8 +457,8 @@
             "Type": "Shape",
             "name": "TriggerBox1",
             "position": [
-                4.279373645782471,
-                21.842844009399414,
+                3.40509295463562,
+                2.962538719177246,
                 0.0
             ],
             "rotation": 0.0,
@@ -496,8 +496,8 @@
             "Type": "Shape",
             "name": "TriggerBox2",
             "position": [
-                40.585025787353516,
-                4.349759101867676,
+                36.995872497558594,
+                21.32557487487793,
                 0.0
             ],
             "rotation": 0.0,
@@ -506,9 +506,87 @@
                 1.0,
                 1.0
             ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 45.810546875,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall6",
+            "position": [
+                17.209524154663086,
+                7.171224594116211,
+                0.0
+            ],
+            "rotation": 45.810546875,
+            "scale": [
+                8.59000015258789,
+                0.5400000214576721,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall7",
+            "position": [
+                11.572713851928711,
+                19.162452697753906,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                6.0,
+                0.5,
+                1.0
+            ]
         }
     ],
-    "levelName": "PosLevel1",
+    "levelName": "PosLevelMedium2",
     "physicsEngine": [
         {
             "BounceM": 2.247999906539917

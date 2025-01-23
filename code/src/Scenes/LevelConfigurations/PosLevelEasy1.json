@@ -1,0 +1,527 @@
+{
+    "entities": [
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "WallBottom",
+            "position": [
+                22.091392517089844,
+                0.5,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                22.091392517089844,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "WallTop",
+            "position": [
+                22.091392517089844,
+                24.352815628051758,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                22.091392517089844,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "wallLeft",
+            "position": [
+                0.5,
+                12.426407814025879,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                12.426407814025879,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "wallRight",
+            "position": [
+                43.68278503417969,
+                12.426407814025879,
+                0.30000001192092896
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                12.426407814025879,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "NewEntity",
+            "position": [
+                33.42972946166992,
+                15.682645797729492,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                9.384984970092773,
+                0.6805408000946045,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall1",
+            "position": [
+                21.143787384033203,
+                19.185964584350586,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4844367504119873,
+                4.240650177001953,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 89.55963134765625,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall2",
+            "position": [
+                40.49299621582031,
+                18.974353790283203,
+                0.0
+            ],
+            "rotation": 89.55963134765625,
+            "scale": [
+                0.5238144993782043,
+                2.295966863632202,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.069580078125,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall3",
+            "position": [
+                15.921110153198242,
+                12.014739990234375,
+                0.0
+            ],
+            "rotation": 0.069580078125,
+            "scale": [
+                5.892941951751709,
+                0.7160837650299072,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall4",
+            "position": [
+                35.270320892333984,
+                21.0904541015625,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                0.4875192940235138,
+                2.288862705230713,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IgnoreGravity": false,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "PlayerShape",
+            "name": "Player1",
+            "position": [
+                6.353409767150879,
+                2.3917505741119385,
+                0.0
+            ],
+            "rotation": 0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": true,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "TriggerBox1",
+            "position": [
+                41.34427261352539,
+                21.819332122802734,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 54.222412109375,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall6",
+            "position": [
+                26.136388778686523,
+                10.439421653747559,
+                0.0
+            ],
+            "rotation": 54.222412109375,
+            "scale": [
+                5.0,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.20000000298023224,
+                "IgnoreGravity": false,
+                "IsGrounded": true,
+                "IsInContact": true,
+                "IsResting": true,
+                "IsStatic": false,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Box1",
+            "position": [
+                33.54476547241211,
+                17.493085861206055,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ],
+    "levelName": "PosLevelEasy1",
+    "physicsEngine": [
+        {
+            "BounceM": 2.247999906539917
+        }
+    ],
+    "worldData": [
+        {
+            "CameraPos": [
+                22.100000381469727,
+                12.425999641418457,
+                30.0
+            ],
+            "Fov": 45.0
+        }
+    ]
+}
