@@ -244,7 +244,9 @@ void PhysicsEngine::collisionRespone()
                 // Skip response if both colliders are static or resting
                 if (cA->getIsStatic() && cB->getIsStatic() || cA->getIsResting() && cB->getIsResting())
                     continue;
-                 
+                
+                if(cA->getIsTrigger()||cB->getIsTrigger())
+                    continue;
                 
                 // Check if this collision has already been processed
                 if (processedCollisions.find(std::make_pair(cA, cB)) != processedCollisions.end() ||
@@ -442,6 +444,28 @@ bool PhysicsEngine::checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, f
         if(CollisionTester::isColliderCollidingWithShell(entry, pos, scale, rotZ))
             return true;
     return false;
+}
+
+bool PhysicsEngine::checkTriggerColliderCollision(const std::string &colliderEntityName, const std::string &triggerColliderEntityName)
+{
+    PhysicsCollider* collider = nullptr;
+    PhysicsCollider* triggerCollider = nullptr;
+
+    // Search for the colliders in the physicsObjects vector
+    for (auto& entry : physicsObjects)
+    {
+        if (entry->getEntityThisIsAttachedTo()->getEntityName() == colliderEntityName)
+            collider = entry;
+        if (entry->getEntityThisIsAttachedTo()->getEntityName() == triggerColliderEntityName)
+            triggerCollider = entry;
+    }
+
+    if (!collider || !triggerCollider)
+        return false;
+
+    glm::vec3 contactNormal;
+    float penetrationDepth;
+    return CollisionTester::arePhysicsCollidersCollidingWithDetails(collider, triggerCollider, contactNormal, penetrationDepth);
 }
 
 PhysicsCollider *PhysicsEngine::getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float& rotZ)

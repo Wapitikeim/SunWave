@@ -254,7 +254,7 @@ class GameEnvironment
         
       
         //minigames
-        
+        void initGoToPosition();
 
 
         const bool& getShapeFound();

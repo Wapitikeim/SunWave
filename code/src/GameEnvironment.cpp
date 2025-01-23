@@ -253,7 +253,8 @@ void GameEnvironment::mouseClickLogic()
             refColliderForMouseCurrent->setIsStatic(staticPrevRef);  
     }
 
-    if(pressedAndHoldingSomething)
+    
+    if(pressedAndHoldingSomething&& entityManipulationThroughMouse)
     {      
         refColliderForMouseCurrent->setPos(glm::vec3(mouseX,mouseY,0));
         refColliderForMouseCurrent->update();
@@ -451,7 +452,7 @@ void GameEnvironment::loadLevelSelector()
         this->setGamePaused(false);
         this->setInMenu(false);
         this->setMouseEntityManipulation(true);
-        sceneManager.loadLevel("BalanceLevel1", entities, getPhysicsEngine());;
+        this->getSceneManager().loadLevel("BalanceLevel1", this->getEntities(), this->getPhysicsEngine());
     });
 
     auto gopButton = getEntityFromName<UiElement>("GoP");
@@ -462,7 +463,7 @@ void GameEnvironment::loadLevelSelector()
         this->setInMenu(false);
         this->setMouseEntityManipulation(false);
         this->getPhysicsEngine()->setIsHalting(false);
-        sceneManager.loadLevel("PosLevel1", entities, getPhysicsEngine());;
+        this->initGoToPosition(); 
     });
 
 }
@@ -675,7 +676,35 @@ void GameEnvironment::updateRepeatingFunctions()
     }
 }
 
-const bool& GameEnvironment::getShapeFound()
+void GameEnvironment::initGoToPosition()
+{
+    sceneManager.loadLevel("PosLevel1", entities,getPhysicsEngine());
+    registerRepeatingFunction(
+        [this]() {
+            auto refTrigger1 = this->getEntityFromName<Entity>("TriggerBox1");
+            auto refTrigger2 = this->getEntityFromName<Entity>("TriggerBox2");
+            refTrigger1->setZRotation((refTrigger1->getRotation()+10*this->getDeltaTime()));  
+            refTrigger2->setZRotation((refTrigger2->getRotation()+10*this->getDeltaTime()));  
+            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player1", "TriggerBox1"))
+                refTrigger1->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+            else 
+                refTrigger1->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1)); 
+            
+            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player2", "TriggerBox2"))
+                refTrigger2->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+            else 
+                refTrigger2->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+        },
+        [this]() -> bool {
+            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player2", "TriggerBox2") && this->getPhysicsEngine()->checkTriggerColliderCollision("Player1", "TriggerBox1"))
+                return true;
+            return false;
+        }
+    );
+       
+}
+
+const bool &GameEnvironment::getShapeFound()
 {
     
     if(shapeFound)
