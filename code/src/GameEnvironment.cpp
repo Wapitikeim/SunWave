@@ -678,7 +678,7 @@ void GameEnvironment::updateRepeatingFunctions()
 
 void GameEnvironment::initGoToPosition()
 {
-    sceneManager.loadLevel("PosLevelMedium2", entities,getPhysicsEngine());
+    sceneManager.loadLevel("PosLevelMedium3", entities,getPhysicsEngine());
     registerRepeatingFunction(
         [this]() {
             auto refTrigger1 = this->getEntityFromName<Entity>("TriggerBox1");
