@@ -621,6 +621,81 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
     }
 }
 
+void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
+{
+    std::vector<std::string>playerNames;
+    std::vector<std::string>triggerNames;
+    std::vector<std::string>levelNames;
+    //Names based on difficulty
+    switch (difficulty)
+    {
+        case Difficulty::Easy:
+            playerNames = {"Player1"};
+            triggerNames = {"TriggerBox1"};
+            levelNames = {"PosLevelEasy1", "PosLevelEasy2", "PosLevelEasy3"};
+            break;
+        case Difficulty::Middle:
+            playerNames = {"Player1", "Player2"};
+            triggerNames = {"TriggerBox1", "TriggerBox2"};
+            levelNames = {"PosLevelMedium1", "PosLevelMedium2", "PosLevelMedium3"};
+            break;
+        case Difficulty::Hard:
+            playerNames = {"Player1", "Player2", "Player3"};
+            triggerNames = {"TriggerBox1", "TriggerBox2", "TriggerBox3"};
+            levelNames = {"PosLevelHard1", "PosLevelHard2", "PosLevelHard3"};
+            break;
+        
+        default:
+            break;
+    }
+    sceneManager.loadLevel(levelNames[roundsPlayed%3], entities, getPhysicsEngine());
+    registerRepeatingFunction(
+        [this, playerNames, triggerNames]() 
+        {
+            int i = 0;
+            for(auto& triggerBoxes:triggerNames)
+            {
+                //Rotation
+                auto refTrigger = this->getEntityFromName<Entity>(triggerBoxes);
+                refTrigger->setZRotation((refTrigger->getRotation()+10*this->getDeltaTime()));  
+                //Color
+                if(this->getPhysicsEngine()->checkTriggerColliderCollision(playerNames[i], triggerBoxes))
+                    refTrigger->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                else 
+                    refTrigger->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+                i++;  
+            }
+        },
+        [this, playerNames, triggerNames]() -> bool 
+        {
+            //Check if all players are in the trigger boxes
+            int i = 0;
+            for(auto& playerName:playerNames)
+            {
+                if(!this->getPhysicsEngine()->checkTriggerColliderCollision(playerName, triggerNames[i]))
+                    return false;
+                i++;
+            }
+            roundsPlayed++;
+            if(roundsPlayed > 2)
+                this->gameDifficultyLevel = Difficulty::Middle;
+            if(roundsPlayed > 5)
+                this->gameDifficultyLevel = Difficulty::Hard;
+            if(roundsPlayed > 8)
+            {
+                this->gameDifficultyLevel = Difficulty::Easy;
+                this->resetMouseStates();
+                this->loadMenu();
+                return true;
+            }
+            this->miniGameGoToPosition(this->gameDifficultyLevel);
+            return true;
+        }
+    );
+
+
+}
+
 void GameEnvironment::updateFunctionEvents()
 {
     if(gamePaused)
@@ -657,50 +732,28 @@ void GameEnvironment::updateRepeatingFunctions()
 {
     if(gamePaused)
         return;
-    for (auto it = repeatingFunctions.begin(); it != repeatingFunctions.end();)
-    {
-        // Execute the stored function
-        it->function();
 
-        // Check the stop condition
-        if (it->stopCondition())
-        {
-            // Erase the struct from the vector and get a valid iterator to the next element
-            it = repeatingFunctions.erase(it);
-        }
-        else
-        {
-            // Move to the next element if not erasing
-            ++it;
-        }
+    std::vector<size_t> indicesToRemove;
+    
+    // First pass: Execute functions and collect indices to remove
+    for (size_t i = 0; i < repeatingFunctions.size(); i++)
+    {
+        repeatingFunctions[i].function();
+        
+        if (repeatingFunctions[i].stopCondition())
+            indicesToRemove.push_back(i);
+        
     }
+
+    // Second pass: Remove functions from back to front
+    for (auto it = indicesToRemove.rbegin(); it != indicesToRemove.rend(); ++it)
+        repeatingFunctions.erase(repeatingFunctions.begin() + *it);
+    
 }
 
 void GameEnvironment::initGoToPosition()
 {
-    sceneManager.loadLevel("PosLevelMedium3", entities,getPhysicsEngine());
-    registerRepeatingFunction(
-        [this]() {
-            auto refTrigger1 = this->getEntityFromName<Entity>("TriggerBox1");
-            auto refTrigger2 = this->getEntityFromName<Entity>("TriggerBox2");
-            refTrigger1->setZRotation((refTrigger1->getRotation()+10*this->getDeltaTime()));  
-            refTrigger2->setZRotation((refTrigger2->getRotation()+10*this->getDeltaTime()));  
-            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player1", "TriggerBox1"))
-                refTrigger1->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
-            else 
-                refTrigger1->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1)); 
-            
-            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player2", "TriggerBox2"))
-                refTrigger2->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
-            else 
-                refTrigger2->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
-        },
-        [this]() -> bool {
-            if(this->getPhysicsEngine()->checkTriggerColliderCollision("Player2", "TriggerBox2") && this->getPhysicsEngine()->checkTriggerColliderCollision("Player1", "TriggerBox1"))
-                return true;
-            return false;
-        }
-    );
+    miniGameGoToPosition(gameDifficultyLevel);
        
 }
 
@@ -711,12 +764,12 @@ const bool &GameEnvironment::getShapeFound()
     {
         std::cout << "It took: " << timeToComplete << "\n";
         timeToComplete = 0;
-        shapeFinderRoundsPlayed++;
-        if(shapeFinderRoundsPlayed > 2)
-            shapeFinderDifficulty = Difficulty::Middle;
-        if(shapeFinderRoundsPlayed > 5)
-            shapeFinderDifficulty = Difficulty::Hard;
-        switch (shapeFinderDifficulty)
+        roundsPlayed++;
+        if(roundsPlayed > 2)
+            gameDifficultyLevel = Difficulty::Middle;
+        if(roundsPlayed > 5)
+            gameDifficultyLevel = Difficulty::Hard;
+        switch (gameDifficultyLevel)
         {
             case Difficulty::Easy:
                 entitiesToFill = getRandomNumber(80, 120);
@@ -729,7 +782,7 @@ const bool &GameEnvironment::getShapeFound()
                 break;
         };
         
-        std::cout << "Round: " << shapeFinderRoundsPlayed << " Difficulty: " << difficultyToString(shapeFinderDifficulty) << "\n";
+        std::cout << "Round: " << roundsPlayed << " Difficulty: " << difficultyToString(gameDifficultyLevel) << "\n";
     }
     return shapeFound;  
 }
@@ -760,7 +813,7 @@ void GameEnvironment::initFindTheShape()
             return this->getShapeFound();
         }
     );
-    miniGameFindShape(shapeFinderDifficulty);
+    miniGameFindShape(gameDifficultyLevel);
 }
 
 void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute)

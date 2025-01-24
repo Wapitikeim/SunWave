@@ -254,16 +254,18 @@ class GameEnvironment
         
       
         //minigames
-        void initGoToPosition();
+        
 
 
         const bool& getShapeFound();
         void updateShapeFinderLogic();
-        Difficulty shapeFinderDifficulty = Difficulty::Easy;
+        Difficulty gameDifficultyLevel = Difficulty::Easy;
         int entitiesToFill = 60;
-        int shapeFinderRoundsPlayed = 0;
+        int roundsPlayed = 0;
         void initFindTheShape();
+        void initGoToPosition();
         void miniGameFindShape(Difficulty difficulty);
+        void miniGameGoToPosition(Difficulty difficulty);
         
 
 };
