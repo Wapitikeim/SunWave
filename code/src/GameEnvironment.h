@@ -165,7 +165,7 @@ class GameEnvironment
             Hard
         };
         bool shapeFound = false;
-        float timeToComplete = 0.f;
+        
         std::string difficultyToString(Difficulty difficulty);
         
 
@@ -262,8 +262,8 @@ class GameEnvironment
         Difficulty gameDifficultyLevel = Difficulty::Easy;
         int entitiesToFill = 60;
         int roundsPlayed = 0;
+        float timeToComplete = 0.f;
         void initFindTheShape();
-        void initGoToPosition();
         void miniGameFindShape(Difficulty difficulty);
         void miniGameGoToPosition(Difficulty difficulty);
         

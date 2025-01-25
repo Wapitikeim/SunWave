@@ -332,6 +332,9 @@ void GameEnvironment::processInput(GLFWwindow *window)
         {
             this->setGamePaused(false);
             this->getPhysicsEngine()->setIsHalting(false);
+            this->roundsPlayed = 0;
+            this->timeToComplete = 0;
+            this->gameDifficultyLevel = Difficulty::Easy;
             this->resetMouseStates();
             this->resetRegisterdFunctions();
             this->loadMenu();
@@ -463,7 +466,7 @@ void GameEnvironment::loadLevelSelector()
         this->setInMenu(false);
         this->setMouseEntityManipulation(false);
         this->getPhysicsEngine()->setIsHalting(false);
-        this->initGoToPosition(); 
+        this->miniGameGoToPosition(this->gameDifficultyLevel); 
     });
 
 }
@@ -652,6 +655,14 @@ void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
     registerRepeatingFunction(
         [this, playerNames, triggerNames]() 
         {
+            //Timer just for testing
+            auto timer = this->getEntityFromName<UiElement>("Timer");
+            if(!timer)
+            {
+                addEntity(std::make_unique<UiElement>("Timer",glm::vec3(3.3,24.2,0),glm::vec3(1),0,"Time: 0","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+                timer = getEntityFromName<UiElement>("Timer");
+            }
+            timer->setTextToBeRenderd("Time: " + std::to_string((int)this->timeToComplete));
             int i = 0;
             for(auto& triggerBoxes:triggerNames)
             {
@@ -665,6 +676,7 @@ void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
                     refTrigger->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
                 i++;  
             }
+            this->timeToComplete+=this->getDeltaTime();
         },
         [this, playerNames, triggerNames]() -> bool 
         {
@@ -684,6 +696,8 @@ void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
             if(roundsPlayed > 8)
             {
                 this->gameDifficultyLevel = Difficulty::Easy;
+                this->roundsPlayed = 0;
+                this->timeToComplete = 0;
                 this->resetMouseStates();
                 this->loadMenu();
                 return true;
@@ -749,12 +763,6 @@ void GameEnvironment::updateRepeatingFunctions()
     for (auto it = indicesToRemove.rbegin(); it != indicesToRemove.rend(); ++it)
         repeatingFunctions.erase(repeatingFunctions.begin() + *it);
     
-}
-
-void GameEnvironment::initGoToPosition()
-{
-    miniGameGoToPosition(gameDifficultyLevel);
-       
 }
 
 const bool &GameEnvironment::getShapeFound()
