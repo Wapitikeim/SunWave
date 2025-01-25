@@ -164,7 +164,7 @@ class GameEnvironment
             Middle,
             Hard
         };
-        bool shapeFound = false;
+        
         
         std::string difficultyToString(Difficulty difficulty);
         
@@ -239,6 +239,7 @@ class GameEnvironment
         void setInMenu(const bool& newMenu){inMenu = newMenu;};
         void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
+        const bool& getIfPressedAndHolding(){return pressedAndHoldingSomething;};
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};
         UiManager& getUiManager(){return ui;};
@@ -254,16 +255,11 @@ class GameEnvironment
         
       
         //minigames
-        
-
-
-        const bool& getShapeFound();
-        void updateShapeFinderLogic();
         Difficulty gameDifficultyLevel = Difficulty::Easy;
+        bool shapeFound = false;
         int entitiesToFill = 60;
         int roundsPlayed = 0;
         float timeToComplete = 0.f;
-        void initFindTheShape();
         void miniGameFindShape(Difficulty difficulty);
         void miniGameGoToPosition(Difficulty difficulty);
         

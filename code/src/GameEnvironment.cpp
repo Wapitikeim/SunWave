@@ -445,7 +445,7 @@ void GameEnvironment::loadLevelSelector()
         this->setGamePaused(false);
         this->setInMenu(false);
         this->setMouseEntityManipulation(true);
-        this->initFindTheShape();
+        this->miniGameFindShape(this->gameDifficultyLevel);
     });
 
     auto btsButton = getEntityFromName<UiElement>("BtS");
@@ -522,7 +522,12 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
     prepareForLevelChange();
 
     physicsEngine->setIsHalting(true);
+    shapeFound = false;
 
+    //Timer
+    addEntity(std::make_unique<UiElement>("Timer",glm::vec3(3.3,24,0),glm::vec3(1),0,"Time: 0","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+    getEntityFromName<Entity>("Timer")->addComponent(std::make_unique<PhysicsCollider>(getEntityFromName<Entity>("Timer"),1));
+    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Timer","Physics"));
     //Walls
     {
         addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,-0.7f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
@@ -622,6 +627,57 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
             }
         }
     }
+    
+    registerRepeatingFunction
+    (
+        [this]()
+        {
+            auto timer = this->getEntityFromName<UiElement>("Timer");
+            if(this->getCurrentMouseCollider() && this->getCurrentMouseCollider()->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !this->shapeFound && this->getIfPressedAndHolding())
+            {
+                this->shapeFound = true;
+                this->getPhysicsEngine()->setIsHalting(false);
+                deleteEntityFromName("WallBottom");
+                this->registerFunctionToExecuteWhen(4.f,[this]() {this->miniGameFindShape(this->gameDifficultyLevel);});
+            }
+            this->timeToComplete+=this->getDeltaTime();
+            timer->setTextToBeRenderd("Time: " + std::to_string((int)this->timeToComplete));
+        },
+        [this]() -> bool
+        {
+            if(this->shapeFound)
+            {
+                this->roundsPlayed++;
+                if(this->roundsPlayed > 2)
+                    this->gameDifficultyLevel = Difficulty::Middle;
+                if(this->roundsPlayed > 5)
+                    this->gameDifficultyLevel = Difficulty::Hard;
+                if(this->roundsPlayed > 8)
+                {
+                    this->gameDifficultyLevel = Difficulty::Easy;
+                    this->roundsPlayed = 0;
+                    this->timeToComplete = 0;
+                    this->resetMouseStates();
+                    this->loadMenu();
+                    return true;
+                }
+                switch (this->gameDifficultyLevel)
+                {
+                    case Difficulty::Easy:
+                        this->entitiesToFill = getRandomNumber(80, 120);
+                        break;
+                    case Difficulty::Middle:
+                        this->entitiesToFill = getRandomNumber(120, 160);
+                        break;
+                    case Difficulty::Hard:
+                        this->entitiesToFill = getRandomNumber(180, 250);
+                        break;
+                };
+            }
+            return this->shapeFound;
+        }
+    );
+
 }
 
 void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
@@ -763,65 +819,6 @@ void GameEnvironment::updateRepeatingFunctions()
     for (auto it = indicesToRemove.rbegin(); it != indicesToRemove.rend(); ++it)
         repeatingFunctions.erase(repeatingFunctions.begin() + *it);
     
-}
-
-const bool &GameEnvironment::getShapeFound()
-{
-    
-    if(shapeFound)
-    {
-        std::cout << "It took: " << timeToComplete << "\n";
-        timeToComplete = 0;
-        roundsPlayed++;
-        if(roundsPlayed > 2)
-            gameDifficultyLevel = Difficulty::Middle;
-        if(roundsPlayed > 5)
-            gameDifficultyLevel = Difficulty::Hard;
-        switch (gameDifficultyLevel)
-        {
-            case Difficulty::Easy:
-                entitiesToFill = getRandomNumber(80, 120);
-                break;
-            case Difficulty::Middle:
-                entitiesToFill = getRandomNumber(120, 160);
-                break;
-            case Difficulty::Hard:
-                entitiesToFill = getRandomNumber(180, 250);
-                break;
-        };
-        
-        std::cout << "Round: " << roundsPlayed << " Difficulty: " << difficultyToString(gameDifficultyLevel) << "\n";
-    }
-    return shapeFound;  
-}
-
-void GameEnvironment::updateShapeFinderLogic()
-{
-    if(gamePaused)
-        return;
-
-    if(refColliderForMouseCurrent && refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !shapeFound && pressedAndHoldingSomething)
-    {
-        shapeFound = true;
-        physicsEngine->setIsHalting(false);
-        deleteEntityFromName("WallBottom");
-        registerFunctionToExecuteWhen(4.f,[this]() {this->initFindTheShape();});
-    }
-    timeToComplete+=deltaTime;
-}
-
-void GameEnvironment::initFindTheShape()
-{
-    shapeFound = false;
-    registerRepeatingFunction(
-        [this]() {
-            this->updateShapeFinderLogic();
-        },
-        [this]() -> bool {
-            return this->getShapeFound();
-        }
-    );
-    miniGameFindShape(gameDifficultyLevel);
 }
 
 void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute)
