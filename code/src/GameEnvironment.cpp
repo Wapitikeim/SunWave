@@ -454,8 +454,8 @@ void GameEnvironment::loadLevelSelector()
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setInMenu(false);
-        this->setMouseEntityManipulation(true);
-        this->getSceneManager().loadLevel("BalanceLevel1", this->getEntities(), this->getPhysicsEngine());
+        this->setMouseEntityManipulation(false);
+        this->miniGameCatch(this->gameDifficultyLevel);
     });
 
     auto gopButton = getEntityFromName<UiElement>("GoP");
@@ -634,12 +634,7 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
         {
             auto timer = this->getEntityFromName<UiElement>("Timer");
             if(this->getCurrentMouseCollider() && this->getCurrentMouseCollider()->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindHere" && !this->shapeFound && this->getIfPressedAndHolding())
-            {
                 this->shapeFound = true;
-                this->getPhysicsEngine()->setIsHalting(false);
-                deleteEntityFromName("WallBottom");
-                this->registerFunctionToExecuteWhen(4.f,[this]() {this->miniGameFindShape(this->gameDifficultyLevel);});
-            }
             this->timeToComplete+=this->getDeltaTime();
             timer->setTextToBeRenderd("Time: " + std::to_string((int)this->timeToComplete));
         },
@@ -657,7 +652,9 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
                     this->gameDifficultyLevel = Difficulty::Easy;
                     this->roundsPlayed = 0;
                     this->timeToComplete = 0;
+                    this->entitiesToFill = 60;
                     this->resetMouseStates();
+                    this->setMouseEntityManipulation(false);
                     this->loadMenu();
                     return true;
                 }
@@ -673,6 +670,9 @@ void GameEnvironment::miniGameFindShape(Difficulty difficulty)
                         this->entitiesToFill = getRandomNumber(180, 250);
                         break;
                 };
+                this->getPhysicsEngine()->setIsHalting(false);
+                deleteEntityFromName("WallBottom");
+                this->registerFunctionToExecuteWhen(4.f,[this]() {this->miniGameFindShape(this->gameDifficultyLevel);});
             }
             return this->shapeFound;
         }
@@ -763,6 +763,65 @@ void GameEnvironment::miniGameGoToPosition(Difficulty difficulty)
         }
     );
 
+
+}
+
+void GameEnvironment::miniGameCatch(Difficulty difficulty)
+{
+    std::vector<std::string>spawnerNames;
+    std::vector<std::string>levelNames;
+    int shapesToSpawn = 0;
+    int shapesSpawned = 0;
+    //Names based on difficulty
+    switch (difficulty)
+    {
+        case Difficulty::Easy:
+            spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4"};
+            levelNames = {"BalanceLevelEasy1", "BalanceLevelEasy2", "BalanceLevelEasy3"};
+            shapesToSpawn = 20;
+            break;
+        case Difficulty::Middle:
+            spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5"};
+            levelNames = {"BalanceLevelMedium1", "BalanceLevelMedium2", "BalanceLevelMedium3"};
+            shapesToSpawn = 30;
+            break;
+        case Difficulty::Hard:
+            spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5", "Spawner6"};
+            levelNames = {"BalanceLevelHard1", "BalanceLevelHard2", "BalanceLevelHard3"};
+            shapesToSpawn = 40;
+            break;
+        
+        default:
+            break;
+    }
+    sceneManager.loadLevel(levelNames[roundsPlayed%3], entities, getPhysicsEngine());
+    //Status
+    addEntity(std::make_unique<UiElement>("Status",glm::vec3(2.5,24,0),glm::vec3(1),0,"0/20","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+    //Prep
+    for(auto& entry:spawnerNames)
+        getEntityFromName<Entity>(entry)->setDontDraw(true);
+    getEntityFromName<PlayerShape>("Player")->velocity = 5.f;
+    //Logic
+    registerRepeatingFunction(
+        [this, spawnerNames, shapesToSpawn, shapesSpawned]() 
+        {
+            //Logic that spawns shapes
+                // "Good" shapes in green that need to be catched
+                // "Bad" shapes in red that need to be avoided
+            //Every x time interval spawn a shape at a spawner location +y so that it falls down
+            //shape needs to be monitored based on "good" or "bad"
+                //Good shapes need to be catched e.g. collision with player
+                //Bad shapes need to be avoided e.g. no collision with player
+            //If shape goes .y<0 delete it
+            //For every shape handelded correctly 1 point
+                //total points are reflected in "Status" UI element
+            this->timeToComplete+=this->getDeltaTime();
+        },
+        [this, spawnerNames, shapesToSpawn, shapesSpawned]() -> bool 
+        {
+            return true;
+        }
+    );
 
 }
 
