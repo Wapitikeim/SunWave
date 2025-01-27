@@ -260,6 +260,11 @@ class GameEnvironment
         int entitiesToFill = 60;
         int roundsPlayed = 0;
         float timeToComplete = 0.f;
+        float timeElapsed = 0;
+        int shapesSpawned = 0;
+        int shapesHandeldCorrectly = 0;
+        float spawnInterval = 0.1f;
+        std::vector<Entity*>activeShapes;
         void miniGameFindShape(Difficulty difficulty);
         void miniGameGoToPosition(Difficulty difficulty);
         void miniGameCatch(Difficulty difficulty);

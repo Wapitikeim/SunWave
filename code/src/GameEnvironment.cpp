@@ -770,25 +770,25 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
 {
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
-    int shapesToSpawn = 0;
-    int shapesSpawned = 0;
+    int numberOfShapesToSpawn = 0;
+    
     //Names based on difficulty
     switch (difficulty)
     {
         case Difficulty::Easy:
             spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4"};
             levelNames = {"BalanceLevelEasy1", "BalanceLevelEasy2", "BalanceLevelEasy3"};
-            shapesToSpawn = 20;
+            numberOfShapesToSpawn = 20;
             break;
         case Difficulty::Middle:
             spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5"};
             levelNames = {"BalanceLevelMedium1", "BalanceLevelMedium2", "BalanceLevelMedium3"};
-            shapesToSpawn = 30;
+            numberOfShapesToSpawn = 30;
             break;
         case Difficulty::Hard:
             spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5", "Spawner6"};
             levelNames = {"BalanceLevelHard1", "BalanceLevelHard2", "BalanceLevelHard3"};
-            shapesToSpawn = 40;
+            numberOfShapesToSpawn = 40;
             break;
         
         default:
@@ -796,30 +796,69 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
     }
     sceneManager.loadLevel(levelNames[roundsPlayed%3], entities, getPhysicsEngine());
     //Status
-    addEntity(std::make_unique<UiElement>("Status",glm::vec3(2.5,24,0),glm::vec3(1),0,"0/20","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
+    addEntity(std::make_unique<UiElement>("Status",glm::vec3(2,24,0),glm::vec3(1),0,"0/20","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
     //Prep
     for(auto& entry:spawnerNames)
         getEntityFromName<Entity>(entry)->setDontDraw(true);
     getEntityFromName<PlayerShape>("Player")->velocity = 5.f;
     //Logic
     registerRepeatingFunction(
-        [this, spawnerNames, shapesToSpawn, shapesSpawned]() 
+        [this, spawnerNames, numberOfShapesToSpawn]() 
         {
             //Logic that spawns shapes
                 // "Good" shapes in green that need to be catched
                 // "Bad" shapes in red that need to be avoided
+            
             //Every x time interval spawn a shape at a spawner location +y so that it falls down
+            if(timeElapsed > numberOfShapesToSpawn*spawnInterval && this->shapesSpawned < numberOfShapesToSpawn)
+            {
+                auto spawner = getEntityFromName<Entity>(spawnerNames[getRandomNumber(0,spawnerNames.size()-1)]);
+                std::string entityName = std::string("ShapeToCatch") + std::to_string(this->shapesSpawned);
+                auto shape = std::make_unique<Shape>(entityName, glm::vec3(spawner->getPosition().x,spawner->getPosition().y+5,0),glm::vec3(1), getRandomNumber(0,360), true, "circle");
+                shape->addComponent(std::make_unique<PhysicsCollider>(shape.get(),0));
+                shape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                addEntity(std::move(shape));
+                this->getPhysicsEngine()->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(entityName,"Physics"));
+                this->activeShapes.push_back(getEntityFromName<Entity>(entityName));
+                
+                this->shapesSpawned++;
+                this->timeElapsed = 0;
+            }
+            
+            
+            for(auto& entry: this->activeShapes)
+            {
+                if(this->getPhysicsEngine()->checkColliderPlayerCollision(entry->getEntityName()))
+                {
+                    this->deleteEntityFromName(entry->getEntityName());
+                    this->activeShapes.erase(std::remove(this->activeShapes.begin(), this->activeShapes.end(), entry), this->activeShapes.end());
+                    shapesHandeldCorrectly++;
+                    continue;
+                }
+                //If shape goes .y<0 delete it
+                if(entry->getPosition().y < 0)
+                {
+                    this->deleteEntityFromName(entry->getEntityName());
+                    this->activeShapes.erase(std::remove(this->activeShapes.begin(), this->activeShapes.end(), entry), this->activeShapes.end());
+                }
+            }
             //shape needs to be monitored based on "good" or "bad"
                 //Good shapes need to be catched e.g. collision with player
                 //Bad shapes need to be avoided e.g. no collision with player
-            //If shape goes .y<0 delete it
-            //For every shape handelded correctly 1 point
-                //total points are reflected in "Status" UI element
+            
+            
+            //Status update
+            auto status = getEntityFromName<UiElement>("Status");
+            status->setTextToBeRenderd(std::to_string(this->shapesHandeldCorrectly) + "/" + std::to_string(numberOfShapesToSpawn));
+            //Update
+            this->timeElapsed+=this->getDeltaTime();
             this->timeToComplete+=this->getDeltaTime();
         },
-        [this, spawnerNames, shapesToSpawn, shapesSpawned]() -> bool 
+        [this, spawnerNames, numberOfShapesToSpawn]() -> bool 
         {
-            return true;
+            if(this->shapesSpawned >= numberOfShapesToSpawn && this->activeShapes.size() == 0)
+                return true;  
+            return false;
         }
     );
 

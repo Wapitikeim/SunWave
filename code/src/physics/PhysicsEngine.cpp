@@ -468,6 +468,29 @@ bool PhysicsEngine::checkTriggerColliderCollision(const std::string &colliderEnt
     return CollisionTester::arePhysicsCollidersCollidingWithDetails(collider, triggerCollider, contactNormal, penetrationDepth);
 }
 
+bool PhysicsEngine::checkColliderPlayerCollision(const std::string &colliderEntityName)
+{
+    PhysicsCollider* collider = nullptr;
+    PhysicsCollider* colliderTwo = nullptr;
+
+    // Search for the colliders in the physicsObjects vector
+    for (auto& entry : physicsObjects)
+    {
+        if (entry->getEntityThisIsAttachedTo()->getEntityName() == colliderEntityName)
+            collider = entry;
+        if (entry->getEntityThisIsAttachedTo()->getEntityName() == "Player")
+            colliderTwo = entry;
+    }
+
+    if (!collider || !colliderTwo)
+        return false;
+    //Basically just here to inflate the scale for the catch shapes minigames
+    colliderTwo->setScale(colliderTwo->getBody().colliderScale*1.2f);
+    glm::vec3 contactNormal;
+    float penetrationDepth;
+    return CollisionTester::arePhysicsCollidersCollidingWithDetails(collider, colliderTwo, contactNormal, penetrationDepth);
+}
+
 PhysicsCollider *PhysicsEngine::getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float& rotZ)
 {
     for(auto &entry:physicsObjects)

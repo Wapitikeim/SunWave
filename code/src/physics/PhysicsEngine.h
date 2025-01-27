@@ -135,6 +135,7 @@ class PhysicsEngine
         void setBounceMultiplier(const float &newBounce){BOUNCE_MULTIPLIER = newBounce;};
         bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
         bool checkTriggerColliderCollision(const std::string& colliderEntityName, const std::string& triggerColliderEntityName);
+        bool checkColliderPlayerCollision(const std::string& colliderEntityName);
         PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
 
         //HasTableFunctions
