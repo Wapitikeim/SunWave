@@ -263,8 +263,9 @@ class GameEnvironment
         float timeElapsed = 0;
         int shapesSpawned = 0;
         int shapesHandeldCorrectly = 0;
-        float spawnInterval = 0.1f;
-        std::vector<Entity*>activeShapes;
+        int bias = 2;
+        float spawnInterval = 0.05f;
+        std::map<int,std::vector<Entity*>> activeShapesMap;
         void miniGameFindShape(Difficulty difficulty);
         void miniGameGoToPosition(Difficulty difficulty);
         void miniGameCatch(Difficulty difficulty);

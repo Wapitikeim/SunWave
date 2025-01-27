@@ -95,7 +95,7 @@
                 "LockX": false,
                 "LockY": true,
                 "Mass": 1.0,
-                "Rot": 0.0,
+                "Rot": 0,
                 "Velocity": [
                     0.0,
                     0.0,
@@ -106,11 +106,11 @@
             "Type": "PlayerShape",
             "name": "Player",
             "position": [
-                20.84383201599121,
+                21.705333709716797,
                 3.0330750942230225,
                 0.0
             ],
-            "rotation": 0.0,
+            "rotation": 0,
             "scale": [
                 3.0,
                 0.5,
@@ -145,8 +145,8 @@
             "Type": "Shape",
             "name": "Spawner1",
             "position": [
-                8.673784255981445,
-                17.0,
+                4.072307109832764,
+                21.819332122802734,
                 0.0
             ],
             "rotation": 0.0,
@@ -184,8 +184,8 @@
             "Type": "Shape",
             "name": "Spawner2",
             "position": [
-                17.094486236572266,
-                22.0,
+                13.114209175109863,
+                21.983917236328125,
                 0.0
             ],
             "rotation": 0.0,
@@ -223,8 +223,8 @@
             "Type": "Shape",
             "name": "Spawner3",
             "position": [
-                24.548879623413086,
-                22.0,
+                22.45520782470703,
+                21.913381576538086,
                 0.0
             ],
             "rotation": 0.0,
@@ -262,8 +262,47 @@
             "Type": "Shape",
             "name": "Spawner4",
             "position": [
-                34.83318328857422,
-                17.0,
+                32.94657516479492,
+                22.054454803466797,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": true,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Spawner5",
+            "position": [
+                40.170894622802734,
+                22.172016143798828,
                 0.0
             ],
             "rotation": 0.0,
@@ -301,89 +340,11 @@
             "Type": "Shape",
             "name": "Wall1",
             "position": [
-                25.768272399902344,
-                17.0,
+                14.011496543884277,
+                16.0,
                 0.0
             ],
             "rotation": 45.0,
-            "scale": [
-                3.0,
-                0.5,
-                1.0
-            ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.5,
-                "IgnoreGravity": false,
-                "IsGrounded": false,
-                "IsInContact": false,
-                "IsResting": true,
-                "IsStatic": true,
-                "IsTrigger": false,
-                "LockX": false,
-                "LockY": false,
-                "Mass": 1.0,
-                "Rot": 135.0,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "box",
-            "Type": "Shape",
-            "name": "Wall2",
-            "position": [
-                7.569429397583008,
-                13.0,
-                0.0
-            ],
-            "rotation": 135.0,
-            "scale": [
-                3.0,
-                0.5,
-                1.0
-            ]
-        },
-        {
-            "Physics": {
-                "Acceleration": [
-                    0.0,
-                    0.0,
-                    0.0
-                ],
-                "Elasticity": 0.5,
-                "IgnoreGravity": false,
-                "IsGrounded": false,
-                "IsInContact": false,
-                "IsResting": true,
-                "IsStatic": true,
-                "IsTrigger": false,
-                "LockX": false,
-                "LockY": false,
-                "Mass": 1.0,
-                "Rot": 135.0,
-                "Velocity": [
-                    0.0,
-                    0.0,
-                    0.0
-                ]
-            },
-            "ShaderName": "box",
-            "Type": "Shape",
-            "name": "Wall3",
-            "position": [
-                15.460963249206543,
-                17.0,
-                0.0
-            ],
-            "rotation": 135.0,
             "scale": [
                 3.0,
                 0.5,
@@ -416,10 +377,10 @@
             },
             "ShaderName": "box",
             "Type": "Shape",
-            "name": "Wall4",
+            "name": "Wall2",
             "position": [
-                36.32866287231445,
-                13.0,
+                41.068180084228516,
+                16.0,
                 0.0
             ],
             "rotation": 45.0,
@@ -428,9 +389,165 @@
                 0.5,
                 1.0
             ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 45.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall3",
+            "position": [
+                23.42151641845703,
+                16.0,
+                0.0
+            ],
+            "rotation": 45.0,
+            "scale": [
+                3.0,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 135.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall4",
+            "position": [
+                3.40509295463562,
+                16.0,
+                0.0
+            ],
+            "rotation": 135.0,
+            "scale": [
+                3.0,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 135.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall5",
+            "position": [
+                31.54312515258789,
+                16.0,
+                0.0
+            ],
+            "rotation": 135.0,
+            "scale": [
+                3.0,
+                0.5,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 135.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "box",
+            "Type": "Shape",
+            "name": "Wall6",
+            "position": [
+                18.014781951904297,
+                11.75610637664795,
+                0.0
+            ],
+            "rotation": 135.0,
+            "scale": [
+                3.0,
+                0.5,
+                1.0
+            ]
         }
     ],
-    "levelName": "BalanceLevelEasy1",
+    "levelName": "BalanceLevelMedium1",
     "physicsEngine": [
         {
             "BounceM": 2.247999906539917

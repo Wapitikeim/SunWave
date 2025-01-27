@@ -771,6 +771,8 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
     int numberOfShapesToSpawn = 0;
+    difficulty = Difficulty::Middle;
+    roundsPlayed = 3;
     
     //Names based on difficulty
     switch (difficulty)
@@ -783,12 +785,12 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
         case Difficulty::Middle:
             spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5"};
             levelNames = {"BalanceLevelMedium1", "BalanceLevelMedium2", "BalanceLevelMedium3"};
-            numberOfShapesToSpawn = 30;
+            numberOfShapesToSpawn = 25;
             break;
         case Difficulty::Hard:
             spawnerNames = {"Spawner1", "Spawner2", "Spawner3", "Spawner4", "Spawner5", "Spawner6"};
             levelNames = {"BalanceLevelHard1", "BalanceLevelHard2", "BalanceLevelHard3"};
-            numberOfShapesToSpawn = 40;
+            numberOfShapesToSpawn = 30;
             break;
         
         default:
@@ -801,63 +803,121 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
     for(auto& entry:spawnerNames)
         getEntityFromName<Entity>(entry)->setDontDraw(true);
     getEntityFromName<PlayerShape>("Player")->velocity = 5.f;
+    //GameBalance
+    if(difficulty == Difficulty::Easy&& roundsPlayed == 2)
+        spawnInterval = 0.075f;
+    if(difficulty == Difficulty::Middle)
+        spawnInterval = 0.05f;
+    
     //Logic
-    registerRepeatingFunction(
+    registerRepeatingFunction
+    (
         [this, spawnerNames, numberOfShapesToSpawn]() 
         {
-            //Logic that spawns shapes
-                // "Good" shapes in green that need to be catched
-                // "Bad" shapes in red that need to be avoided
-            
             //Every x time interval spawn a shape at a spawner location +y so that it falls down
             if(timeElapsed > numberOfShapesToSpawn*spawnInterval && this->shapesSpawned < numberOfShapesToSpawn)
             {
+                //Logic that spawns shapes
+                // "Good" shapes in green that need to be catched
+                    //Key in table 1
+                // "Bad" shapes in red that need to be avoided
+                    //Key in table 0 
+                int good = getRandomNumber(0,10);
+                if(good > this->bias) //Bias towards good shapes
+                    good = 1;
+                else
+                    good = 0;
                 auto spawner = getEntityFromName<Entity>(spawnerNames[getRandomNumber(0,spawnerNames.size()-1)]);
                 std::string entityName = std::string("ShapeToCatch") + std::to_string(this->shapesSpawned);
                 auto shape = std::make_unique<Shape>(entityName, glm::vec3(spawner->getPosition().x,spawner->getPosition().y+5,0),glm::vec3(1), getRandomNumber(0,360), true, "circle");
                 shape->addComponent(std::make_unique<PhysicsCollider>(shape.get(),0));
-                shape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                if(good)
+                    shape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                else
+                    shape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
                 addEntity(std::move(shape));
                 this->getPhysicsEngine()->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>(entityName,"Physics"));
-                this->activeShapes.push_back(getEntityFromName<Entity>(entityName));
                 
+                if(good)
+                    this->activeShapesMap[1].push_back(getEntityFromName<Entity>(entityName));
+                else
+                    this->activeShapesMap[0].push_back(getEntityFromName<Entity>(entityName));
+
                 this->shapesSpawned++;
                 this->timeElapsed = 0;
             }
             
-            
-            for(auto& entry: this->activeShapes)
+            for (auto& [key, shapes] : this->activeShapesMap) 
             {
-                if(this->getPhysicsEngine()->checkColliderPlayerCollision(entry->getEntityName()))
+                for (auto& shape : shapes) 
                 {
-                    this->deleteEntityFromName(entry->getEntityName());
-                    this->activeShapes.erase(std::remove(this->activeShapes.begin(), this->activeShapes.end(), entry), this->activeShapes.end());
-                    shapesHandeldCorrectly++;
-                    continue;
-                }
-                //If shape goes .y<0 delete it
-                if(entry->getPosition().y < 0)
-                {
-                    this->deleteEntityFromName(entry->getEntityName());
-                    this->activeShapes.erase(std::remove(this->activeShapes.begin(), this->activeShapes.end(), entry), this->activeShapes.end());
+                    if (key == 1) 
+                    {  // Good shapes
+                        if (this->getPhysicsEngine()->checkColliderPlayerCollision(shape->getEntityName())) {
+                            // Handle good shape collision
+                            this->deleteEntityFromName(shape->getEntityName());
+                            shapes.erase(std::remove(shapes.begin(), shapes.end(), shape), shapes.end());
+                            shapesHandeldCorrectly++;
+                            continue;
+                        }
+                    }
+                    else if (key == 0) 
+                    {  // Bad shapes
+                        if (this->getPhysicsEngine()->checkColliderPlayerCollision(shape->getEntityName())) 
+                        {
+                            this->deleteEntityFromName(shape->getEntityName());
+                            shapes.erase(std::remove(shapes.begin(), shapes.end(), shape), shapes.end());
+                            shapesHandeldCorrectly--;
+                            continue;
+                        }
+                    }
+
+                    // Common shape handling (falling off screen)
+                    if (shape->getPosition().y < 0) 
+                    {
+                        if(key == 1)
+                            shapesHandeldCorrectly--;
+                        if(key == 0)
+                            shapesHandeldCorrectly++;
+                        
+                        this->deleteEntityFromName(shape->getEntityName());
+                        shapes.erase(std::remove(shapes.begin(), shapes.end(), shape), shapes.end());
+                    }
                 }
             }
-            //shape needs to be monitored based on "good" or "bad"
-                //Good shapes need to be catched e.g. collision with player
-                //Bad shapes need to be avoided e.g. no collision with player
-            
             
             //Status update
+            if(shapesHandeldCorrectly < 0)
+                shapesHandeldCorrectly = 0;
             auto status = getEntityFromName<UiElement>("Status");
             status->setTextToBeRenderd(std::to_string(this->shapesHandeldCorrectly) + "/" + std::to_string(numberOfShapesToSpawn));
             //Update
             this->timeElapsed+=this->getDeltaTime();
             this->timeToComplete+=this->getDeltaTime();
         },
-        [this, spawnerNames, numberOfShapesToSpawn]() -> bool 
+        [this, numberOfShapesToSpawn]() -> bool 
         {
-            if(this->shapesSpawned >= numberOfShapesToSpawn && this->activeShapes.size() == 0)
-                return true;  
+            if(this->shapesSpawned >= numberOfShapesToSpawn && this->activeShapesMap[0].size() == 0 && this->activeShapesMap[1].size() == 0)
+            {
+                this->roundsPlayed++;
+                if(this->roundsPlayed > 2)
+                    this->gameDifficultyLevel = Difficulty::Middle;
+                if(this->roundsPlayed > 5)
+                    this->gameDifficultyLevel = Difficulty::Hard;
+                if(this->roundsPlayed > 8)
+                {
+                    this->gameDifficultyLevel = Difficulty::Easy;
+                    this->roundsPlayed = 0;
+                    this->timeToComplete = 0;
+                    this->resetMouseStates();
+                    this->loadMenu();
+                    return true;
+                }
+                this->shapesSpawned = 0;
+                this->shapesHandeldCorrectly = 0;
+                this->miniGameCatch(this->gameDifficultyLevel);
+                return true;
+            }  
             return false;
         }
     );
