@@ -140,9 +140,9 @@ class GameEnvironment
         UiManager ui;
 
         //Game logic Update
-        void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
+        
         void updateFunctionEvents();
-        void registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition);
+        void updateLoopingFunctions();
         void updateRepeatingFunctions();
         struct funcExecute
         {
@@ -154,6 +154,12 @@ class GameEnvironment
             std::function<void()> function;
             std::function<bool()> stopCondition;
         };
+        struct LoopingFunction 
+        {
+            float timer;
+            std::function<void()> function;
+        };
+        std::vector<LoopingFunction> loopingFunctions;
         std::vector<funcExecute> functionsToExecuteAfterTime;
         std::vector<RepeatingFunction> repeatingFunctions;
         
@@ -253,7 +259,10 @@ class GameEnvironment
 
         void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
         
-      
+        //Function Registering
+        void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
+        void registerLoopingFunctionUntil(std::function<void()> functionToExecute, float secondsToRun);
+        void registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition);
         //minigames
         Difficulty gameDifficultyLevel = Difficulty::Easy;
         bool shapeFound = false;
@@ -265,6 +274,7 @@ class GameEnvironment
         int shapesHandeldCorrectly = 0;
         int bias = 2;
         float spawnInterval = 0.05f;
+        float positionAlternation = 0.1f;
         std::map<int,std::vector<Entity*>> activeShapesMap;
         void miniGameFindShape(Difficulty difficulty);
         void miniGameGoToPosition(Difficulty difficulty);

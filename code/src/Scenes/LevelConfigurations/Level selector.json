@@ -183,7 +183,7 @@
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
                 "FontSize": 64,
-                "RenderedText": "Balance the spheres",
+                "RenderedText": "Catch the Spheres!",
                 "TextColor": [
                     1.0,
                     1.0,

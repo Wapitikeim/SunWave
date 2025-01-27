@@ -18,6 +18,7 @@ class ShaderContainer
         unsigned int vertexShaderID;
         std::string fragmentShader;
         std::string vertexShader;
+        glm::vec4 setColor;
 
         void setupAndCompileShaders();
         void linkProgrammAndAttachShaders();
@@ -53,7 +54,7 @@ class ShaderContainer
 
         unsigned int& getShaderID(){return fragmentShaderID;};
         void useShader();
-
+        glm::vec4& getSetColor(){return setColor;};
         void setUniformVec4(const std::string &uniformName, const glm::vec4 &valuesToSet) const;
 
         void setUniformMat4(const std::string &uniformName, const glm::mat4 &valuesToSet) const;

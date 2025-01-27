@@ -335,6 +335,11 @@ void GameEnvironment::processInput(GLFWwindow *window)
             this->roundsPlayed = 0;
             this->timeToComplete = 0;
             this->gameDifficultyLevel = Difficulty::Easy;
+            this->shapesSpawned = 0;
+            this->shapesHandeldCorrectly = 0;
+            this->spawnInterval = 0.05f;
+            this->positionAlternation = 0.1f;
+            this->activeShapesMap.clear();
             this->resetMouseStates();
             this->resetRegisterdFunctions();
             this->loadMenu();
@@ -771,8 +776,6 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
     int numberOfShapesToSpawn = 0;
-    difficulty = Difficulty::Middle;
-    roundsPlayed = 3;
     
     //Names based on difficulty
     switch (difficulty)
@@ -808,6 +811,14 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
         spawnInterval = 0.075f;
     if(difficulty == Difficulty::Middle)
         spawnInterval = 0.05f;
+    if(roundsPlayed == 5)
+        spawnInterval = 0.06f;
+    if(difficulty == Difficulty::Hard)
+        spawnInterval = 0.04f;
+    if(roundsPlayed == 7)
+        this->getEntityFromName<PlayerShape>("Player")->velocity = 7.f;
+    if(roundsPlayed == 8)
+        this->getEntityFromName<PlayerShape>("Player")->velocity = 5.f;  
     
     //Logic
     registerRepeatingFunction
@@ -822,6 +833,10 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
                     //Key in table 1
                 // "Bad" shapes in red that need to be avoided
                     //Key in table 0 
+                if(gameDifficultyLevel == Difficulty::Middle)
+                    this->positionAlternation = getRandomNumber(-5,5)/10;
+                
+                
                 int good = getRandomNumber(0,10);
                 if(good > this->bias) //Bias towards good shapes
                     good = 1;
@@ -829,7 +844,7 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
                     good = 0;
                 auto spawner = getEntityFromName<Entity>(spawnerNames[getRandomNumber(0,spawnerNames.size()-1)]);
                 std::string entityName = std::string("ShapeToCatch") + std::to_string(this->shapesSpawned);
-                auto shape = std::make_unique<Shape>(entityName, glm::vec3(spawner->getPosition().x,spawner->getPosition().y+5,0),glm::vec3(1), getRandomNumber(0,360), true, "circle");
+                auto shape = std::make_unique<Shape>(entityName, glm::vec3(spawner->getPosition().x+positionAlternation,spawner->getPosition().y+5,0),glm::vec3(1), getRandomNumber(0,360), true, "circle");
                 shape->addComponent(std::make_unique<PhysicsCollider>(shape.get(),0));
                 if(good)
                     shape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
@@ -858,6 +873,16 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
                             this->deleteEntityFromName(shape->getEntityName());
                             shapes.erase(std::remove(shapes.begin(), shapes.end(), shape), shapes.end());
                             shapesHandeldCorrectly++;
+                            //color
+                            this->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                            this->registerFunctionToExecuteWhen
+                            (
+                                0.5f, 
+                                [this]
+                                {
+                                    this->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+                                }
+                            );
                             continue;
                         }
                     }
@@ -868,6 +893,16 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
                             this->deleteEntityFromName(shape->getEntityName());
                             shapes.erase(std::remove(shapes.begin(), shapes.end(), shape), shapes.end());
                             shapesHandeldCorrectly--;
+                            //color
+                            this->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+                            this->registerFunctionToExecuteWhen
+                            (
+                                0.5f, 
+                                [this]
+                                {
+                                    this->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+                                }
+                            );
                             continue;
                         }
                     }
@@ -909,7 +944,13 @@ void GameEnvironment::miniGameCatch(Difficulty difficulty)
                     this->gameDifficultyLevel = Difficulty::Easy;
                     this->roundsPlayed = 0;
                     this->timeToComplete = 0;
+                    this->shapesSpawned = 0;
+                    this->shapesHandeldCorrectly = 0;
+                    this->spawnInterval = 0.05f;
+                    this->positionAlternation = 0.1f;
+                    this->activeShapesMap.clear();
                     this->resetMouseStates();
+                    this->resetRegisterdFunctions();
                     this->loadMenu();
                     return true;
                 }
@@ -943,6 +984,27 @@ void GameEnvironment::updateFunctionEvents()
         else 
         {
             // Move to the next element if not erasing
+            ++it;
+        }
+    }
+}
+
+void GameEnvironment::updateLoopingFunctions()
+{
+    if(gamePaused)
+        return;
+        
+    for(auto it = loopingFunctions.begin(); it != loopingFunctions.end();) {
+        // Execute the function
+        it->function();
+        
+        // Decrease timer
+        it->timer -= deltaTime;
+        
+        // Remove if timer is up
+        if(it->timer <= 0) {
+            it = loopingFunctions.erase(it);
+        } else {
             ++it;
         }
     }
@@ -986,6 +1048,14 @@ void GameEnvironment::registerFunctionToExecuteWhen(float whenFunctionShouldStar
     t.function = functionToExecute;
     functionsToExecuteAfterTime.push_back(t);
     std::cout << "Function Registerd with timer: " << t.timer << "\n";
+}
+
+void GameEnvironment::registerLoopingFunctionUntil(std::function<void()> functionToExecute, float secondsToRun)
+{
+    LoopingFunction lf;
+    lf.timer = secondsToRun;
+    lf.function = functionToExecute;
+    loopingFunctions.push_back(lf);
 }
 
 std::string GameEnvironment::difficultyToString(Difficulty difficulty)
@@ -1111,6 +1181,7 @@ void GameEnvironment::resetRegisterdFunctions()
 {
     functionsToExecuteAfterTime.clear();
     repeatingFunctions.clear();
+    loopingFunctions.clear();
 }
 
 void GameEnvironment::testing(const std::string& text, float x, float y, float scale, glm::vec3 color)
