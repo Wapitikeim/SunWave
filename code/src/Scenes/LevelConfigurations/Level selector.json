@@ -55,7 +55,7 @@
             "Type": "UiElement",
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
-                "FontSize": 94,
+                "FontSize": 64,
                 "RenderedText": "Games:",
                 "TextColor": [
                     1.0,
@@ -66,13 +66,13 @@
             },
             "name": "GamesBanner",
             "position": [
-                4.624484062194824,
-                19.091915130615234,
+                3,
+                12,
                 0.0
             ],
             "rotation": 0.0,
             "scale": [
-                1.0,
+                1.0019999742507935,
                 1.0,
                 1.0
             ]
@@ -132,7 +132,7 @@
             "Type": "UiElement",
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
-                "FontSize": 64,
+                "FontSize": 48,
                 "RenderedText": "Find the Shape",
                 "TextColor": [
                     1.0,
@@ -143,8 +143,8 @@
             },
             "name": "SF",
             "position": [
-                9.594079971313477,
-                15.988303184509277,
+                7.5,
+                10.0,
                 0.0
             ],
             "rotation": 0.0,
@@ -182,8 +182,8 @@
             "Type": "UiElement",
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
-                "FontSize": 64,
-                "RenderedText": "Catch the Spheres!",
+                "FontSize": 48,
+                "RenderedText": "Catch the Spheres",
                 "TextColor": [
                     1.0,
                     1.0,
@@ -193,8 +193,8 @@
             },
             "name": "BtS",
             "position": [
-                11.5,
-                12.814155578613281,
+                8.3,
+                8.0,
                 0.0
             ],
             "rotation": 0.0,
@@ -232,8 +232,8 @@
             "Type": "UiElement",
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
-                "FontSize": 64,
-                "RenderedText": "Go on Position!",
+                "FontSize": 48,
+                "RenderedText": "Go on Position",
                 "TextColor": [
                     1.0,
                     1.0,
@@ -243,8 +243,58 @@
             },
             "name": "GoP",
             "position": [
-                9.800000190734863,
-                9.592982292175293,
+                7.4,
+                6.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 94,
+                "RenderedText": "Start Sun Wave",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "SunWaveStart",
+            "position": [
+                8.903858184814453,
+                18.12791633605957,
                 0.0
             ],
             "rotation": 0.0,
