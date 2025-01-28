@@ -84,3 +84,17 @@ void UiElement::draw()
 
 }
 
+void UiElement::update(GLFWwindow *window, float deltaTime)
+{
+    // Because the text x Scale isnt reflected in draw correctly
+        //This is an patch for the physics engine using the corrected scale
+    float ratio = calculateTextSizeInPixels().x / glfwPrep::getCurrentWindowWidth() ;
+    float newX = (44.2f * ratio) / 2; // 44.2f Camera xHalf*2 if one day the camera FOV changes this needs to be adjusted
+    float oldX = entityScale.x;
+    entityScale.x = newX;
+    for(auto &comp:this->componentsOfThisEntity)
+    {
+        comp->update();
+    }
+    entityScale.x = oldX;
+}
