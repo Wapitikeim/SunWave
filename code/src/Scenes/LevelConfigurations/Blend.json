@@ -1,0 +1,232 @@
+{
+    "entities": [
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 64,
+                "RenderedText": "Game:",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "UpGame",
+            "position": [
+                2.799999952316284,
+                24.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 94,
+                "RenderedText": "Start ",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "startButton",
+            "position": [
+                39.29661560058594,
+                2.844977617263794,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 64,
+                "RenderedText": "Difficulty:",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "diffShow",
+            "position": [
+                4.0,
+                18.5,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 64,
+                "RenderedText": "Controls:",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "controlsShow",
+            "position": [
+                3.799999952316284,
+                13.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Mouse and click",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "controlsShowText",
+            "position": [
+                9.5,
+                11.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Easy",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "diffShowText",
+            "position": [
+                5.5,
+                16.5,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Regular.ttf",
+                "FontSize": 64,
+                "RenderedText": "Find the Shape",
+                "TextColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "name": "upGameText",
+            "position": [
+                6.5,
+                22.0,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        }
+    ],
+    "levelName": "Blend",
+    "physicsEngine": [
+        {
+            "BounceM": 2.25
+        }
+    ],
+    "worldData": [
+        {
+            "CameraPos": [
+                22.100000381469727,
+                12.425999641418457,
+                30.0
+            ],
+            "Fov": 45.0
+        }
+    ]
+}

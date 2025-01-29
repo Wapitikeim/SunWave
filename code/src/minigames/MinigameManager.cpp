@@ -16,28 +16,32 @@ void MinigameManager::handleNextMinigame()
     {
         gameEnv->resetMouseStates();
         gameEnv->setMouseEntityManipulation(false);
+        gameEnv->setHoverOverEffect(true);
         this->resetMinigameVariabels();
         gameEnv->loadMenu();
     }
     
+    //Blend for next minigame if sunwavemode is active
     if(!minigameSequence.empty()) //Sunwave
     {
+        if(minigameSequence[roundsPlayed] == MinigameType::Catch)
+        {
+            this->shapesSpawned = 0;
+            this->shapesHandeldCorrectly = 0;
+        }
+        
         if(currentMinigame == MinigameType::FindShape)
         {
             gameEnv->getPhysicsEngine()->setIsHalting(false);
             gameEnv->deleteEntityFromName("WallBottom");
-            if(minigameSequence[roundsPlayed] == MinigameType::Catch)
-            {
-                this->shapesSpawned = 0;
-                this->shapesHandeldCorrectly = 0;
-            }
-            gameEnv->registerFunctionToExecuteWhen(4.f,[this]() {this->startMinigame(minigameSequence[roundsPlayed]);});
+            currentMinigame = minigameSequence[roundsPlayed];
+            gameEnv->registerFunctionToExecuteWhen(4.f,[this]() {this->blendTheNextGame();});
             return;
         }
         currentMinigame = minigameSequence[roundsPlayed];
+        blendTheNextGame();
+        return;
     } 
-        
-    
     if(currentMinigame == MinigameType::FindShape)
     {
         if(minigameSequence.empty())
@@ -69,6 +73,8 @@ void MinigameManager::miniGameFindShape()
 
     gameEnv->getPhysicsEngine()->setIsHalting(true);
     shapeFound = false;
+    gameEnv->setHoverOverEffect(true);
+    gameEnv->setMouseEntityManipulation(true);
 
     //Adjustments based on Difficulty
     switch (currentDifficulty)
@@ -214,6 +220,7 @@ void MinigameManager::miniGameGoToPosition()
     std::vector<std::string>playerNames;
     std::vector<std::string>triggerNames;
     std::vector<std::string>levelNames;
+    gameEnv->setHoverOverEffect(false);
     //Names based on difficulty
     switch (currentDifficulty)
     {
@@ -284,6 +291,7 @@ void MinigameManager::miniGameCatch()
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
     int numberOfShapesToSpawn = 0;
+    gameEnv->setHoverOverEffect(false);
     
     //Names based on difficulty
     switch (currentDifficulty)
@@ -308,6 +316,7 @@ void MinigameManager::miniGameCatch()
             break;
     }
     gameEnv->getSceneManager().loadLevel(levelNames[roundsPlayed%3], gameEnv->getEntities(), gameEnv->getPhysicsEngine());
+    gameEnv->getPhysicsEngine()->setIsHalting(false);
     //Status
     gameEnv->addEntity(std::make_unique<UiElement>("Status",glm::vec3(2,24,0),glm::vec3(1),0,"0/20","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
     //Prep
@@ -388,7 +397,7 @@ void MinigameManager::miniGameCatch()
                                 0.5f, 
                                 [this]
                                 {
-                                    if(this->gameEnv->getEntityFromName<PlayerShape>("Player"))
+                                    if(this->gameEnv->getEntityFromName<PlayerShape>("Player") != nullptr)
                                         this->gameEnv->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
                                 }
                             );
@@ -409,7 +418,7 @@ void MinigameManager::miniGameCatch()
                                 0.5f, 
                                 [this]
                                 {
-                                    if(this->gameEnv->getEntityFromName<PlayerShape>("Player"))
+                                    if(this->gameEnv->getEntityFromName<PlayerShape>("Player")!= nullptr)
                                         this->gameEnv->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
                                 }
                             );
@@ -491,9 +500,30 @@ void MinigameManager::startSunwaveGame()
     for(const auto& pair : gamePairs) 
         for(const auto& game : pair) 
             minigameSequence.push_back(game);
-        
-    startMinigame(minigameSequence[0]);
+    
+    blendTheNextGame();
 
+}
+
+void MinigameManager::blendTheNextGame()
+{
+    gameEnv->resetMouseStates();
+    gameEnv->getSceneManager().loadLevel("Blend", gameEnv->getEntities(), gameEnv->getPhysicsEngine());
+    gameEnv->setMouseEntityManipulation(false);
+    gameEnv->setHoverOverEffect(true);
+    
+    auto startButton = gameEnv->getEntityFromName<UiElement>("startButton");
+    startButton->setOnClick([this]
+    {
+        if(!gameEnv->getGamePaused())
+            this->startMinigame(this->minigameSequence[roundsPlayed]);
+    });
+    auto upGameText = gameEnv->getEntityFromName<UiElement>("upGameText");
+    upGameText->setTextToBeRenderd(gameTypeToString(minigameSequence[roundsPlayed]));
+    auto diffShowText = gameEnv->getEntityFromName<UiElement>("diffShowText");
+    diffShowText->setTextToBeRenderd(difficultyToString(currentDifficulty));
+    auto controlShowText = gameEnv->getEntityFromName<UiElement>("controlsShowText");
+    controlShowText->setTextToBeRenderd(typeToControlsString(minigameSequence[roundsPlayed]));
 }
 
 void MinigameManager::resetMinigameVariabels()
@@ -543,6 +573,28 @@ std::string MinigameManager::difficultyToString(Difficulty &difficulty)
         case Difficulty::Easy: return "Easy";
         case Difficulty::Middle: return "Middle";
         case Difficulty::Hard: return "Hard";
+        default: return "Unknown";
+    }
+}
+
+std::string MinigameManager::gameTypeToString(MinigameType &type)
+{
+    switch (type)
+    {
+        case MinigameType::FindShape : return "Shape?";
+        case MinigameType::Catch : return "Catch!";
+        case MinigameType::GoToPosition : return "Go!";
+        default: return "Unknown";
+    }
+}
+
+std::string MinigameManager::typeToControlsString(MinigameType &type)
+{
+    switch (type)
+    {
+        case MinigameType::FindShape : return "Mouse and click";
+        case MinigameType::Catch : return "A and D";
+        case MinigameType::GoToPosition : return "W A S D";
         default: return "Unknown";
     }
 }

@@ -46,7 +46,8 @@ void GameEnvironment::mouseUpdate()
     mouseCursorPositionUpdate();
     mouseClickUpdate();
     mousePhysicsUpdate();
-    mouseHoverOverEffect();
+    if(hoverOverEffect)
+        mouseHoverOverEffect();
     mouseClickLogic();
     if(entityManipulationThroughMouse)
         mouseEntityManipulationLogic();
@@ -309,6 +310,7 @@ void GameEnvironment::processInput(GLFWwindow *window)
             this->setGamePaused(false);
             this->getPhysicsEngine()->setIsHalting(false);
             this->getMinigameManager()->resetMinigameVariabels();
+            this->setHoverOverEffect(true);
             this->resetMouseStates();
             this->resetRegisterdFunctions();
             this->loadMenu();

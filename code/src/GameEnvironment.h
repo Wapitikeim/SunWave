@@ -98,6 +98,7 @@ class GameEnvironment
         bool pressedAndHoldingSomething = false;
         bool staticPrevRef = false;
         bool entityManipulationThroughMouse = true;
+        bool hoverOverEffect = true;
         glm::vec4 colorOfRefEntity;
         Entity* entityColorSaved;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
@@ -238,8 +239,11 @@ class GameEnvironment
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
         void setInMenu(const bool& newMenu){inMenu = newMenu;};
         void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
+        void setHoverOverEffect(const bool& newHover){hoverOverEffect = newHover;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const bool& getIfPressedAndHolding(){return pressedAndHoldingSomething;};
+        const bool& getGamePaused(){return gamePaused;};
+        const bool& getHoverOverEffect(){return hoverOverEffect;};
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};
         UiManager& getUiManager(){return ui;};

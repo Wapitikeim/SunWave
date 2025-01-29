@@ -46,6 +46,7 @@ private:
     void miniGameGoToPosition();
     void miniGameCatch();
     void startSunwaveGame();
+    void blendTheNextGame();
 
 public:
     MinigameManager(GameEnvironment* env) : gameEnv(env) {}
@@ -57,5 +58,8 @@ public:
     Difficulty getCurrentDifficulty() const { return currentDifficulty; }
     
     std::string difficultyToString(Difficulty &difficulty);
+    std::string gameTypeToString(MinigameType &type);
+    std::string typeToControlsString(MinigameType &type);
+    
 
 };
