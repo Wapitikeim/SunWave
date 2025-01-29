@@ -166,18 +166,7 @@ class GameEnvironment
         
         //MiniGames
         std::unique_ptr<MinigameManager> minigameManager;
-        enum class Difficulty 
-        {
-            Easy,
-            Middle,
-            Hard
-        };
         
-        
-        std::string difficultyToString(Difficulty difficulty);
-        
-
-
     public:
         GameEnvironment();
         ~GameEnvironment()

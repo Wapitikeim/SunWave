@@ -1,10 +1,67 @@
 #include "MinigameManager.h"
 #include "../GameEnvironment.h"
 #include "../util/HelperFunctions.h"
+#include <algorithm>
 
-
-
-
+void MinigameManager::handleNextMinigame()
+{
+    //This will called when a minigame is finished
+    roundsPlayed++;
+    //Difficulty increase based on rounds played
+    if(roundsPlayed > 2)
+        currentDifficulty = Difficulty::Middle;
+    if(roundsPlayed > 5)
+        currentDifficulty = Difficulty::Hard;
+    if(roundsPlayed > 8)
+    {
+        gameEnv->resetMouseStates();
+        gameEnv->setMouseEntityManipulation(false);
+        this->resetMinigameVariabels();
+        gameEnv->loadMenu();
+    }
+    
+    if(!minigameSequence.empty()) //Sunwave
+    {
+        if(currentMinigame == MinigameType::FindShape)
+        {
+            gameEnv->getPhysicsEngine()->setIsHalting(false);
+            gameEnv->deleteEntityFromName("WallBottom");
+            if(minigameSequence[roundsPlayed] == MinigameType::Catch)
+            {
+                this->shapesSpawned = 0;
+                this->shapesHandeldCorrectly = 0;
+            }
+            gameEnv->registerFunctionToExecuteWhen(4.f,[this]() {this->startMinigame(minigameSequence[roundsPlayed]);});
+            return;
+        }
+        currentMinigame = minigameSequence[roundsPlayed];
+    } 
+        
+    
+    if(currentMinigame == MinigameType::FindShape)
+    {
+        if(minigameSequence.empty())
+        {
+            gameEnv->getPhysicsEngine()->setIsHalting(false);
+            gameEnv->deleteEntityFromName("WallBottom");
+            gameEnv->registerFunctionToExecuteWhen(4.f,[this]() {this->miniGameFindShape();});
+        }
+        else
+        {
+            this->miniGameFindShape();
+        }         
+    }
+    if(currentMinigame == MinigameType::GoToPosition)
+    {
+        this->miniGameGoToPosition();
+    } 
+    if(currentMinigame == MinigameType::Catch)
+    {
+        this->shapesSpawned = 0;
+        this->shapesHandeldCorrectly = 0;
+        this->miniGameCatch();
+    }
+}
 
 void MinigameManager::miniGameFindShape()
 {
@@ -12,6 +69,20 @@ void MinigameManager::miniGameFindShape()
 
     gameEnv->getPhysicsEngine()->setIsHalting(true);
     shapeFound = false;
+
+    //Adjustments based on Difficulty
+    switch (currentDifficulty)
+    {
+        case Difficulty::Easy:
+            entitiesToFill = getRandomNumber(80, 120);
+            break;
+        case Difficulty::Middle:
+            entitiesToFill = getRandomNumber(120, 160);
+            break;
+        case Difficulty::Hard:
+            entitiesToFill = getRandomNumber(180, 250);
+            break;
+    };
 
     //Timer
     gameEnv->addEntity(std::make_unique<UiElement>("Timer",glm::vec3(3.3,24,0),glm::vec3(1),0,"Time: 0","Open_Sans\\static\\OpenSans-Regular.ttf", 64));
@@ -131,34 +202,7 @@ void MinigameManager::miniGameFindShape()
         {
             if(this->shapeFound)
             {
-                this->roundsPlayed++;
-                if(this->roundsPlayed > 2)
-                    this->currentDifficulty = Difficulty::Middle;
-                if(this->roundsPlayed > 5)
-                    this->currentDifficulty = Difficulty::Hard;
-                if(this->roundsPlayed > 8)
-                {
-                    gameEnv->resetMouseStates();
-                    gameEnv->setMouseEntityManipulation(false);
-                    this->resetMinigameVariabels();
-                    gameEnv->loadMenu();
-                    return true;
-                }
-                switch (this->currentDifficulty)
-                {
-                    case Difficulty::Easy:
-                        this->entitiesToFill = getRandomNumber(80, 120);
-                        break;
-                    case Difficulty::Middle:
-                        this->entitiesToFill = getRandomNumber(120, 160);
-                        break;
-                    case Difficulty::Hard:
-                        this->entitiesToFill = getRandomNumber(180, 250);
-                        break;
-                };
-                gameEnv->getPhysicsEngine()->setIsHalting(false);
-                gameEnv->deleteEntityFromName("WallBottom");
-                gameEnv->registerFunctionToExecuteWhen(4.f,[this]() {this->miniGameFindShape();});
+                this->handleNextMinigame();
             }
             return this->shapeFound;
         }
@@ -229,19 +273,7 @@ void MinigameManager::miniGameGoToPosition()
                     return false;
                 i++;
             }
-            roundsPlayed++;
-            if(roundsPlayed > 2)
-                this->currentDifficulty = Difficulty::Middle;
-            if(roundsPlayed > 5)
-                this->currentDifficulty = Difficulty::Hard;
-            if(roundsPlayed > 8)
-            {
-                this->resetMinigameVariabels();
-                this->gameEnv->resetMouseStates();
-                this->gameEnv->loadMenu();
-                return true;
-            }
-            this->miniGameGoToPosition();
+            this->handleNextMinigame();
             return true;
         }
     );
@@ -302,7 +334,7 @@ void MinigameManager::miniGameCatch()
         [this, spawnerNames, numberOfShapesToSpawn]() 
         {
             //Every x time interval spawn a shape at a spawner location +y so that it falls down
-            if(timeElapsed > numberOfShapesToSpawn*spawnInterval && this->shapesSpawned < numberOfShapesToSpawn)
+            if(this->timeElapsed > numberOfShapesToSpawn*spawnInterval && this->shapesSpawned < numberOfShapesToSpawn)
             {
                 //Logic that spawns shapes
                 // "Good" shapes in green that need to be catched
@@ -412,28 +444,56 @@ void MinigameManager::miniGameCatch()
         {
             if(this->shapesSpawned >= numberOfShapesToSpawn && this->activeShapesMap[0].size() == 0 && this->activeShapesMap[1].size() == 0)
             {
-                this->roundsPlayed++;
-                if(this->roundsPlayed > 2)
-                    this->currentDifficulty = Difficulty::Middle;
-                if(this->roundsPlayed > 5)
-                    this->currentDifficulty = Difficulty::Hard;
-                if(this->roundsPlayed > 8)
-                {
-                    this->currentDifficulty = Difficulty::Easy;
-                    this->resetMinigameVariabels();
-                    this->gameEnv->resetMouseStates();
-                    this->gameEnv->resetRegisterdFunctions();
-                    this->gameEnv->loadMenu();
-                    return true;
-                }
-                this->shapesSpawned = 0;
-                this->shapesHandeldCorrectly = 0;
-                this->miniGameCatch();
+                this->handleNextMinigame();
                 return true;
             }  
             return false;
         }
     );
+}
+
+void MinigameManager::startSunwaveGame()
+{
+    // Available minigames (excluding Sunwave)
+    std::vector<MinigameType> availableTypes = 
+    {
+        MinigameType::FindShape,
+        MinigameType::GoToPosition,
+        MinigameType::Catch
+    };
+
+    // Create 3 pairs of 3 minigames
+    std::vector<std::vector<MinigameType>> gamePairs;
+    for(int pair = 0; pair < 3; pair++) 
+    {
+        std::vector<MinigameType> currentPair;
+        auto shuffledTypes = availableTypes;
+        
+        // Shuffle available types for this pair
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::shuffle(shuffledTypes.begin(), shuffledTypes.end(), gen);
+        
+        // Take all 3 types for this pair
+        for(int i = 0; i < 3; i++) {
+            currentPair.push_back(shuffledTypes[i]);
+        }
+        
+        gamePairs.push_back(currentPair);
+    };
+    // Shuffle the pairs themselves
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(gamePairs.begin(), gamePairs.end(), gen);
+
+    // Store the sequence (flatten the pairs into single sequence)
+    minigameSequence.clear();
+    for(const auto& pair : gamePairs) 
+        for(const auto& game : pair) 
+            minigameSequence.push_back(game);
+        
+    startMinigame(minigameSequence[0]);
+
 }
 
 void MinigameManager::resetMinigameVariabels()
@@ -451,10 +511,12 @@ void MinigameManager::resetMinigameVariabels()
     spawnInterval = 0.05f;
     positionAlternation = 0.1f;
     activeShapesMap.clear();
+    minigameSequence.clear();
 }
 
 void MinigameManager::startMinigame(MinigameType type)
 {
+    currentMinigame = type;
     switch (type)
     {
     case MinigameType::FindShape:
@@ -467,9 +529,20 @@ void MinigameManager::startMinigame(MinigameType type)
         miniGameCatch();
         break;
     case MinigameType::Sunwave:
-        /* code */
+        startSunwaveGame();
         break;
     default:
         break;
+    }
+}
+
+std::string MinigameManager::difficultyToString(Difficulty &difficulty)
+{
+    switch (difficulty)
+    {
+        case Difficulty::Easy: return "Easy";
+        case Difficulty::Middle: return "Middle";
+        case Difficulty::Hard: return "Hard";
+        default: return "Unknown";
     }
 }

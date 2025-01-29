@@ -38,25 +38,24 @@ private:
     float spawnInterval = 0.05f;
     float positionAlternation = 0.1f;
     std::map<int,std::vector<Entity*>> activeShapesMap;
+    std::vector<MinigameType> minigameSequence;
     
     // Minigame transition logic
-    MinigameType determineNextMinigame();
-    void initializeMinigame(MinigameType type);
+    void handleNextMinigame();
     void miniGameFindShape();
     void miniGameGoToPosition();
     void miniGameCatch();
+    void startSunwaveGame();
 
 public:
     MinigameManager(GameEnvironment* env) : gameEnv(env) {}
     void resetMinigameVariabels();
     void startMinigame(MinigameType type);
-    void endCurrentMinigame();
-    void update(float deltaTime);
     
     // Getters/Setters
     MinigameType getCurrentMinigame() const { return currentMinigame; }
     Difficulty getCurrentDifficulty() const { return currentDifficulty; }
     
-    //std::string& difficultyToString(Difficulty &difficulty){return "";};
+    std::string difficultyToString(Difficulty &difficulty);
 
 };

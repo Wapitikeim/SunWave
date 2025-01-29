@@ -443,6 +443,16 @@ void GameEnvironment::loadLevelSelector()
         this->getMinigameManager()->startMinigame(MinigameType::GoToPosition);
     });
 
+    auto sunwaveButton = getEntityFromName<UiElement>("SunWaveStart");
+    sunwaveButton->setOnClick([this]
+    {
+        this->resetMouseStates();
+        this->setGamePaused(false);
+        this->setInMenu(false);
+        this->setMouseEntityManipulation(false);
+        this->getMinigameManager()->startMinigame(MinigameType::Sunwave);
+    });
+
 }
 
 void GameEnvironment::prepareForLevelChange()
@@ -582,17 +592,6 @@ void GameEnvironment::registerLoopingFunctionUntil(std::function<void()> functio
     lf.timer = secondsToRun;
     lf.function = functionToExecute;
     loopingFunctions.push_back(lf);
-}
-
-std::string GameEnvironment::difficultyToString(Difficulty difficulty)
-{
-    switch (difficulty)
-    {
-        case Difficulty::Easy: return "Easy";
-        case Difficulty::Middle: return "Middle";
-        case Difficulty::Hard: return "Hard";
-        default: return "Unknown";
-    }
 }
 
 GameEnvironment::GameEnvironment()
