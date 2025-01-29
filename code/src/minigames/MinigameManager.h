@@ -34,6 +34,7 @@ private:
     float timeToComplete = 0.f;
     int shapesSpawned = 0;
     int shapesHandeldCorrectly = 0;
+    int shapesHandeldCorrectlyFull = 0;
     int bias = 2;
     float spawnInterval = 0.05f;
     float positionAlternation = 0.1f;
@@ -42,6 +43,7 @@ private:
     
     // Minigame transition logic
     void handleNextMinigame();
+    void handleHighscore();
     void miniGameFindShape();
     void miniGameGoToPosition();
     void miniGameCatch();

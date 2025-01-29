@@ -2,6 +2,8 @@
 #include "../GameEnvironment.h"
 #include "../util/HelperFunctions.h"
 #include <algorithm>
+#include <filesystem>
+
 
 void MinigameManager::handleNextMinigame()
 {
@@ -14,6 +16,10 @@ void MinigameManager::handleNextMinigame()
         currentDifficulty = Difficulty::Hard;
     if(roundsPlayed > 8)
     {
+        //Highscorehandeling
+        if(!minigameSequence.empty())
+            currentMinigame = MinigameType::Sunwave;
+        handleHighscore();
         gameEnv->resetMouseStates();
         gameEnv->setMouseEntityManipulation(false);
         gameEnv->setHoverOverEffect(true);
@@ -64,6 +70,78 @@ void MinigameManager::handleNextMinigame()
         this->shapesSpawned = 0;
         this->shapesHandeldCorrectly = 0;
         this->miniGameCatch();
+    }
+}
+
+void MinigameManager::handleHighscore()
+{
+    std::filesystem::path srcPath = std::filesystem::current_path();
+    fileReader::trimDownPathToWorkingDirectory(srcPath);
+    srcPath.append("src/minigames/highscores/highscores.json");
+
+    nlohmann::json highscores;
+    if(std::filesystem::exists(srcPath)) {
+        std::ifstream input(srcPath);
+        if(input.is_open()) {
+            input >> highscores;
+            input.close();
+        }
+    } else 
+    {
+        highscores = nlohmann::json{
+            {"Sunwave", nlohmann::json::array()},
+            {"Go!", nlohmann::json::array()},
+            {"Catch!", nlohmann::json::array()},
+            {"Shape?", nlohmann::json::array()}
+        };
+    }
+
+    std::string gameType = gameTypeToString(currentMinigame);
+    bool shouldUpdate = false;
+
+    if(currentMinigame == MinigameType::Catch) 
+    {
+        // For Catch, compare shapesHandeldCorrectlyFull
+        if(highscores[gameType].empty() || 
+           shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>()) {
+            highscores[gameType] = nlohmann::json::array();
+            highscores[gameType].push_back({
+                {"Shapes", shapesHandeldCorrectlyFull}
+            });
+            shouldUpdate = true;
+        }
+    }
+    else if(currentMinigame == MinigameType::Sunwave) 
+    {
+        // For Sunwave, compare both time and shapes
+        if(highscores[gameType].empty() || 
+           (timeToComplete < highscores[gameType][0]["Time"].get<float>() && 
+            shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>())) {
+            highscores[gameType] = nlohmann::json::array();
+            highscores[gameType].push_back({
+                {"Time", timeToComplete},
+                {"Shapes", shapesHandeldCorrectlyFull}
+            });
+            shouldUpdate = true;
+        }
+    }
+    else 
+    {
+        // For other games, compare time
+        if(highscores[gameType].empty() || 
+           timeToComplete < highscores[gameType][0]["Time"].get<float>()) {
+            highscores[gameType] = nlohmann::json::array();
+            highscores[gameType].push_back({
+                {"Time", timeToComplete}
+            });
+            shouldUpdate = true;
+        }
+    }
+
+    if(shouldUpdate) 
+    {
+        std::ofstream file(srcPath);
+        file << highscores.dump(4);
     }
 }
 
@@ -209,6 +287,7 @@ void MinigameManager::miniGameFindShape()
             if(this->shapeFound)
             {
                 this->handleNextMinigame();
+                return true;
             }
             return this->shapeFound;
         }
@@ -453,6 +532,7 @@ void MinigameManager::miniGameCatch()
         {
             if(this->shapesSpawned >= numberOfShapesToSpawn && this->activeShapesMap[0].size() == 0 && this->activeShapesMap[1].size() == 0)
             {
+                shapesHandeldCorrectlyFull += shapesHandeldCorrectly;
                 this->handleNextMinigame();
                 return true;
             }  
@@ -537,6 +617,7 @@ void MinigameManager::resetMinigameVariabels()
     timeToComplete = 0.f;
     shapesSpawned = 0;
     shapesHandeldCorrectly = 0;
+    shapesHandeldCorrectlyFull = 0;
     bias = 2;
     spawnInterval = 0.05f;
     positionAlternation = 0.1f;
@@ -584,6 +665,7 @@ std::string MinigameManager::gameTypeToString(MinigameType &type)
         case MinigameType::FindShape : return "Shape?";
         case MinigameType::Catch : return "Catch!";
         case MinigameType::GoToPosition : return "Go!";
+        case MinigameType::Sunwave : return "Sunwave";
         default: return "Unknown";
     }
 }
