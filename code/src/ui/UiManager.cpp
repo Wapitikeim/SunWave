@@ -269,11 +269,6 @@ void UiManager::drawImGuiPhysicsEngineControl()
     ImGui::SameLine();
     if(ImGui::Button("Halt Engine"))
         physicsEngine->setIsHalting(!engineHalting);
-    /* if(ImGui::Button("Reset Level"))
-        resetLevel();
-    if(ImGui::Button("Load just walls"))
-        loadWallLevel(); */
-    ImGui::SliderInt("Entity Count", &gameEnv->entitiesToFill, 20, 200);
 
     float newBounce = physicsEngine->getBounceMultiplier();
     ImGui::SliderFloat("Bounce multiplier:", &newBounce, 0.5f, 4.0f, "%.3f",0);

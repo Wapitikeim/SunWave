@@ -31,6 +31,8 @@
 #include "entities/PlayerShape.h"
 #include "entities/UiElement.h"
 #include "Scenes/SceneManager.h"
+#include "minigames/MinigameManager.h"
+
 
 
 //UI
@@ -111,9 +113,8 @@ class GameEnvironment
 
         //Level loading
         SceneManager sceneManager;
-        void prepareForLevelChange();
-        void loadMenu();
-        void loadLevelSelector();
+        
+        
         void resetLevel();
         void loadWallLevel();
         bool gamePaused = false;
@@ -164,6 +165,7 @@ class GameEnvironment
         std::vector<RepeatingFunction> repeatingFunctions;
         
         //MiniGames
+        std::unique_ptr<MinigameManager> minigameManager;
         enum class Difficulty 
         {
             Easy,
@@ -240,6 +242,9 @@ class GameEnvironment
         SceneManager& getSceneManager() { return sceneManager; }
         const float& getFov()const{return fov;};
         const float& getDeltaTime()const{return deltaTime;};
+        const glm::vec3 getCameraPos()const{return cameraPos;};
+        const float& getXHalf()const{return xHalf;};
+        const float& getYHalf()const{return yHalf;};
         void setFOV(const float& newFOV){fov = newFOV;};
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
         void setInMenu(const bool& newMenu){inMenu = newMenu;};
@@ -249,11 +254,14 @@ class GameEnvironment
         const float& getMouseX()const{return mouseX;};
         const float& getMouseY()const{return mouseY;};
         UiManager& getUiManager(){return ui;};
-        const glm::vec3 getCameraPos()const{return cameraPos;};
         PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
         
         void run();
-
+        
+        //Level Loading
+        void loadMenu();
+        void loadLevelSelector();
+        void prepareForLevelChange();
         void resetMouseStates();
         void resetRegisterdFunctions();
 
@@ -264,21 +272,7 @@ class GameEnvironment
         void registerLoopingFunctionUntil(std::function<void()> functionToExecute, float secondsToRun);
         void registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition);
         //minigames
-        Difficulty gameDifficultyLevel = Difficulty::Easy;
-        bool shapeFound = false;
-        int entitiesToFill = 60;
-        int roundsPlayed = 0;
-        float timeToComplete = 0.f;
-        float timeElapsed = 0;
-        int shapesSpawned = 0;
-        int shapesHandeldCorrectly = 0;
-        int bias = 2;
-        float spawnInterval = 0.05f;
-        float positionAlternation = 0.1f;
-        std::map<int,std::vector<Entity*>> activeShapesMap;
-        void miniGameFindShape(Difficulty difficulty);
-        void miniGameGoToPosition(Difficulty difficulty);
-        void miniGameCatch(Difficulty difficulty);
+        MinigameManager* getMinigameManager(){return minigameManager.get();};
         
 
 };
