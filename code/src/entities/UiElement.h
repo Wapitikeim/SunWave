@@ -31,6 +31,9 @@ class UiElement : public Entity
         void const setNewFont(std::string& newFontName, unsigned int newFontSize){font = FontLoader(newFontName, newFontSize);};
 
         void setOnClick(std::function<void()> callback) { onClickFunction = callback; }
-        void click() { if (onClickFunction) onClickFunction(); }
+        void click() {
+             if(onClickFunction != nullptr) 
+                onClickFunction(); 
+             }
 
 };

@@ -143,6 +143,7 @@ void MinigameManager::handleHighscore()
 void MinigameManager::loadEndCard()
 {
     gameEnv->setHoverOverEffect(true);
+    gameEnv->prepareForLevelChange();
     gameEnv->getSceneManager().loadLevel("Endcard", gameEnv->getEntities(), gameEnv->getPhysicsEngine());
     
     auto backToMenuButton = gameEnv->getEntityFromName<UiElement>("BackToMenu");
@@ -353,10 +354,12 @@ void MinigameManager::miniGameFindShape()
 
 void MinigameManager::miniGameGoToPosition()
 {
+    gameEnv->prepareForLevelChange();
     std::vector<std::string>playerNames;
     std::vector<std::string>triggerNames;
     std::vector<std::string>levelNames;
     gameEnv->setHoverOverEffect(false);
+    
     //Names based on difficulty
     switch (currentDifficulty)
     {
@@ -424,10 +427,12 @@ void MinigameManager::miniGameGoToPosition()
 
 void MinigameManager::miniGameCatch()
 {
+    gameEnv->prepareForLevelChange();
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
     int numberOfShapesToSpawn = 0;
     gameEnv->setHoverOverEffect(false);
+    
     
     //Names based on difficulty
     switch (currentDifficulty)
@@ -648,19 +653,22 @@ void MinigameManager::blendTheNextGame()
     gameEnv->getSceneManager().loadLevel("Blend", gameEnv->getEntities(), gameEnv->getPhysicsEngine());
     gameEnv->setMouseEntityManipulation(false);
     gameEnv->setHoverOverEffect(true);
-    
-    auto startButton = gameEnv->getEntityFromName<UiElement>("startButton");
-    startButton->setOnClick([this]
-    {
-        if(!gameEnv->getGamePaused())
-            this->startMinigame(this->minigameSequence[roundsPlayed]);
-    });
+
+    //Text
     auto upGameText = gameEnv->getEntityFromName<UiElement>("upGameText");
     upGameText->setTextToBeRenderd(gameTypeToString(minigameSequence[roundsPlayed]));
     auto diffShowText = gameEnv->getEntityFromName<UiElement>("diffShowText");
     diffShowText->setTextToBeRenderd(difficultyToString(currentDifficulty));
     auto controlShowText = gameEnv->getEntityFromName<UiElement>("controlsShowText");
     controlShowText->setTextToBeRenderd(typeToControlsString(minigameSequence[roundsPlayed]));
+
+    //Buttons
+    auto startButton = gameEnv->getEntityFromName<UiElement>("startButton");
+    startButton->setOnClick([this]
+    {
+        if(!gameEnv->getGamePaused())
+            this->startMinigame(this->minigameSequence[roundsPlayed]);
+    });
 }
 
 void MinigameManager::resetMinigameVariabels()

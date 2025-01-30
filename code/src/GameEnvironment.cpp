@@ -407,14 +407,36 @@ void GameEnvironment::loadLevelSelector()
     sceneManager.loadLevel("Level selector", entities, getPhysicsEngine());
     
     auto backToMenuButton = getEntityFromName<UiElement>("BtM");
+    auto sfButton = getEntityFromName<UiElement>("SF");
+    auto btsButton = getEntityFromName<UiElement>("BtS");
+    auto gopButton = getEntityFromName<UiElement>("GoP");
+    auto sunwaveButton = getEntityFromName<UiElement>("SunWaveStart");
+    
+    //Highscore Hover Over
+    auto highScoreBanner = getEntityFromName<UiElement>("hBanner");
+    highScoreBanner->setDontDraw(true);
+    // Read highscores once
+    std::filesystem::path srcPath = std::filesystem::current_path();
+    fileReader::trimDownPathToWorkingDirectory(srcPath);
+    srcPath.append("src/minigames/highscores/highscores.json");
+    nlohmann::json highscores;
+    if(std::filesystem::exists(srcPath)) 
+    {
+        std::ifstream input(srcPath);
+        if(input.is_open()) {
+            input >> highscores;
+            input.close();
+        }
+    }
+
+
+    //Buttons
     backToMenuButton->setOnClick([this]
     {
         this->resetMouseStates();
         this->resetRegisterdFunctions();
         this->loadMenu();
     });
-
-    auto sfButton = getEntityFromName<UiElement>("SF");
     sfButton->setOnClick([this]
     {
         this->resetMouseStates();
@@ -423,8 +445,6 @@ void GameEnvironment::loadLevelSelector()
         this->setMouseEntityManipulation(true);
         this->getMinigameManager()->startMinigame(MinigameType::FindShape);
     });
-
-    auto btsButton = getEntityFromName<UiElement>("BtS");
     btsButton->setOnClick([this]
     {
         this->resetMouseStates();
@@ -433,8 +453,6 @@ void GameEnvironment::loadLevelSelector()
         this->setMouseEntityManipulation(false);
         this->getMinigameManager()->startMinigame(MinigameType::Catch);
     });
-
-    auto gopButton = getEntityFromName<UiElement>("GoP");
     gopButton->setOnClick([this]
     {
         this->resetMouseStates();
@@ -444,8 +462,6 @@ void GameEnvironment::loadLevelSelector()
         this->getPhysicsEngine()->setIsHalting(false);
         this->getMinigameManager()->startMinigame(MinigameType::GoToPosition);
     });
-
-    auto sunwaveButton = getEntityFromName<UiElement>("SunWaveStart");
     sunwaveButton->setOnClick([this]
     {
         this->resetMouseStates();
@@ -454,6 +470,61 @@ void GameEnvironment::loadLevelSelector()
         this->setMouseEntityManipulation(false);
         this->getMinigameManager()->startMinigame(MinigameType::Sunwave);
     });
+
+    // Register repeating function for hover highscore effect
+    registerRepeatingFunction(
+        [this, highscores, highScoreBanner]() {
+            if(!getCurrentMouseCollider()) {
+                highScoreBanner->setDontDraw(true);
+                return;
+            }
+
+            std::string entityName = getCurrentMouseCollider()->getEntityThisIsAttachedTo()->getEntityName();
+            std::string highscoreText = "No highscore yet";
+
+            if(entityName == "SF" && !highscores["Shape?"].empty()) 
+            {
+                highscoreText = "Highscore: " + std::to_string((int)highscores["Shape?"][0]["Time"].get<float>())+ "s";
+                highScoreBanner->setDontDraw(false);
+                glm::vec3 adjustedPos = getEntityFromName<UiElement>(entityName)->getPosition();
+                adjustedPos.x += 12.5f;
+                highScoreBanner->setPosition(adjustedPos);
+            }
+            else if(entityName == "GoP" && !highscores["Go!"].empty()) {
+                highscoreText = "Highscore: " + std::to_string((int)highscores["Go!"][0]["Time"].get<float>()) + "s";
+                highScoreBanner->setDontDraw(false);
+                glm::vec3 adjustedPos = getEntityFromName<UiElement>(entityName)->getPosition();
+                adjustedPos.x += 12.5f;
+                highScoreBanner->setPosition(adjustedPos);
+            }
+            else if(entityName == "BtS" && !highscores["Catch!"].empty()) 
+            {
+                highscoreText = "Highscore: " + std::to_string(highscores["Catch!"][0]["Shapes"].get<int>()) + "/225";
+                highScoreBanner->setDontDraw(false);
+                glm::vec3 adjustedPos = getEntityFromName<UiElement>(entityName)->getPosition();
+                adjustedPos.x += 13.0f;
+                highScoreBanner->setPosition(adjustedPos);
+            }
+            else if(entityName == "SunWaveStart" && !highscores["Sunwave"].empty()) {
+                highscoreText = "Highscore: " + std::to_string((int)highscores["Sunwave"][0]["Time"].get<float>()) + 
+                               "s, " + std::to_string(highscores["Sunwave"][0]["Shapes"].get<int>()) + "/75";
+                highScoreBanner->setDontDraw(false);
+                glm::vec3 adjustedPos = getEntityFromName<UiElement>(entityName)->getPosition();
+                adjustedPos.x -= 2.0f;
+                adjustedPos.y -= 2.0f;
+                highScoreBanner->setPosition(adjustedPos);
+            }
+            else {
+                highScoreBanner->setDontDraw(true);
+                return;
+            }
+
+            highScoreBanner->setTextToBeRenderd(highscoreText);
+        },
+        [this]() -> bool {
+            return !inMenu;
+        }
+    );
 
 }
 

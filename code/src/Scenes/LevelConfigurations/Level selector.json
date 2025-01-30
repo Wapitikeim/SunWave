@@ -66,8 +66,8 @@
             },
             "name": "GamesBanner",
             "position": [
-                3,
-                12,
+                3.0,
+                12.0,
                 0.0
             ],
             "rotation": 0.0,
@@ -193,7 +193,7 @@
             },
             "name": "BtS",
             "position": [
-                8.3,
+                8.300000190734863,
                 8.0,
                 0.0
             ],
@@ -243,7 +243,7 @@
             },
             "name": "GoP",
             "position": [
-                7.4,
+                7.400000095367432,
                 6.0,
                 0.0
             ],
@@ -295,6 +295,56 @@
             "position": [
                 8.903858184814453,
                 18.12791633605957,
+                0.0
+            ],
+            "rotation": 0.0,
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        {
+            "Physics": {
+                "Acceleration": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "Elasticity": 0.5,
+                "IgnoreGravity": false,
+                "IsGrounded": false,
+                "IsInContact": false,
+                "IsResting": true,
+                "IsStatic": true,
+                "IsTrigger": false,
+                "LockX": false,
+                "LockY": false,
+                "Mass": 1.0,
+                "Rot": 0.0,
+                "Velocity": [
+                    0.0,
+                    0.0,
+                    0.0
+                ]
+            },
+            "ShaderName": "textFragmentShader",
+            "Type": "UiElement",
+            "UiElement": {
+                "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
+                "FontSize": 48,
+                "RenderedText": "100",
+                "TextColor": [
+                    0.08650517463684082,
+                    0.2033720165491104,
+                    0.39215683937072754,
+                    1.0
+                ]
+            },
+            "name": "hBanner",
+            "position": [
+                15.368932723999023,
+                9.969178199768066,
                 0.0
             ],
             "rotation": 0.0,
