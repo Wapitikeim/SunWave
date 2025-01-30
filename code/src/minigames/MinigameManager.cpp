@@ -7,6 +7,7 @@
 
 void MinigameManager::handleNextMinigame()
 {
+    gameEnv->resetMouseStates();
     //This will called when a minigame is finished
     roundsPlayed++;
     //Difficulty increase based on rounds played
@@ -16,15 +17,8 @@ void MinigameManager::handleNextMinigame()
         currentDifficulty = Difficulty::Hard;
     if(roundsPlayed > 8)
     {
-        //Highscorehandeling
-        if(!minigameSequence.empty())
-            currentMinigame = MinigameType::Sunwave;
-        handleHighscore();
-        gameEnv->resetMouseStates();
-        gameEnv->setMouseEntityManipulation(false);
-        gameEnv->setHoverOverEffect(true);
-        this->resetMinigameVariabels();
-        gameEnv->loadMenu();
+        loadEndCard();
+        return;
     }
     
     //Blend for next minigame if sunwavemode is active
@@ -103,7 +97,8 @@ void MinigameManager::handleHighscore()
     {
         // For Catch, compare shapesHandeldCorrectlyFull
         if(highscores[gameType].empty() || 
-           shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>()) {
+           shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>()) 
+        {
             highscores[gameType] = nlohmann::json::array();
             highscores[gameType].push_back({
                 {"Shapes", shapesHandeldCorrectlyFull}
@@ -143,6 +138,68 @@ void MinigameManager::handleHighscore()
         std::ofstream file(srcPath);
         file << highscores.dump(4);
     }
+}
+
+void MinigameManager::loadEndCard()
+{
+    gameEnv->setHoverOverEffect(true);
+    gameEnv->getSceneManager().loadLevel("Endcard", gameEnv->getEntities(), gameEnv->getPhysicsEngine());
+    
+    auto backToMenuButton = gameEnv->getEntityFromName<UiElement>("BackToMenu");
+    auto yourScoreText = gameEnv->getEntityFromName<UiElement>("YScoreText");
+    auto prevHighScoreText = gameEnv->getEntityFromName<UiElement>("HScoreText");
+
+    if(!minigameSequence.empty())
+        currentMinigame = MinigameType::Sunwave;
+
+    // Read previous highscores
+    std::filesystem::path srcPath = std::filesystem::current_path();
+    fileReader::trimDownPathToWorkingDirectory(srcPath);
+    srcPath.append("src/minigames/highscores/highscores.json");
+
+    nlohmann::json highscores;
+    if(std::filesystem::exists(srcPath)) {
+        std::ifstream input(srcPath);
+        if(input.is_open()) {
+            input >> highscores;
+            input.close();
+        }
+    }
+
+    std::string gameType = gameTypeToString(currentMinigame);
+    std::string highscoreText = "No highscore yet";
+
+    if(!highscores[gameType].empty()) 
+    {
+        if(currentMinigame == MinigameType::Sunwave) 
+            highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>()) + 
+                           ", " + std::to_string(highscores[gameType][0]["Shapes"].get<int>()) + "/75";
+        else if(currentMinigame == MinigameType::Catch) 
+            highscoreText = std::to_string(highscores[gameType][0]["Shapes"].get<int>()) + "/225";
+        else 
+            highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>());    
+    }
+    prevHighScoreText->setTextToBeRenderd(highscoreText);
+    
+    if(!minigameSequence.empty())
+        currentMinigame = MinigameType::Sunwave;
+    if(currentMinigame == MinigameType::Sunwave)
+        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete) + ", " + std::to_string(shapesHandeldCorrectlyFull) + "/75");
+    else if(currentMinigame == MinigameType::Catch)
+        yourScoreText->setTextToBeRenderd(std::to_string(shapesHandeldCorrectlyFull) + "/225"); 
+    else
+        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete));
+
+    //Button
+    backToMenuButton->setOnClick([this]
+    {
+        this->handleHighscore();
+        this->gameEnv->resetMouseStates();
+        this->gameEnv->setMouseEntityManipulation(false);
+        this->gameEnv->setHoverOverEffect(true);
+        this->resetMinigameVariabels();
+        this->gameEnv->loadMenu();
+    });
 }
 
 void MinigameManager::miniGameFindShape()

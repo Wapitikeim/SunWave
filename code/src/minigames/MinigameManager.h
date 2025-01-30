@@ -44,6 +44,7 @@ private:
     // Minigame transition logic
     void handleNextMinigame();
     void handleHighscore();
+    void loadEndCard();
     void miniGameFindShape();
     void miniGameGoToPosition();
     void miniGameCatch();
