@@ -662,6 +662,36 @@ void MinigameManager::blendTheNextGame()
     auto controlShowText = gameEnv->getEntityFromName<UiElement>("controlsShowText");
     controlShowText->setTextToBeRenderd(typeToControlsString(minigameSequence[roundsPlayed]));
 
+    //Corrections
+    if(minigameSequence[roundsPlayed] == MinigameType::GoToPosition)
+    {
+        glm::vec3 adjustedPos;
+        adjustedPos = controlShowText->getPosition();
+        adjustedPos.x -=2.7f;
+        controlShowText->setPosition(adjustedPos);
+        adjustedPos = upGameText->getPosition();
+        adjustedPos.x -=1.5f;
+        upGameText->setPosition(adjustedPos);
+    }
+    else if(minigameSequence[roundsPlayed] == MinigameType::Catch)
+    {
+        glm::vec3 adjustedPos;
+        adjustedPos = controlShowText->getPosition();
+        adjustedPos.x -=2.7f;
+        controlShowText->setPosition(adjustedPos);
+        adjustedPos = upGameText->getPosition();
+        adjustedPos.x -=0.6f;
+        upGameText->setPosition(adjustedPos);
+    }
+    else if (minigameSequence[roundsPlayed] == MinigameType::FindShape)
+    {
+        glm::vec3 adjustedPos;
+        adjustedPos = upGameText->getPosition();
+        adjustedPos.x -=0.3f;
+        upGameText->setPosition(adjustedPos);
+    }
+    
+
     //Buttons
     auto startButton = gameEnv->getEntityFromName<UiElement>("startButton");
     startButton->setOnClick([this]

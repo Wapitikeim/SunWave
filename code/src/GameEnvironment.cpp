@@ -405,7 +405,7 @@ void GameEnvironment::loadMenu()
 void GameEnvironment::loadLevelSelector()
 {
     sceneManager.loadLevel("Level selector", entities, getPhysicsEngine());
-    
+    inLevelSelector = true;
     auto backToMenuButton = getEntityFromName<UiElement>("BtM");
     auto sfButton = getEntityFromName<UiElement>("SF");
     auto btsButton = getEntityFromName<UiElement>("BtS");
@@ -433,12 +433,14 @@ void GameEnvironment::loadLevelSelector()
     //Buttons
     backToMenuButton->setOnClick([this]
     {
+        this->setInLevelSelector(false);
         this->resetMouseStates();
         this->resetRegisterdFunctions();
         this->loadMenu();
     });
     sfButton->setOnClick([this]
     {
+        this->setInLevelSelector(false);
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setInMenu(false);
@@ -447,6 +449,7 @@ void GameEnvironment::loadLevelSelector()
     });
     btsButton->setOnClick([this]
     {
+        this->setInLevelSelector(false);
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setInMenu(false);
@@ -455,6 +458,7 @@ void GameEnvironment::loadLevelSelector()
     });
     gopButton->setOnClick([this]
     {
+        this->setInLevelSelector(false);
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setInMenu(false);
@@ -464,6 +468,7 @@ void GameEnvironment::loadLevelSelector()
     });
     sunwaveButton->setOnClick([this]
     {
+        this->setInLevelSelector(false);
         this->resetMouseStates();
         this->setGamePaused(false);
         this->setInMenu(false);
@@ -474,6 +479,8 @@ void GameEnvironment::loadLevelSelector()
     // Register repeating function for hover highscore effect
     registerRepeatingFunction(
         [this, highscores, highScoreBanner]() {
+            if(!inLevelSelector)
+                return;
             if(!getCurrentMouseCollider()) {
                 highScoreBanner->setDontDraw(true);
                 return;
@@ -522,7 +529,7 @@ void GameEnvironment::loadLevelSelector()
             highScoreBanner->setTextToBeRenderd(highscoreText);
         },
         [this]() -> bool {
-            return !inMenu;
+            return !inLevelSelector;
         }
     );
 

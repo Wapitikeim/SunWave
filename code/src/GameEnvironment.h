@@ -119,6 +119,7 @@ class GameEnvironment
         void resetLevel();
         void loadWallLevel();
         bool gamePaused = false;
+        bool inLevelSelector = false;
         bool inMenu = false;
         bool physicsEngineWasActive = false;
         
@@ -238,6 +239,7 @@ class GameEnvironment
         void setFOV(const float& newFOV){fov = newFOV;};
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
         void setInMenu(const bool& newMenu){inMenu = newMenu;};
+        void setInLevelSelector(const bool& newLevelSelector){inLevelSelector = newLevelSelector;};
         void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
         void setHoverOverEffect(const bool& newHover){hoverOverEffect = newHover;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
