@@ -173,11 +173,11 @@ void MinigameManager::loadEndCard()
     {
         if(currentMinigame == MinigameType::Sunwave) 
             highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>()) + 
-                           ", " + std::to_string(highscores[gameType][0]["Shapes"].get<int>()) + "/75";
+                           "s, " + std::to_string(highscores[gameType][0]["Shapes"].get<int>()) + "/75";
         else if(currentMinigame == MinigameType::Catch) 
             highscoreText = std::to_string(highscores[gameType][0]["Shapes"].get<int>()) + "/225";
         else 
-            highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>());    
+            highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>()) + "s";    
     }
     prevHighScoreText->setTextToBeRenderd(highscoreText);
     
@@ -701,6 +701,23 @@ void MinigameManager::blendTheNextGame()
         if(!gameEnv->getGamePaused())
             this->startMinigame(this->minigameSequence[roundsPlayed]);
     });
+    //Enter to start
+    gameEnv->registerRepeatingFunction
+    (
+        [this]()
+        {
+        },
+        [this]() -> bool
+        {
+            if(glfwGetKey(gameEnv->getCurrentWindow(), GLFW_KEY_ENTER) == GLFW_PRESS || glfwGetKey(gameEnv->getCurrentWindow(), GLFW_KEY_KP_ENTER) == GLFW_PRESS)
+            {
+                if(!gameEnv->getGamePaused())
+                    this->startMinigame(this->minigameSequence[roundsPlayed]);
+                return true;
+            }
+            return false;    
+        }
+    );
 }
 
 void MinigameManager::createFindShapeExplanation()

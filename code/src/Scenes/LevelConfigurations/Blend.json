@@ -6,7 +6,7 @@
             "UiElement": {
                 "Font": "Open_Sans\\static\\OpenSans-Bold.ttf",
                 "FontSize": 64,
-                "RenderedText": "Game:",
+                "RenderedText": "Upcomming game:",
                 "TextColor": [
                     1.0,
                     1.0,
@@ -16,7 +16,7 @@
             },
             "name": "UpGame",
             "position": [
-                2.799999952316284,
+                7.2,
                 24.0,
                 0.0
             ],
