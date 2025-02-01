@@ -99,7 +99,7 @@ class GameEnvironment
         bool staticPrevRef = false;
         bool entityManipulationThroughMouse = true;
         bool hoverOverEffect = true;
-        glm::vec4 hoverOverColor = glm::vec4(0,0,0,1);
+        glm::vec4 hoverOverColor = glm::vec4(1);
         glm::vec4 colorOfRefEntity;
         Entity* entityColorSaved;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;

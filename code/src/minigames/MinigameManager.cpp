@@ -158,6 +158,7 @@ void MinigameManager::loadEndCard()
     srcPath.append("src/minigames/highscores/highscores.json");
 
     nlohmann::json highscores;
+    bool isNewHighscore = false;
     if(std::filesystem::exists(srcPath)) {
         std::ifstream input(srcPath);
         if(input.is_open()) {
@@ -179,6 +180,22 @@ void MinigameManager::loadEndCard()
         else 
             highscoreText = std::to_string((int)highscores[gameType][0]["Time"].get<float>()) + "s";    
     }
+
+    // Check if new highscore based on game type
+    if(currentMinigame == MinigameType::Catch) 
+        isNewHighscore = highscores[gameType].empty() || 
+                        shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>();
+    else if(currentMinigame == MinigameType::Sunwave) 
+        isNewHighscore = highscores[gameType].empty() || 
+                        (timeToComplete < highscores[gameType][0]["Time"].get<float>() && 
+                         shapesHandeldCorrectlyFull > highscores[gameType][0]["Shapes"].get<int>());
+    else 
+        isNewHighscore = highscores[gameType].empty() || 
+                        timeToComplete < highscores[gameType][0]["Time"].get<float>();
+     // Set color based on highscore achievement
+    yourScoreText->setTextColor( 
+        isNewHighscore ? glm::vec4(0, 1, 0, 1) : glm::vec4(1, 0, 0, 1));
+    
     prevHighScoreText->setTextToBeRenderd(highscoreText);
     
     if(!minigameSequence.empty())
