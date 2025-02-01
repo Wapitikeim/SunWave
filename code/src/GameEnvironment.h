@@ -99,6 +99,7 @@ class GameEnvironment
         bool staticPrevRef = false;
         bool entityManipulationThroughMouse = true;
         bool hoverOverEffect = true;
+        glm::vec4 hoverOverColor = glm::vec4(0,0,0,1);
         glm::vec4 colorOfRefEntity;
         Entity* entityColorSaved;
         PhysicsCollider* refColliderForMouseCurrent = nullptr;
@@ -242,6 +243,7 @@ class GameEnvironment
         void setInLevelSelector(const bool& newLevelSelector){inLevelSelector = newLevelSelector;};
         void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
         void setHoverOverEffect(const bool& newHover){hoverOverEffect = newHover;};
+        void setHoverOverColor(const glm::vec4& newColor){hoverOverColor = newColor;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const bool& getIfPressedAndHolding(){return pressedAndHoldingSomething;};
         const bool& getGamePaused(){return gamePaused;};

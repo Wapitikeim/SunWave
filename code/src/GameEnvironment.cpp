@@ -119,7 +119,7 @@ void GameEnvironment::mouseHoverOverEffect()
         //Other
         else if(entityColorSaved != refColliderForMouseCurrent->getEntityThisIsAttachedTo())
         {
-            refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1));
+            refColliderForMouseCurrent->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange",hoverOverColor);
             entityColorSaved = refColliderForMouseCurrent->getEntityThisIsAttachedTo();
         }
     }

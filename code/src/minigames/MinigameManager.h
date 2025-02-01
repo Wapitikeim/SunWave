@@ -51,6 +51,11 @@ private:
     void startSunwaveGame();
     void blendTheNextGame();
 
+    //Blending explanation
+    void createFindShapeExplanation();
+    void createGoToPositionExplanation();
+    void createCatchExplanation();
+
 public:
     MinigameManager(GameEnvironment* env) : gameEnv(env) {}
     void resetMinigameVariabels();

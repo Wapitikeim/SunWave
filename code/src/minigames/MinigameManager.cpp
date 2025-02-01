@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <filesystem>
 
-
 void MinigameManager::handleNextMinigame()
 {
     gameEnv->resetMouseStates();
@@ -672,6 +671,7 @@ void MinigameManager::blendTheNextGame()
         adjustedPos = upGameText->getPosition();
         adjustedPos.x -=1.5f;
         upGameText->setPosition(adjustedPos);
+        createGoToPositionExplanation();
     }
     else if(minigameSequence[roundsPlayed] == MinigameType::Catch)
     {
@@ -682,6 +682,7 @@ void MinigameManager::blendTheNextGame()
         adjustedPos = upGameText->getPosition();
         adjustedPos.x -=0.6f;
         upGameText->setPosition(adjustedPos);
+        createCatchExplanation();
     }
     else if (minigameSequence[roundsPlayed] == MinigameType::FindShape)
     {
@@ -689,6 +690,7 @@ void MinigameManager::blendTheNextGame()
         adjustedPos = upGameText->getPosition();
         adjustedPos.x -=0.3f;
         upGameText->setPosition(adjustedPos);
+        createFindShapeExplanation();
     }
     
 
@@ -699,6 +701,252 @@ void MinigameManager::blendTheNextGame()
         if(!gameEnv->getGamePaused())
             this->startMinigame(this->minigameSequence[roundsPlayed]);
     });
+}
+
+void MinigameManager::createFindShapeExplanation()
+{
+    gameEnv->setMouseEntityManipulation(true);
+    std::vector<std::string>shapeNames{"box", "circle", "triangle"};
+    std::string shapeToFindName = shapeNames[getRandomNumber(0,shapeNames.size()-1)];
+    std::vector<int> xMinMax = {30, (int)(gameEnv->getXHalf()*2)-1};
+    std::vector<int> yMinMax = {10, 23};
+    glm::vec3 scale(getRandomNumber(2,10)*0.1f);
+    std::vector<std::string> randomNames;
+    auto shapeToFindExp = std::make_unique<Shape>("ShapeToFindExp", glm::vec3(getRandomNumber(xMinMax[0],xMinMax[1]),getRandomNumber(yMinMax[0],yMinMax[1]),0),scale, getRandomNumber(0,360), true, shapeToFindName);
+    shapeToFindExp->addComponent(std::make_unique<PhysicsCollider>(shapeToFindExp.get(),1));
+    gameEnv->addEntity(std::move(shapeToFindExp));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("ShapeToFindExp","Physics"));
+    shapeNames.erase(std::remove(shapeNames.begin(), shapeNames.end(), shapeToFindName), shapeNames.end());
+    for(int i = 0;i < 35;i++)
+    {
+        auto name = random_string(4);
+        glm::vec3 pos(getRandomNumber(xMinMax[0],xMinMax[1]),getRandomNumber(yMinMax[0],yMinMax[1]),0);
+        glm::vec3 scale(getRandomNumber(2,10)*0.1f);
+        float rotZ(getRandomNumber(0,360));
+        if(!gameEnv->getPhysicsEngine()->checkIfShellWouldCollide(pos,scale,rotZ))
+        {
+            gameEnv->addEntity(std::make_unique<Shape>(name, pos,scale, rotZ, true, shapeNames[getRandomNumber(0,shapeNames.size()-1)]));
+            auto randomEntity = gameEnv->getEntityFromName<Entity>(name);
+            randomEntity->addComponent(std::make_unique<PhysicsCollider>(randomEntity,1));
+            gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>(name,"Physics"));
+            randomNames.push_back(name);
+        }
+    }
+
+    gameEnv->registerRepeatingFunction
+    (
+        [this, randomNames]()
+        {
+            auto shapeTofindExp = gameEnv->getEntityFromName<Entity>("ShapeToFindExp");
+            if(!shapeTofindExp)
+                return;
+            if(!gameEnv->getCurrentMouseCollider())
+                return;
+            if(gameEnv->getCurrentMouseCollider()->getEntityThisIsAttachedTo()->getEntityName() == "ShapeToFindExp" && gameEnv->getIfPressedAndHolding())
+            {
+                gameEnv->getEntityFromName<Entity>("ShapeToFindExp")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                for(auto& name:randomNames)
+                {
+                    gameEnv->getEntityFromName<Entity>(name)->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+                }
+            }
+            else          
+            {
+                gameEnv->getEntityFromName<Entity>("ShapeToFindExp")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+                for(auto& name:randomNames)
+                {
+                    gameEnv->getEntityFromName<Entity>(name)->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+                }
+            }
+        },
+        [this]() -> bool
+        {
+            auto shapeTofindExp = gameEnv->getEntityFromName<Entity>("ShapeToFindExp");
+            if(!shapeTofindExp)
+            {
+                gameEnv->setHoverOverColor(glm::vec4(1,1,1,1));
+                return true;
+            }
+            return false;
+        }
+    );
+
+    
+}
+
+void MinigameManager::createGoToPositionExplanation()
+{
+    auto wall1 = std::make_unique<Shape>("Wall1", glm::vec3(35,10,0),glm::vec3(5,0.5,1), 0.0f, true, "box");
+    wall1->addComponent(std::make_unique<PhysicsCollider>(wall1.get(),1));
+    gameEnv->addEntity(std::move(wall1));
+    auto wall2 = std::make_unique<Shape>("Wall2", glm::vec3(30.f,15.f,0),glm::vec3(5,0.5,1), 90.f, true, "box");
+    wall2->addComponent(std::make_unique<PhysicsCollider>(wall2.get(),1));
+    gameEnv->addEntity(std::move(wall2));
+    auto wall3 = std::make_unique<Shape>("Wall3", glm::vec3(40.f,15.f,0),glm::vec3(5,0.5,1), 90.f, true, "box");
+    wall3->addComponent(std::make_unique<PhysicsCollider>(wall3.get(),1));
+    gameEnv->addEntity(std::move(wall3));
+    auto wall4 = std::make_unique<Shape>("Wall4", glm::vec3(35,20,0),glm::vec3(5,0.5,1), 0, true, "box");
+    wall4->addComponent(std::make_unique<PhysicsCollider>(wall4.get(),1));
+    gameEnv->addEntity(std::move(wall4));
+    auto TriggerBoxExp = std::make_unique<Shape>("TriggerBoxExp", glm::vec3(38,18,0),glm::vec3(0.75f), 0.0f, true, "box");
+    TriggerBoxExp->addComponent(std::make_unique<PhysicsCollider>(TriggerBoxExp.get(),1));
+    gameEnv->addEntity(std::move(TriggerBoxExp));
+    gameEnv->getComponentOfEntity<PhysicsCollider>("TriggerBoxExp","Physics")->setIsTrigger(true);
+    auto player = std::make_unique<PlayerShape>("Player", glm::vec3(32,12,0),glm::vec3(1), 0, true, "box");
+    player->addComponent(std::make_unique<PhysicsCollider>(player.get(),0));
+    gameEnv->addEntity(std::move(player));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall1","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall2","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall3","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall4","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Player","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("TriggerBoxExp","Physics"));
+    
+
+    //ColorChange logic
+    gameEnv->registerRepeatingFunction
+    (
+        [this]()
+        {
+            auto player = gameEnv->getEntityFromName<PlayerShape>("Player");
+            auto TriggerBoxExp = gameEnv->getEntityFromName<Entity>("TriggerBoxExp");
+            if(!TriggerBoxExp)
+                return;
+            //rotate Triggerbox
+            TriggerBoxExp->setZRotation(TriggerBoxExp->getRotation()+10*gameEnv->getDeltaTime());
+            if(gameEnv->getPhysicsEngine()->checkTriggerColliderCollision("Player", "TriggerBoxExp"))
+            {
+                TriggerBoxExp->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+                gameEnv->registerFunctionToExecuteWhen
+                (
+                    0.5f, 
+                    [this]
+                    {
+                        auto triggerBoxExp = gameEnv->getEntityFromName<Entity>("TriggerBoxExp");
+                        if(!triggerBoxExp)
+                            return;
+                        triggerBoxExp->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+                    }
+                );
+            }
+            else
+            {
+                TriggerBoxExp->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+                gameEnv->registerFunctionToExecuteWhen
+                (
+                    0.5f, 
+                    [this]
+                    {
+                        auto triggerBoxExp = gameEnv->getEntityFromName<Entity>("TriggerBoxExp");
+                        if(!triggerBoxExp)
+                            return;
+                        triggerBoxExp->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,0,0,1));
+                    }
+                );
+            }
+        },
+        [this]() -> bool
+        {
+            auto TriggerBoxExp = gameEnv->getEntityFromName<Entity>("TriggerBoxExp");
+            if(!TriggerBoxExp)
+                return true;
+            return false;
+        }
+    );
+}
+
+void MinigameManager::createCatchExplanation()
+{
+    auto Player = std::make_unique<PlayerShape>("Player", glm::vec3(35,10,0),glm::vec3(3,0.5,1), 0, true, "box");
+    Player->addComponent(std::make_unique<PhysicsCollider>(Player.get(),0));
+    gameEnv->addEntity(std::move(Player));
+    gameEnv->getComponentOfEntity<PhysicsCollider>("Player","Physics")->setLockY(true);
+    auto wall1 = std::make_unique<Shape>("Wall1", glm::vec3(24,10,0),glm::vec3(0.5f,2,1), 0.0f, true, "box");
+    wall1->addComponent(std::make_unique<PhysicsCollider>(wall1.get(),1));
+    gameEnv->addEntity(std::move(wall1));
+    auto wall2 = std::make_unique<Shape>("Wall2", glm::vec3(gameEnv->getXHalf()*2,10,0),glm::vec3(0.5f,2,1), 0.0f, true, "box");
+    wall2->addComponent(std::make_unique<PhysicsCollider>(wall2.get(),1));
+    gameEnv->addEntity(std::move(wall2));
+
+    auto goodShape = std::make_unique<Shape>("GoodShapeExp", glm::vec3(40,25,0),glm::vec3(1), 0.0f, true, "circle");
+    goodShape->addComponent(std::make_unique<PhysicsCollider>(goodShape.get(),0));
+    goodShape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+    gameEnv->addEntity(std::move(goodShape));
+
+    auto badShape = std::make_unique<Shape>("BadShapeExp", glm::vec3(30,25,0),glm::vec3(1), 0.0f, true, "circle");
+    badShape->addComponent(std::make_unique<PhysicsCollider>(badShape.get(),0));
+    badShape->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+    gameEnv->addEntity(std::move(badShape));
+
+
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Player","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall1","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("Wall2","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("GoodShapeExp","Physics"));
+    gameEnv->getPhysicsEngine()->registerPhysicsCollider(gameEnv->getComponentOfEntity<PhysicsCollider>("BadShapeExp","Physics"));
+
+    //Fall logic
+    gameEnv->registerRepeatingFunction
+    (
+        [this]()
+        {
+            auto goodShape = gameEnv->getEntityFromName<Entity>("GoodShapeExp");
+            auto badShape = gameEnv->getEntityFromName<Entity>("BadShapeExp");
+            auto player = gameEnv->getEntityFromName<PlayerShape>("Player");
+            if(!goodShape || !badShape)
+                return;
+            if(goodShape->getPosition().y < 5)
+            {
+                goodShape->setPosition(goodShape->getPosition()+glm::vec3(0,20,0));
+                if(goodShape->getPosition().x <23.5)
+                {
+                    glm::vec3 newPos = goodShape->getPosition();
+                    newPos.x+= 10;
+                    goodShape->setPosition(newPos);
+                }
+                if(goodShape->getPosition().x >gameEnv->getXHalf()*2-1)
+                {
+                    glm::vec3 newPos = goodShape->getPosition();
+                    newPos.x-= 10;
+                    goodShape->setPosition(newPos);
+                }
+            }
+            
+            if(badShape->getPosition().y < 5)
+            {
+                badShape->setPosition(badShape->getPosition()+glm::vec3(0,20,0));
+                if(badShape->getPosition().x <23.5)
+                {
+                    glm::vec3 newPos = badShape->getPosition();
+                    newPos.x+= 10;
+                    badShape->setPosition(newPos);
+                }
+                if(badShape->getPosition().x >gameEnv->getXHalf()*2-1)
+                {
+                    glm::vec3 newPos = badShape->getPosition();
+                    newPos.x-= 10;
+                    badShape->setPosition(newPos);
+                }
+            }
+
+            if(gameEnv->getPhysicsEngine()->checkColliderPlayerCollision("GoodShapeExp"))
+                gameEnv->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(0,1,0,1));
+            
+            if(gameEnv->getPhysicsEngine()->checkColliderPlayerCollision("BadShapeExp"))
+                gameEnv->getEntityFromName<PlayerShape>("Player")->getShaderContainer().setUniformVec4("colorChange",glm::vec4(1,0,0,1));
+            
+            
+        },
+        [this]() -> bool
+        {
+            auto goodShape = gameEnv->getEntityFromName<Entity>("GoodShapeExp");
+            auto badShape = gameEnv->getEntityFromName<Entity>("BadShapeExp");
+            if(!goodShape || !badShape)
+                return true;
+            return false;
+        }
+    );
+
 }
 
 void MinigameManager::resetMinigameVariabels()
