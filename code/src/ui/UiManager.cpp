@@ -42,9 +42,7 @@ void UiManager::drawImGuiWorldControl()
     ImGui::Begin("World Control");
     ImGui::Checkbox("Grid", &showGrid);
     ImGui::SliderFloat("Grid size:", &gridSize, 0.1, 3, "%.3f",0);
-    float fov = gameEnv->getFov();
-    ImGui::SliderFloat("Fov:", &fov, 30, 120, "%.3f",0);
-    gameEnv->setFOV(fov);
+
 
     // Vector of entity names
     std::vector<std::string> entityNames;
@@ -55,11 +53,16 @@ void UiManager::drawImGuiWorldControl()
     static int selectedEntityIndex = 0;
     static char entityToLoad[128] = "";
 
-    // Set entityToLoad to the mouseCollider name if available
-    if (mouseCollider != nullptr)
-    {
-        strncpy(entityToLoad, mouseCollider->getEntityThisIsAttachedTo()->getEntityName().c_str(), sizeof(entityToLoad));
-        entityToLoad[sizeof(entityToLoad) - 1] = '\0'; // Ensure null-termination
+    // Update selected index AND entityToLoad when hovering over entity
+    if (mouseCollider != nullptr) {
+        auto it = std::find(entityNames.begin(), entityNames.end(), 
+                           mouseCollider->getEntityThisIsAttachedTo()->getEntityName());
+        if (it != entityNames.end()) {
+            selectedEntityIndex = std::distance(entityNames.begin(), it);
+            // Also update entityToLoad here
+            strncpy(entityToLoad, entityNames[selectedEntityIndex].c_str(), sizeof(entityToLoad));
+            entityToLoad[sizeof(entityToLoad) - 1] = '\0';
+        }
     }
 
     // Create a combo box for selecting the level name
@@ -79,11 +82,23 @@ void UiManager::drawImGuiWorldControl()
         auto entityRef = gameEnv->getEntityFromName<Entity>(entityToLoad);
         auto* colliderRef = gameEnv->getComponentOfEntity<PhysicsCollider>(entityRef->getEntityName(),"Physics");
         ImGui::Text("Current selected entity: %s ", entityRef->getEntityName().c_str());
+        float position[2] = { entityRef->getPosition().x, entityRef->getPosition().y };
+        if (ImGui::InputFloat2("Position", position)) 
+            entityRef->setPosition(glm::vec3(position[0], position[1], entityRef->getPosition().z));
+        float scaleX = entityRef->getScale().x;
+        float scaleY = entityRef->getScale().y;
+        ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
+        ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
+        glm::vec3 newScale(scaleX,scaleY, entityRef->getScale().z);
+        entityRef->setScale(newScale);
+        
+        ImGui::Spacing();
+        ImGui::Spacing();
+
         if(colliderRef == nullptr)
             ImGui::Text("Entity %s has no active Physics Collider", entityRef->getEntityName().c_str());
-        else
+        else if(ImGui::CollapsingHeader("Physics Properties"))
         {
-            ImGui::Text("X: %f Y: %f", colliderRef->getPos().x,colliderRef->getPos().y);
             ImGui::Text("Velocity: X: %f Y: %f", colliderRef->getVelocity().x, colliderRef->getVelocity().y);
             ImGui::Text("Elasicity: %f", colliderRef->getElascicity());
             bool iTrigger = colliderRef->getIsTrigger();
@@ -139,15 +154,9 @@ void UiManager::drawImGuiWorldControl()
             if(physicsEngine->getHashTableIndicesSize() != 0)
                 ImGui::Text("HashTable Index: %i", colliderRef->getTableIndicies()[0]);
         }
-        float position[2] = { entityRef->getPosition().x, entityRef->getPosition().y };
-        if (ImGui::InputFloat2("Position", position)) 
-            entityRef->setPosition(glm::vec3(position[0], position[1], entityRef->getPosition().z));
-        float scaleX = entityRef->getScale().x;
-        float scaleY = entityRef->getScale().y;
-        ImGui::SliderFloat("ScaleX:", &scaleX, 0.1, 30, "%.3f",0);
-        ImGui::SliderFloat("ScaleY:", &scaleY, 0.1, 30, "%.3f",0);
-        glm::vec3 newScale(scaleX,scaleY, entityRef->getScale().z);
-        entityRef->setScale(newScale);
+
+        ImGui::Spacing();
+        ImGui::Spacing();
 
         if(entityRef->getEntityType() == "UiElement")
         {

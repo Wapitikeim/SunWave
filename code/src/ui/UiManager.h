@@ -13,17 +13,12 @@ class UiManager
     private:
         GameEnvironment* gameEnv;
         GLFWwindow* window;
-        
-        //std::vector<std::unique_ptr<Entity>>& entities;
-        //PhysicsEngine* physicsEngine;
 
         bool showGrid=true;
         float gridSize = 1.f;
         int imGuiFPS = 0;
 
-
         void setupImGui();
-
 
         void drawImGuiControlPanel();
         bool imGuiControlPanel = true;
@@ -41,7 +36,6 @@ class UiManager
         bool mouseInformation = false;
         void drawImGuiEnitityAdder();
         bool entityAdder = false;
-
         
     public:
         UiManager(GLFWwindow* w, GameEnvironment* gE)
