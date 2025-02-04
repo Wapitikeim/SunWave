@@ -71,7 +71,7 @@ std::vector<std::string> fileReader::getAllLevelFileNames()
     std::filesystem::path path(std::filesystem::current_path());
     trimDownPathToWorkingDirectory(path);
     path.append("src");
-    path.append("Scenes");
+    path.append("scenes");
     path.append("LevelConfigurations");
 
     // Iterate through the files in the directory

@@ -12,7 +12,7 @@ void SceneManager::loadLevel(const std::string& levelName, std::vector<std::uniq
 {
     std::filesystem::path srcPath = std::filesystem::current_path();
     fileReader::trimDownPathToWorkingDirectory(srcPath);
-    srcPath.append("src/Scenes/LevelConfigurations/"+levelName+".json");
+    srcPath.append("src/scenes/LevelConfigurations/"+levelName+".json");
     nlohmann::json levelToLoad;
     std::ifstream file(srcPath);
     // Check if the file was successfully opened
@@ -170,7 +170,7 @@ void SceneManager::saveLevel(const std::string& levelName, std::vector<std::uniq
     
     std::filesystem::path srcPath = std::filesystem::current_path();
     fileReader::trimDownPathToWorkingDirectory(srcPath);
-    srcPath.append("src/Scenes/LevelConfigurations/"+levelName+".json");
+    srcPath.append("src/scenes/LevelConfigurations/"+levelName+".json");
     std::ofstream file(srcPath);
     file << level.dump(4);
 }

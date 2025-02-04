@@ -329,10 +329,40 @@ void GameEnvironment::updateDeltaTime()
 
 void GameEnvironment::update()
 {
+    ui.prepFrames();
+
+    //Physics pre Update
+    physicsEngine->getInitialTransform(deltaTime);
+
+    //FPS
+    double currentTime = glfwGetTime();
+    fps++;
+    if (currentTime - prevTime >= 1.)
+    {
+        ui.setImGuiFps(fps);
+        fps = 0;
+        prevTime = currentTime;
+    }
+    //Camera Update
+    Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
+    Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
+    Camera::setCurrentCameraOrto(glm::ortho(0.0f, (float)glfwPrep::getCurrentWindowWidth(), 0.0f, (float)glfwPrep::getCurrentWindowHeight()));
+    
+    //Mouse
+    mouseUpdate();
+    
+    //Function logic      
+    updateFunctionEvents();
+    updateRepeatingFunctions();
+    
+    //Entities
     for(auto &entity: entities) 
     {
         entity->update(window, deltaTime);
     }
+
+    //"Physics" Reset AFTER entity Update
+    physicsEngine->updatePhysics(); 
 }
 
 void GameEnvironment::loadMenu()
@@ -543,44 +573,6 @@ void GameEnvironment::prepareForLevelChange()
     refColliderForMouseOld = nullptr;
 }
 
-void GameEnvironment::resetLevel()
-{
-    prepareForLevelChange();
-    loadMenu();
-}
-
-void GameEnvironment::loadWallLevel()
-{
-    prepareForLevelChange();
-
-    //Player
-    addEntity(std::make_unique<PlayerShape>("Player", glm::vec3(5.f,5.f,0.0f), glm::vec3(1.f), 0.0f, true, "box"));
-    auto player = getEntityFromName<Entity>("Player");
-    player->addComponent(std::make_unique<PhysicsCollider>(player,0));
-    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("Player","Physics"));
-
-    //Entities Prep
-    addEntity(std::make_unique<Shape>("WallBottom", glm::vec3(xHalf,0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
-    auto WallBottom = getEntityFromName<Entity>("WallBottom");
-    WallBottom->addComponent(std::make_unique<PhysicsCollider>(WallBottom,1));
-    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallBottom","Physics"));
-
-    addEntity(std::make_unique<Shape>("WallTop", glm::vec3(xHalf,yHalf*2-0.5f,0.3f),glm::vec3(xHalf,1.f,1.0f), 0.0f, true, "box"));
-    auto WallTop = getEntityFromName<Entity>("WallTop");
-    WallTop->addComponent(std::make_unique<PhysicsCollider>(WallTop,1));
-    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("WallTop","Physics"));
-
-    addEntity(std::make_unique<Shape>("wallLeft", glm::vec3(0.5f,yHalf,0.3f),glm::vec3(1.0f,yHalf,1.0f), 0.0f, true, "box"));
-    auto wallLeft = getEntityFromName<Entity>("wallLeft");
-    wallLeft->addComponent(std::make_unique<PhysicsCollider>(wallLeft,1));
-    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallLeft","Physics"));
-
-    addEntity(std::make_unique<Shape>("wallRight", glm::vec3(xHalf*2-0.5f,yHalf,0.3f),glm::vec3(1.f,yHalf,1.0f), 0.0f, true, "box"));
-    auto wallRight = getEntityFromName<Entity>("wallRight");
-    wallRight->addComponent(std::make_unique<PhysicsCollider>(wallRight,1));
-    physicsEngine->registerPhysicsCollider(getComponentOfEntity<PhysicsCollider>("wallRight","Physics"));
-}
-
 void GameEnvironment::updateFunctionEvents()
 {
     if(gamePaused)
@@ -677,20 +669,13 @@ void GameEnvironment::registerLoopingFunctionUntil(std::function<void()> functio
 GameEnvironment::GameEnvironment()
     : window(glfwPrep::prepGLFWAndGladThenGiveBackWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "SunWave")),
       ui(window, this),
+      physicsEngine(std::make_unique<PhysicsEngine>()),
       minigameManager(std::make_unique<MinigameManager>(this))
 {   
 }
 
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    //mousePosX = xpos;
-    //mousePosY = abs(ypos-SCREEN_HEIGHT);
-}
-
 void GameEnvironment::run()
 {
-    physicsEngine = std::make_unique<PhysicsEngine>();
-    
     //Camera Prep
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, up); 
     Camera::setCurrentCameraView(view);//Prep if no Camera Flight active
@@ -711,7 +696,7 @@ void GameEnvironment::run()
     InfiniteGrid grid(ShaderContainer("gridVertexShader.vert", "gridFragmentShader.frag"));
 
 
-    //Load Level
+    //Load Main Menu
     loadMenu();
  
     glfwMaximizeWindow(window);
@@ -722,47 +707,20 @@ void GameEnvironment::run()
         //Input
         processInput(window);
 
-        //glfwSetCursorPosCallback(window, cursor_position_callback);
-
         //Rendering
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        //"z" Buffer - depth testing
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //"z" Buffer - depth testing
 
-        ui.prepFrames();
-        
-
-        //Physics pre Update
-        physicsEngine->getInitialTransform(deltaTime);
-
-        //FPS
-        double currentTime = glfwGetTime();
-        fps++;
-        if (currentTime - prevTime >= 1.)
-        {
-            ui.setImGuiFps(fps);
-            fps = 0;
-            prevTime = currentTime;
-        }
-        //Camera Update (Theoriactically)
-        Camera::setCurrentCameraView(glm::lookAt(cameraPos, cameraPos + cameraFront, up));
-        Camera::setCurrentCameraProjection(glm::perspective(glm::radians(fov), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f));
-        Camera::setCurrentCameraOrto(glm::ortho(0.0f, (float)glfwPrep::getCurrentWindowWidth(), 0.0f, (float)glfwPrep::getCurrentWindowHeight()));
-        mouseUpdate();
-        //GameLogic      
-        updateFunctionEvents();
-        updateRepeatingFunctions();
-
-        //Grid First for transperent Textures ->They get cut off if they enter the -y plane though 
+        //Update
         update();
+        
+        //Draw
         if(ui.getShowGrid())
             grid.drawGrid(ui.getGridSize());
-        //"Physics" Reset AFTER Update
-        physicsEngine->updatePhysics(); 
         drawEntities();
-        
         ui.draw();
+
         glfwSwapBuffers(window);
         updateDeltaTime(); 
         //BuffersAndEventHandeling
@@ -788,11 +746,6 @@ void GameEnvironment::resetRegisterdFunctions()
     functionsToExecuteAfterTime.clear();
     repeatingFunctions.clear();
     loopingFunctions.clear();
-}
-
-void GameEnvironment::testing(const std::string& text, float x, float y, float scale, glm::vec3 color)
-{
-    
 }
 
 

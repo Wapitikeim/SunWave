@@ -20,29 +20,38 @@
 #include <math.h>
 #include <random>
 
-
+//Util
 #include "util/glfwPrep.h"
 #include "util/InfiniteGrid.h"
 #include "util/Camera.h"
+
+//Shaders and Meshes
 #include "shaders/ShaderContainer.h"
 #include "mesh/MeshContainer.h"
+
+//Scenes
+#include "scenes/SceneManager.h"
+
+//Minigames
+#include "minigames/MinigameManager.h"
+
+//Entities
 #include "entities/Entity.h"
 #include "entities/Shape.h"
 #include "entities/PlayerShape.h"
 #include "entities/UiElement.h"
-#include "Scenes/SceneManager.h"
-#include "minigames/MinigameManager.h"
 
-
+//Entity Components
+#include "components/Component.h"
+#include "components/PhysicsCollider.h"
 
 //UI
 #include "ui/UiManager.h"
 #include "ui/FontLoader.h"
-//ComponentTesting
+
+//Physics
 #include "physics/CollisionTester.h"
 #include "physics/PhysicsEngine.h"
-#include "components/Component.h"
-#include "components/PhysicsCollider.h"
 
 class GameEnvironment 
 {
@@ -51,13 +60,8 @@ class GameEnvironment
         //Physics engine
         std::unique_ptr<PhysicsEngine> physicsEngine;
 
-        //Zoom
-        float fov = 45.0f;
-        void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-
         //Camera
-        glm::mat4 view;
-        //glm::vec3 cameraPos = glm::vec3(30.f, 20.f, 30.f);  
+        glm::mat4 view; 
         glm::vec3 cameraPos = glm::vec3(22.1f, 12.426f, 30.f);
         glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -65,6 +69,10 @@ class GameEnvironment
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); 
         glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
         glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
+        //Zoom
+        float fov = 45.0f;
+        void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
         
         //World Translate Information
         void updateWorldTranslationInfo();
@@ -89,7 +97,7 @@ class GameEnvironment
         float yaw = -90.f; 
         void mouse_callback(GLFWwindow* window, double xpos, double ypos);
         
-        //Mouse 
+        //Mouse
         float mouseX;
         float mouseY;
         bool currentMouseLeftButtonState;
@@ -116,9 +124,6 @@ class GameEnvironment
         //Level loading
         SceneManager sceneManager;
         
-        
-        void resetLevel();
-        void loadWallLevel();
         bool gamePaused = false;
         bool inLevelSelector = false;
         bool inMenu = false;
@@ -128,7 +133,7 @@ class GameEnvironment
         std::vector<std::unique_ptr<Entity>> entities;
         void drawEntities();
 
-        //Grab Input for ESC key
+        //Global Input Managment
         void processInput(GLFWwindow* window);      
 
         //Update Delta
@@ -144,7 +149,6 @@ class GameEnvironment
         UiManager ui;
 
         //Game logic Update
-        
         void updateFunctionEvents();
         void updateLoopingFunctions();
         void updateRepeatingFunctions();
@@ -176,9 +180,11 @@ class GameEnvironment
         {
             glfwTerminate();
         };
-
         
-        //Entitys
+        //Main Loop
+        void run();
+
+        //Entity Management
         template<typename entityTypeToGet>
         entityTypeToGet* getEntityFromName(std::string entityName)
         {
@@ -227,9 +233,11 @@ class GameEnvironment
                 }
             entities.push_back(std::move(entityToAdd));
         }
-        GLFWwindow* getCurrentWindow(){return window;};
-
+        
         std::vector<std::unique_ptr<Entity>>& getEntities() {return entities;}
+        
+        //Getter
+        GLFWwindow* getCurrentWindow(){return window;};
         PhysicsEngine* getPhysicsEngine()const{return physicsEngine.get();};
         SceneManager& getSceneManager() { return sceneManager; }
         const float& getFov()const{return fov;};
@@ -237,13 +245,6 @@ class GameEnvironment
         const glm::vec3 getCameraPos()const{return cameraPos;};
         const float& getXHalf()const{return xHalf;};
         const float& getYHalf()const{return yHalf;};
-        void setFOV(const float& newFOV){fov = newFOV;};
-        void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
-        void setInMenu(const bool& newMenu){inMenu = newMenu;};
-        void setInLevelSelector(const bool& newLevelSelector){inLevelSelector = newLevelSelector;};
-        void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
-        void setHoverOverEffect(const bool& newHover){hoverOverEffect = newHover;};
-        void setHoverOverColor(const glm::vec4& newColor){hoverOverColor = newColor;};
         const bool& getIfPhysicsEngineWasActive(){return physicsEngineWasActive;};
         const bool& getIfPressedAndHolding(){return pressedAndHoldingSomething;};
         const bool& getGamePaused(){return gamePaused;};
@@ -252,8 +253,16 @@ class GameEnvironment
         const float& getMouseY()const{return mouseY;};
         UiManager& getUiManager(){return ui;};
         PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
+        MinigameManager* getMinigameManager(){return minigameManager.get();};
         
-        void run();
+        //Setter
+        void setFOV(const float& newFOV){fov = newFOV;};
+        void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
+        void setInMenu(const bool& newMenu){inMenu = newMenu;};
+        void setInLevelSelector(const bool& newLevelSelector){inLevelSelector = newLevelSelector;};
+        void setMouseEntityManipulation(const bool& newM){entityManipulationThroughMouse = newM;};
+        void setHoverOverEffect(const bool& newHover){hoverOverEffect = newHover;};
+        void setHoverOverColor(const glm::vec4& newColor){hoverOverColor = newColor;};
         
         //Level Loading
         void loadMenu();
@@ -261,15 +270,10 @@ class GameEnvironment
         void prepareForLevelChange();
         void resetMouseStates();
         void resetRegisterdFunctions();
-
-        void testing(const std::string& text, float x, float y, float scale, glm::vec3 color); //Random testing function
         
         //Function Registering
         void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
         void registerLoopingFunctionUntil(std::function<void()> functionToExecute, float secondsToRun);
         void registerRepeatingFunction(std::function<void()> functionToExecute, std::function<bool()> stopCondition);
-        //minigames
-        MinigameManager* getMinigameManager(){return minigameManager.get();};
-        
 
 };

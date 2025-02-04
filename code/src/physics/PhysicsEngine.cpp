@@ -29,50 +29,6 @@ void PhysicsEngine::restoreInitialPosAndRot(PhysicsCollider* collider)
     //collider.setRot(colliderInitialRot);
 }
 
-void PhysicsEngine::testing()
-{
-/*     if (collisionsToResolve.size() == 0)
-        return;
-    
-    //std::cout << "Collisions to Resolve:" << std::endl;
-    for (const auto& collisionList : collisionsToResolve)
-    {
-        //std::cout << "Collision Group:" << std::endl;
-        for (const auto& collider : collisionList)
-        {
-            //std::cout << "  Collider: " << collider->getNameOfEntityThisIsAttachedTo() << " ";
-            // Change color to red if colliding
-            if(collider!=nullptr)
-                collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
-        }
-    }   
-
-    // Set color to black for colliders not in collisionsToResolve
-    for (const auto& collider : physicsObjects)
-    {
-        bool isColliding = false;
-        for (const auto& collisionList : collisionsToResolve)
-        {
-            if (std::find(collisionList.begin(), collisionList.end(), collider) != collisionList.end())
-            {
-                isColliding = true;
-                break;
-            }
-        }
-        if (!isColliding)
-        {
-            if(collider!=nullptr)
-                collider->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
-        }
-    }
- */
-    if(physicsObjects[0]->getNameOfEntityThisIsAttachedTo() == "Player")
-        if(physicsObjects[0]->getIsInContact())
-            physicsObjects[0]->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(1, 0, 0, 1));
-        else
-            physicsObjects[0]->getEntityThisIsAttachedTo()->getShaderContainer().setUniformVec4("colorChange", glm::vec4(0, 0, 0, 1));
-}
-
 void PhysicsEngine::updatePhysicsState()
 {
     for(auto& collider:physicsObjects)
@@ -410,7 +366,6 @@ void PhysicsEngine::updatePhysics()
     {
         updatePhysicsState();
         collisionDetection();
-        testing();
         collisionRespone();
         tickTime -= getTimeStep();
         ticksLastFrame++;

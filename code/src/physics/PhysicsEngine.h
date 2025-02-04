@@ -13,64 +13,59 @@ struct PhysicColliderInitialTransform
 {
     PhysicsCollider* ref;
     glm::vec3 colliderInitialPos;
-    //glm::vec3 colliderInitialVelocity;
-    float colliderInitialRot;
-    
+    float colliderInitialRot; 
 };
 
 class PhysicsEngine 
 {
     private:
-        float deltatime = 0;
-        float tickTime = 0;
-        std::vector<glm::vec3> colliderInitialPos;
-        std::vector<float> colliderInitialRot;
-
-        std::vector<PhysicColliderInitialTransform> initTransformOfColliders;
+        //Colliders to apply physics to
         std::vector<PhysicsCollider*> physicsObjects;
-        void restoreInitialPosAndRot(PhysicsCollider* collider);
         
-
-        //Spitial Hash Grid 
-        std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> mortonHashTable;
-        MortonHashTableLogic tableLogic;
-        void testing();
-
-        int spacing = 4; // double the size of standard collider 
-        float cameraXHalf;
-        float cameraYHalf;
-
-        
-        //std::vector<PhysicsCollider&> getNearEntitysFromHashTable(){return;};
-        
-        std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
-        
-        //PhysicsUpdateLoop
-        void updatePhysicsState();
-        void applyGravity(PhysicsCollider* collider);
+        //Forces
         float GRAVITY = -9.81f;
         float AIR_RESISTANCE = 0.995f;
+        void updatePhysicsState();
+        void applyGravity(PhysicsCollider* collider);
         void integrateForces(PhysicsCollider* collider);
-        void broadCollisionGathering();
-        void updateNonCollidingColliders();
-        void narrowCollisionGathering();
+
+        //CollisionDetection
+        std::vector<std::vector<PhysicsCollider*>> collisionsToResolve;
+        //---Morton encoded hash Grid 
+        std::unordered_map<uint32_t, std::vector<PhysicsCollider*>> mortonHashTable;
+        MortonHashTableLogic tableLogic;
         void collisionDetection();
+        void broadCollisionGathering();
+        void narrowCollisionGathering();
+        
+        //CollisionResponse
         float RESTING_THRESHOLD = 0.15f;
         float BOUNCE_MULTIPLIER = 2.25f;
+        std::vector<glm::vec3> colliderInitialPos;
+        std::vector<float> colliderInitialRot;
+        std::vector<PhysicColliderInitialTransform> initTransformOfColliders;
         void collisionRespone();
         void resolveCollision(PhysicsCollider* colliderA, PhysicsCollider* colliderB, const glm::vec3& contactNormal, float penetrationDepth, const glm::vec3& relativeVelocity);
-
+        void restoreInitialPosAndRot(PhysicsCollider* collider);
         
         //Debug/Info Helpers
         int maxCollisionsResolvedLastTick = 0;
         int ticksLastFrame = 0;
         int ticksBuffer = 0;
         int ticksCalculatedInOneSecond = 0;
-
+        float cameraXHalf;
+        float cameraYHalf;
+        float deltatime = 0;
+        float tickTime = 0;
         bool initDone = false;
         bool isHalting = false;
+        void updateNonCollidingColliders();
         
     public:
+        
+        //Main update for physics update
+        void updatePhysics();
+        //Management of PhysicsColliders
         void registerPhysicsCollider(PhysicsCollider* colliderToRegister)
         {
             if(colliderToRegister == nullptr)
@@ -101,9 +96,6 @@ class PhysicsEngine
                 physicsObjects.erase(std::remove(physicsObjects.begin(), physicsObjects.end(), colliderToRemove),physicsObjects.end());
             std::cout << "Removed Physicscollider form " << colliderToRemove->getNameOfEntityThisIsAttachedTo() << " from the Physics engine\n";
         };
-        void getInitialTransform(float _deltatime);
-        void updatePhysics();
-
         void clearPhysicsObjects()
         {
             mortonHashTable.clear();
@@ -115,15 +107,13 @@ class PhysicsEngine
             physicsObjects.shrink_to_fit();
             initDone = false;  
         };
+        bool getPhysicsObjectsEmpty(){return physicsObjects.empty();};
 
+        //Physics Engine control
         float speedOfSimulation = 1;
         float tickrateOfSimulation = 150;
+        //Getter
         float getTimeStep(){return (1.0f / tickrateOfSimulation) * speedOfSimulation;};
-        const bool& getPhysicsObjectsEmpty(){return physicsObjects.empty();};
-        void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
-        void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
-
-        void setIsHalting(const bool &newHalt){isHalting = newHalt; mortonHashTable.clear(); initDone=false;tickTime=0;};
         bool getIsHalting(){return isHalting;};
         const int& getCurrentCollisions(){return maxCollisionsResolvedLastTick;};
         const int& getTicksLastFrame(){return ticksLastFrame;};
@@ -131,15 +121,22 @@ class PhysicsEngine
         const float& getBounceMultiplier(){return BOUNCE_MULTIPLIER;};
         const std::vector<PhysicsCollider*>& getActiveColliders(){return physicsObjects;};
         const bool& getInitDone()const {return initDone;};
+        void getInitialTransform(float _deltatime);
+        //Setter
+        void setcameraXHalf(float &newXHalf){cameraXHalf = newXHalf;};
+        void setcameraYHalf(float &newYHalf){cameraYHalf = newYHalf;};
+        void setIsHalting(const bool &newHalt){isHalting = newHalt; mortonHashTable.clear(); initDone=false;tickTime=0;};
         void setInitDone(const bool& newInit){initDone = newInit;};
         void setBounceMultiplier(const float &newBounce){BOUNCE_MULTIPLIER = newBounce;};
-        bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
-        bool checkTriggerColliderCollision(const std::string& colliderEntityName, const std::string& triggerColliderEntityName);
-        bool checkColliderPlayerCollision(const std::string& colliderEntityName);
-        PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
-
+        
         //HasTableFunctions
         void addColliderIntoHashTable(PhysicsCollider* colliderRef);
         void removeColliderFromHashTable(PhysicsCollider* colliderRef);
         int getHashTableIndicesSize();
+
+        //Collision functions meant to be used outside
+        bool checkIfShellWouldCollide(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
+        bool checkTriggerColliderCollision(const std::string& colliderEntityName, const std::string& triggerColliderEntityName);
+        bool checkColliderPlayerCollision(const std::string& colliderEntityName);
+        PhysicsCollider* getFirstColliderShellCollidesWith(glm::vec3 &pos, glm::vec3 &scale, float &rotZ);
 };
