@@ -48,6 +48,7 @@ SunWave is a 2D physics-based minigame collection built with a custom game engin
 - [nlohmann/json](https://github.com/nlohmann/json) - JSON handling
 - [GLAD](https://glad.dav1d.de/) - OpenGL loader
 - [stb_image](https://github.com/nothings/stb) - Image loading library
+- [soloud](https://solhsa.com/soloud/index.html) - Sound libary
 
 ### Fonts
 - [Open Sans](https://fonts.google.com/specimen/Open+Sans) - Main UI font
