@@ -21,7 +21,7 @@ Codequality concerns
 ## Classes Overview
 
 ### Entry Point
-- [main](Class Files/main.md)
+- [main](documentation/Class Files/main.md)
 
 ### Most Relevant Classes:
 - [[GameEnvironment]]  
