@@ -367,6 +367,8 @@ void GameEnvironment::update()
 
 void GameEnvironment::loadMenu()
 {
+    playMusicByName("menu");
+    
     sceneManager.loadLevel("Main Menu", entities, getPhysicsEngine());
     inMenu = true;
     ui.setShowImGuiUI(false);
@@ -672,6 +674,10 @@ GameEnvironment::GameEnvironment()
       physicsEngine(std::make_unique<PhysicsEngine>()),
       minigameManager(std::make_unique<MinigameManager>(this))
 {   
+    //SoundPrep
+    audio.init();
+    audio.setGlobalVolume(0.1f);
+    loadAllMusic();
 }
 
 void GameEnvironment::run()
@@ -748,4 +754,49 @@ void GameEnvironment::resetRegisterdFunctions()
     loopingFunctions.clear();
 }
 
+void GameEnvironment::playMusicByName(const std::string &musicName)
+{
+    // Don't restart if same music is playing
+    if (currentlyPlayingMusic == musicName && 
+        audio.getActiveVoiceCount() > 0 && 
+        audio.isValidVoiceHandle(musicHandle)) {
+        return;
+    }
+
+    // Stop current music
+    audio.stopAll();
+
+    // Play new music
+    if (musicMap.find(musicName) != musicMap.end()) 
+    {
+        musicHandle = audio.play(musicMap[musicName]);
+        currentlyPlayingMusic = musicName;
+    }
+}
+
+void GameEnvironment::loadAllMusic()
+{
+    std::filesystem::path basePath = std::filesystem::current_path();
+    fileReader::trimDownPathToWorkingDirectory(basePath);
+    basePath /= "assets/audio";
+
+    // Define music files
+    std::vector<std::pair<std::string, std::string>> musicFiles = {
+        {"menu", "BackgroundMusic.wav"},
+        {"shape", "Shape.wav"},
+        {"go", "Go.wav"},
+        {"catch", "Catch.wav"},
+        {"sunwave", "Sunwave.wav"},
+        // Add more music files here
+    };
+
+    // Load all music files
+    for (const auto& [name, filename] : musicFiles) 
+    {
+        auto path = basePath / filename;
+        musicMap[name].load(path.string().c_str());
+        musicMap[name].setSingleInstance(true);
+        musicMap[name].setLooping(true);
+    }
+}
 

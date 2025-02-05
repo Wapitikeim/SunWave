@@ -53,6 +53,10 @@
 #include "physics/CollisionTester.h"
 #include "physics/PhysicsEngine.h"
 
+//Sound
+#include <soloud.h>
+#include <soloud_wav.h>
+
 class GameEnvironment 
 {
     private:
@@ -173,12 +177,20 @@ class GameEnvironment
         
         //MiniGames
         std::unique_ptr<MinigameManager> minigameManager;
+
+        //Sound
+        SoLoud::Soloud audio;
+        SoLoud::Wav menuMusic;
+        std::unordered_map<std::string, SoLoud::Wav> musicMap;
+        unsigned int musicHandle;
+        std::string currentlyPlayingMusic;
         
     public:
         GameEnvironment();
         ~GameEnvironment()
         {
             glfwTerminate();
+            audio.deinit();
         };
         
         //Main Loop
@@ -254,7 +266,8 @@ class GameEnvironment
         UiManager& getUiManager(){return ui;};
         PhysicsCollider* getCurrentMouseCollider()const{return refColliderForMouseCurrent;};
         MinigameManager* getMinigameManager(){return minigameManager.get();};
-        
+        SoLoud::Soloud& getAudioEngine(){return audio;};
+
         //Setter
         void setFOV(const float& newFOV){fov = newFOV;};
         void setGamePaused(const bool& newPaused){gamePaused = newPaused;};
@@ -271,6 +284,10 @@ class GameEnvironment
         void resetMouseStates();
         void resetRegisterdFunctions();
         
+        //Sound
+        void playMusicByName(const std::string& musicName);
+        void loadAllMusic();
+
         //Function Registering
         void registerFunctionToExecuteWhen(float whenFunctionShouldStart, std::function<void()> functionToExecute);
         void registerLoopingFunctionUntil(std::function<void()> functionToExecute, float secondsToRun);

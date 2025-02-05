@@ -21,21 +21,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_HOME_DIRECTORY}/out/build/runtime)
 
-#[[
-file(GLOB SOURCEFILES 
- src/*.h 
- src/*.cpp
- src/util/*.cpp
- src/util/*.h
- src/shaders/*.cpp
- src/shaders/*.h
- src/entities/*.cpp
- src/entities/*.h
- src/mesh/*.h
- src/mesh/*.cpp
- src/fieldOfShapes/*.h
- src/fieldOfShapes/*.cpp)
-]]
 
 file(GLOB SOURCEFILES src/*.cpp src/*/*.cpp)
 file(GLOB HEADERFILES src/*.h src/*/*.h)
@@ -46,6 +31,9 @@ add_subdirectory(extern/glm)
 add_subdirectory(extern/stbimage)
 add_subdirectory(extern/imgui)
 add_subdirectory(extern/nhlohmann_json)
+add_subdirectory(extern/soloud)
+
+
 # FreeType configuration
 set(FT_DISABLE_ZLIB TRUE CACHE BOOL "Disable ZLIB")
 set(FT_DISABLE_BZIP2 TRUE CACHE BOOL "Disable BZIP2")
@@ -63,7 +51,7 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_executable (SunWave ${SOURCEFILES} ${HEADERFILES})
 
 # opengl32.lib -> included in glad
-target_link_libraries(SunWave PRIVATE glfw glad glm stbimage imgui nlohmann_json freetype)
+target_link_libraries(SunWave PRIVATE glfw glad glm stbimage imgui nlohmann_json freetype soloud)
 
 # require C++ 17 compiler
 target_compile_features(SunWave PRIVATE cxx_std_17)

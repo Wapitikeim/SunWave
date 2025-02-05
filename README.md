@@ -59,7 +59,7 @@ SunWave is a 2D physics-based minigame collection built with a custom game engin
 - [Background Image for Poster](https://pixabay.com/illustrations/sun-water-boho-bohemian-color-8066051/)
 
 ### Soundtracks
-- [Trailer](https://pixabay.com/music/modern-classical-inspiring-piano-music-293598/)
+- [Trailer + Menu music](https://pixabay.com/music/modern-classical-inspiring-piano-music-293598/)
 
 ## Installation Guide / Requirements
 ### Prerequisites

@@ -131,7 +131,7 @@ void MinigameManager::handleHighscore()
             shouldUpdate = true;
         }
     }
-
+    
     if(shouldUpdate) 
     {
         std::ofstream file(srcPath);
@@ -148,6 +148,7 @@ void MinigameManager::loadEndCard()
     auto backToMenuButton = gameEnv->getEntityFromName<UiElement>("BackToMenu");
     auto yourScoreText = gameEnv->getEntityFromName<UiElement>("YScoreText");
     auto prevHighScoreText = gameEnv->getEntityFromName<UiElement>("HScoreText");
+    auto banner = gameEnv->getEntityFromName<UiElement>("Banner");
 
     if(!minigameSequence.empty())
         currentMinigame = MinigameType::Sunwave;
@@ -207,6 +208,11 @@ void MinigameManager::loadEndCard()
     else
         yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete));
 
+    if(calledMinigame == MinigameType::Sunwave)
+        banner->setTextToBeRenderd(std::string("Sunwave complete!"));
+    else
+        banner->setTextToBeRenderd(gameTypeToString(currentMinigame) + " complete!");
+
     //Button
     backToMenuButton->setOnClick([this]
     {
@@ -221,8 +227,9 @@ void MinigameManager::loadEndCard()
 
 void MinigameManager::miniGameFindShape()
 {
+    if(calledMinigame != MinigameType::Sunwave)
+        gameEnv->playMusicByName("shape");
     gameEnv->prepareForLevelChange();
-
     gameEnv->getPhysicsEngine()->setIsHalting(true);
     shapeFound = false;
     gameEnv->setHoverOverEffect(true);
@@ -370,6 +377,8 @@ void MinigameManager::miniGameFindShape()
 
 void MinigameManager::miniGameGoToPosition()
 {
+    if(calledMinigame != MinigameType::Sunwave)
+        gameEnv->playMusicByName("go");
     gameEnv->prepareForLevelChange();
     std::vector<std::string>playerNames;
     std::vector<std::string>triggerNames;
@@ -443,6 +452,8 @@ void MinigameManager::miniGameGoToPosition()
 
 void MinigameManager::miniGameCatch()
 {
+    if(calledMinigame != MinigameType::Sunwave)
+        gameEnv->playMusicByName("catch");
     gameEnv->prepareForLevelChange();
     std::vector<std::string>spawnerNames;
     std::vector<std::string>levelNames;
@@ -621,6 +632,7 @@ void MinigameManager::miniGameCatch()
 
 void MinigameManager::startSunwaveGame()
 {
+    gameEnv->playMusicByName("sunwave");
     // Available minigames (excluding Sunwave)
     std::vector<MinigameType> availableTypes = 
     {
@@ -726,6 +738,9 @@ void MinigameManager::blendTheNextGame()
         },
         [this]() -> bool
         {
+            auto startButton = gameEnv->getEntityFromName<UiElement>("startButton");
+            if(!startButton)
+                return true;
             if(glfwGetKey(gameEnv->getCurrentWindow(), GLFW_KEY_ENTER) == GLFW_PRESS || glfwGetKey(gameEnv->getCurrentWindow(), GLFW_KEY_KP_ENTER) == GLFW_PRESS)
             {
                 if(!gameEnv->getGamePaused())
@@ -986,6 +1001,7 @@ void MinigameManager::createCatchExplanation()
 void MinigameManager::resetMinigameVariabels()
 {
     currentMinigame = MinigameType::None;
+    calledMinigame = MinigameType::None;
     currentDifficulty = Difficulty::Easy;
     roundsPlayed = 0;
     timeElapsed = 0.0f;
@@ -1017,6 +1033,7 @@ void MinigameManager::startMinigame(MinigameType type)
         miniGameCatch();
         break;
     case MinigameType::Sunwave:
+        calledMinigame = MinigameType::Sunwave;
         startSunwaveGame();
         break;
     default:

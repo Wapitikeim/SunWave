@@ -414,7 +414,7 @@
                     0.0
                 ]
             },
-            "ShaderName": "box",
+            "ShaderName": "boxWithin",
             "Type": "PlayerShape",
             "name": "Player2",
             "position": [
@@ -492,7 +492,7 @@
                     0.0
                 ]
             },
-            "ShaderName": "box",
+            "ShaderName": "boxWithin",
             "Type": "Shape",
             "name": "TriggerBox2",
             "position": [

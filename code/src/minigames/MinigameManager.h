@@ -26,6 +26,7 @@ class MinigameManager
 private:
     GameEnvironment* gameEnv;
     MinigameType currentMinigame = MinigameType::None;
+    MinigameType calledMinigame = MinigameType::None;
     Difficulty currentDifficulty = Difficulty::Easy;
     int roundsPlayed = 0;
     float timeElapsed = 0.0f;

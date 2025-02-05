@@ -3,19 +3,29 @@
 void fileReader::trimDownPathToWorkingDirectory(std::filesystem::path &pathToTrim)
 {
     if(pathToTrim.empty())
-    {
         return;
-    }
-    while(pathToTrim.filename() != "out" && !pathToTrim.empty())
+    
+
+    // First find 'code' or 'builds' directory
+    while(!pathToTrim.empty() && 
+          pathToTrim.filename() != "code" && 
+          pathToTrim.filename() != "builds")
     {
         pathToTrim._Remove_filename_and_separator();
     }
-    if(!pathToTrim.empty())
-    {
-        pathToTrim.remove_filename();
-    }
-    
 
+    // If we found 'builds', switch to parallel 'code' directory
+    if(pathToTrim.filename() == "builds")
+    {
+        pathToTrim._Remove_filename_and_separator();
+        pathToTrim /= "code";
+    }
+
+    // If we found nothing, throw error
+    if(pathToTrim.empty())
+    {
+        throw std::runtime_error("Could not find 'code' or 'builds' directory in path");
+    }
 }
 
 std::string fileReader::extractContentsFromFile(std::filesystem::path locationToFile)
