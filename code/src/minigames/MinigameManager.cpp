@@ -202,11 +202,11 @@ void MinigameManager::loadEndCard()
     if(!minigameSequence.empty())
         currentMinigame = MinigameType::Sunwave;
     if(currentMinigame == MinigameType::Sunwave)
-        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete) + ", " + std::to_string(shapesHandeldCorrectlyFull) + "/75");
+        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete) + "s, " + std::to_string(shapesHandeldCorrectlyFull) + "/75");
     else if(currentMinigame == MinigameType::Catch)
         yourScoreText->setTextToBeRenderd(std::to_string(shapesHandeldCorrectlyFull) + "/225"); 
     else
-        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete));
+        yourScoreText->setTextToBeRenderd(std::to_string((int)timeToComplete)+ "s");
 
     if(calledMinigame == MinigameType::Sunwave)
         banner->setTextToBeRenderd(std::string("Sunwave complete!"));

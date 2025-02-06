@@ -309,6 +309,8 @@ void GameEnvironment::processInput(GLFWwindow *window)
         {
             this->setGamePaused(false);
             this->getPhysicsEngine()->setIsHalting(false);
+            this->getPhysicsEngine()->tickrateOfSimulation = 150;
+            this->getPhysicsEngine()->speedOfSimulation = 1;
             this->getMinigameManager()->resetMinigameVariabels();
             this->setHoverOverEffect(true);
             this->resetMouseStates();
