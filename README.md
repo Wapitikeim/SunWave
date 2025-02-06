@@ -69,9 +69,13 @@ SunWave is a 2D physics-based minigame collection built with a custom game engin
 
 
 ## Installation Guide / Requirements
+
+### Precompiled exe
+- If you already have MSVC 16 installed you can unzip the executable under /builds and start the application.
+
 ### Prerequisites
 - [CMake 3.31.4+](https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-windows-x86_64.msi)
-- [Visual Studio 2019](https://aka.ms/vs/16/release/vs_community.exe)
+- Microsoft Visual Studio Compiler (MSVC - tested with version 15 16 17) [Visual Studio 2019](https://aka.ms/vs/16/release/vs_community.exe)
 
 ### Visual Studio Setup
 During Visual Studio installation, ensure these workloads are selected:
@@ -93,7 +97,7 @@ Set-ExecutionPolicy unrestricted
 /code/out/build/runtime/Debug/Sunwave.exe
 
 
-
+5.(optional) you can edit the contents of install.ps1 to match your installed msvc compiler version edit the -G "Visual Studio 16 2019" to e.g. "Visual Studio 17 2022" or "Visual Studio 15 2017" 
 
 ## Repository Usage Guides
 

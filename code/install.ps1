@@ -1,23 +1,3 @@
-###Functions###
-function Check-Command {
-    param (
-        [string]$commandLine
-    )
-    try {
-        $parts = $commandLine -split " "
-        & $parts[0] $parts[1..$parts.Length] > $null 2>&1
-        return $true
-    } catch {
-        return $false
-    }
-}
-
-# Check if cmake is available
-# Check if Visual Studio 16 2019 is available
-
-cmake --version
-cmake -E capabilities
-
 # Dynamically determine the current directory
 $CurrPath = Get-Location
 
