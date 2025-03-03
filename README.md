@@ -1,17 +1,3 @@
-
-# GameLab Project Repository
-
-|  General Info  | |
-| ---|---|
-| Working Title | Hidden Instinct |
-| Final Title | Sun Wave |
-| Student | Wenzel Hünting, wenzel.huenting@stud-mail.uni-wuerzburg.de, s375936 |
-| Target Platform(s) | PC |
-| Start Date | 21.10.2019 |
-| Study Program | Games Engineering B.Sc.|
-
-### Abstract
-
 # SunWave Game Engine & Minigame Collection
 
 ## Overview
@@ -71,7 +57,7 @@ SunWave is a 2D physics-based minigame collection built with a custom game engin
 ## Installation Guide / Requirements
 
 ### Precompiled exe
-- If you already have MSVC 16 installed you can unzip the executable under /builds and start the application.
+- If you already have MSVC (testen with version 15/16/17) installed you can unzip the executable under /builds and start the application.
 
 ### Prerequisites
 - [CMake 3.31.4+](https://github.com/Kitware/CMake/releases/download/v3.31.4/cmake-3.31.4-windows-x86_64.msi)
